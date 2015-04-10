@@ -1,0 +1,379 @@
+package GUT;
+
+import org.checkerframework.common.basetype.BaseTypeChecker;
+import org.checkerframework.common.basetype.BaseTypeValidator;
+import org.checkerframework.common.basetype.BaseTypeVisitor;
+import org.checkerframework.framework.source.Result;
+import org.checkerframework.framework.type.AnnotatedTypeFactory;
+import org.checkerframework.framework.type.AnnotatedTypeMirror;
+import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedArrayType;
+import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedDeclaredType;
+import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedExecutableType;
+import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedPrimitiveType;
+import org.checkerframework.framework.type.AnnotatedTypeParameterBounds;
+import org.checkerframework.framework.util.AnnotatedTypes;
+import org.checkerframework.javacutil.ElementUtils;
+import org.checkerframework.javacutil.Pair;
+import org.checkerframework.javacutil.TreeUtils;
+
+import java.util.List;
+import java.util.Set;
+
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
+
+import com.sun.source.tree.AssignmentTree;
+import com.sun.source.tree.ExpressionTree;
+import com.sun.source.tree.MethodInvocationTree;
+import com.sun.source.tree.MethodTree;
+import com.sun.source.tree.ModifiersTree;
+import com.sun.source.tree.NewClassTree;
+import com.sun.source.tree.ParameterizedTypeTree;
+import com.sun.source.tree.Tree;
+import com.sun.source.tree.Tree.Kind;
+import com.sun.source.tree.TypeCastTree;
+import com.sun.source.tree.VariableTree;
+
+/**
+ * Type visitor to enforce the GUT type rules.
+ *
+ * @author wmdietl
+ */
+public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
+
+    public final boolean checkOaM;
+    public final boolean checkStrictPurity;
+    public final boolean allowLost;
+    public final boolean warn_staticpeer;
+
+    public GUTVisitor(BaseTypeChecker checker) {
+        super(checker);
+
+        this.allowLost = checker.getLintOption("allowLost", false);
+        this.checkOaM = checker.getLintOption("checkOaM", false);
+        this.checkStrictPurity = checker.getLintOption("checkStrictPurity", false);
+
+        String warn = checker.getOption("warn", "");
+        warn_staticpeer = warn.contains("staticpeer");
+    }
+
+    /**
+     * The type validator to ensure correct usage of ownership modifiers.
+     */
+    @Override
+    protected BaseTypeValidator createTypeValidator() {
+        return new GUTTypeValidator(checker, this, atypeFactory);
+    }
+
+    /*
+     * The supermethod is currently OK, it only checks for a subtype relationship between the erased types.
+     * Depends on what we use as default modifier. Super meth is ok for Any default, but not for peer.
+     */
+    @Override
+    public boolean isValidUse(AnnotatedDeclaredType elemType, AnnotatedDeclaredType use, Tree tree) {
+        return true;
+        // return super.isValidUse(elemType, use, tree);
+    }
+
+    /**
+     * GUT does not use receiver annotations, forbid them.
+     */
+    @Override
+    public Void visitMethod(MethodTree node, Void p) {
+        // System.out.println("MethodTree: " + node);
+
+        if (node.getReceiverParameter() != null &&
+                !node.getReceiverParameter().getModifiers().getAnnotations().isEmpty()) {
+            checker.report(Result.failure("uts.receiver.annotations.forbidden"), node);
+        }
+
+        return super.visitMethod(node, p);
+    }
+
+    /**
+     * Ignore method receiver annotations.
+     */
+    @Override
+    protected void checkMethodInvocability(AnnotatedExecutableType method,
+            MethodInvocationTree node) {
+        return;
+    }
+
+    /**
+     * Ignore constructor receiver annotations.
+     */
+    @Override
+    protected boolean checkConstructorInvocation(AnnotatedDeclaredType dt,
+            AnnotatedExecutableType constructor, Tree src) {
+        return true;
+    }
+
+    /**
+     * Validate a new object creation.
+     *
+     * @param node
+     *            the new object creation.
+     * @param p
+     *            not used.
+     */
+    @Override
+    public Void visitNewClass(NewClassTree node, Void p) {
+        assert node != null;
+
+        Pair<AnnotatedExecutableType, List<AnnotatedTypeMirror>> fromUse = atypeFactory.constructorFromUse(node);
+        AnnotatedExecutableType constructor = fromUse.first;
+
+        // Check for @Lost in combined parameter types.
+        for (AnnotatedTypeMirror parameterType : constructor.getParameterTypes()) {
+            if (AnnotatedTypes.containsModifier(parameterType, atypeFactory.LOST)) {
+                checker.report(Result.failure("uts.lost.parameter"), node);
+            }
+        }
+
+        // Check for @Peer or @Rep as top-level modifier.
+        AnnotatedTypeMirror type = atypeFactory.getAnnotatedType(node);
+        if (!(type.hasEffectiveAnnotation(atypeFactory.PEER) || type.hasEffectiveAnnotation(atypeFactory.REP))) {
+            // System.out.println("new got: " + type.toString());
+            checker.report(Result.failure("uts.new.ownership"), node);
+        }
+
+        // TODO: forbid rep in static context
+        // TODO: test this. fields, methods, local vars, ... Checker.isValid?
+        if (ElementUtils.isStatic(TreeUtils.elementFromUse(node))
+                && type.hasEffectiveAnnotation(atypeFactory.REP)) {
+            checker.report(Result.failure("uts.static.rep.forbidden"), node);
+        }
+
+        return super.visitNewClass(node, p);
+    }
+
+    /**
+     * Validate a method invocation.
+     *
+     * @param node
+     *            the method invocation.
+     * @param p
+     *            not used.
+     */
+    @Override
+    public Void visitMethodInvocation(MethodInvocationTree node, Void p) {
+        assert node != null;
+
+        AnnotatedExecutableType method = atypeFactory.methodFromUse(node).first;
+
+        // Check for @Lost in combined parameter types.
+        for (AnnotatedTypeMirror parameterType : method.getParameterTypes()) {
+            if (AnnotatedTypes.containsModifier(parameterType, atypeFactory.LOST)) {
+                checker.report(Result.failure("uts.lost.parameter"), node);
+            }
+        }
+
+        if (checkOaM) {
+            ExpressionTree recvTree = TreeUtils.getReceiverTree(node.getMethodSelect());
+            if (recvTree != null) {
+                AnnotatedTypeMirror recvType = atypeFactory.getAnnotatedType(recvTree);
+
+                if (recvType != null) {
+                    if (recvType.hasEffectiveAnnotation(atypeFactory.LOST) ||
+                            recvType.hasEffectiveAnnotation(atypeFactory.ANY)) {
+                        ExecutableElement exelem = TreeUtils.elementFromUse(node);
+                        java.util.List<? extends AnnotationMirror> anns = exelem.getAnnotationMirrors();
+
+                        boolean hasPure = false;
+                        for (AnnotationMirror an : anns) {
+                            if (isPure(an.getAnnotationType())) {
+                                hasPure = true;
+                            }
+                        }
+                        if (anns.isEmpty() || !hasPure) {
+                            checker.report(Result.failure("oam.call.forbidden"), node);
+                        }
+                    }
+                }
+            }
+        }
+
+        // TODO purity
+
+        return super.visitMethodInvocation(node, p);
+    }
+
+    private boolean isPure(DeclaredType anno) {
+        // TODO: Is this the simplest way to do this?
+        return anno.toString().equals(GUT.quals.Pure.class.getName())
+                || anno.toString().equals(org.jmlspecs.annotation.Pure.class.getName());
+    }
+
+    /**
+     * Validate an assignment.
+     *
+     * @param node
+     *            the assignment.
+     * @param p
+     *            not used.
+     */
+    @Override
+    public Void visitAssignment(AssignmentTree node, Void p) {
+        assert node != null;
+
+        // Check for @Lost in left hand side of assignment.
+        AnnotatedTypeMirror type = atypeFactory.getAnnotatedType(node.getVariable());
+        if (AnnotatedTypes.containsModifier(type, atypeFactory.LOST)) {
+            checker.report(Result.failure("uts.lost.lhs"), node);
+        }
+
+        if (checkOaM) {
+            ExpressionTree recvTree = TreeUtils.getReceiverTree(node.getVariable());
+            if (recvTree != null) {
+                AnnotatedTypeMirror recvType = atypeFactory.getAnnotatedType(recvTree);
+
+                if (recvType != null) {
+                    if (recvType.hasEffectiveAnnotation(atypeFactory.LOST) ||
+                            recvType.hasEffectiveAnnotation(atypeFactory.ANY)) {
+                        checker.report(Result.failure("oam.assignment.forbidden"), node);
+                    }
+                }
+            }
+        }
+
+        if (checkStrictPurity && true /*TODO environment pure*/) {
+            checker.report(Result.failure("purity.assignment.forbidden"), node);
+        }
+
+        return super.visitAssignment(node, p);
+    }
+
+    @Override
+    public Void visitTypeCast(TypeCastTree node, Void p) {
+        AnnotatedTypeMirror type = atypeFactory.getAnnotatedType(node.getType());
+        // AnnotatedTypeMirror expr =
+        // atypeFactory.getAnnotatedType(node.getExpression());
+
+        if ((AnnotatedTypes.containsModifier(type, atypeFactory.LOST)
+                || AnnotatedTypes.containsModifier(type, atypeFactory.ANY))
+                && !GUTChecker.isAnyDefault(type)) {
+            checker.report(Result.warning("uts.cast.type.warning", type), node);
+            // checker.getProcessingEnvironment().getMessager().printMessage(javax.tools.Diagnostic.Kind.WARNING,
+            // "Casting to " + type + " is not recommended.");
+        }
+
+        // The only part from the super call that we want.
+        validateTypeOf(node.getType());
+
+        // calling super would check for cast safety... is there a different way
+        // to unset cast:unsafe?
+        return null;
+        // return super.visitTypeCast(node, p);
+    }
+
+    /**
+     * This type validator ensures correct usage of ownership modifiers.
+     * It must be run before implicits/defaults, because it should only
+     * validate explicitly written qualifiers.
+     */
+    private final class GUTTypeValidator extends BaseTypeValidator {
+
+        public GUTTypeValidator(BaseTypeChecker checker,
+                BaseTypeVisitor<?> visitor, AnnotatedTypeFactory atypeFactory) {
+            super(checker, visitor, atypeFactory);
+        }
+
+        /**
+         * Ensure that only one ownership modifier is used, that ownership
+         * modifiers are correctly used in static contexts, and check for
+         * explicit use of lost.
+         */
+        @Override
+        public Void visitDeclared(AnnotatedDeclaredType type, Tree p) {
+            if (p.getKind() == Kind.VARIABLE) {
+                ModifiersTree mt = ((VariableTree) p).getModifiers();
+                if (mt.getFlags().contains(Modifier.STATIC)) {
+                    if (AnnotatedTypes.containsModifier(type, GUTVisitor.this.atypeFactory.REP)) {
+                        checker.report(Result.failure("uts.static.rep.forbidden",
+                                type.getAnnotations(), type.toString()), p);
+                    }
+                    if (AnnotatedTypes.containsModifier(type, GUTVisitor.this.atypeFactory.PEER)
+                            && warn_staticpeer) {
+                        // TODO: I would really like to only give the warning if
+                        // the modifier was explicit.
+                        checker.report(Result.warning("uts.static.peer.warning",
+                                type.getAnnotations(), type.toString()), p);
+                    }
+                } else {
+                    // TODO: how do I find if I'm in a static method? selftype
+                    // is non-null :-(
+                    // System.out.println("Self: " +
+                    // GUTVisitor.this.atypeFactory.getSelfType(p));
+                    // System.out.println("Check on tree: " + p);
+                }
+            }
+
+            if (!allowLost &&
+                    AnnotatedTypes.containsModifier(type, GUTVisitor.this.atypeFactory.LOST)) {
+                // TODO: find a way to distinguish explicit annotations from viewpoint adaptation result,
+                // e.g. by adding a separate annotation.
+                // checker.report(Result.failure("uts.explicit.lost.forbidden",
+                //       type.getAnnotations(), type.toString()), p);
+            }
+
+            if (GUTQualifierUtils.hasMultipleModifiers(type)) {
+                reportError(type, p);
+            }
+            return super.visitDeclared(type, p);
+        }
+
+        @Override
+        protected Void visitParameterizedType(AnnotatedDeclaredType type, ParameterizedTypeTree tree) {
+            final TypeElement element =
+                (TypeElement)type.getUnderlyingType().asElement();
+
+            List<AnnotatedTypeParameterBounds> typevars = atypeFactory.typeVariablesFromUse(type, element);
+
+            for (AnnotatedTypeParameterBounds atpb : typevars) {
+                if ((atpb.getUpperBound().getKind() != TypeKind.NULL &&
+                        AnnotatedTypes.containsModifier(atpb.getUpperBound(), GUTVisitor.this.atypeFactory.LOST)) ||
+                        (atpb.getLowerBound().getKind() != TypeKind.NULL &&
+                        AnnotatedTypes.containsModifier(atpb.getLowerBound(), GUTVisitor.this.atypeFactory.LOST))) {
+                    checker.report(Result.failure("uts.lost.in.bounds",
+                            atpb.toString(), type.toString()), tree);
+                }
+            }
+            return super.visitParameterizedType(type, tree);
+        }
+
+        /**
+         * Forbid explicit annotations on primitive types.
+         */
+        @Override
+        public Void visitPrimitive(AnnotatedPrimitiveType type, Tree p) {
+            if (type.isAnnotatedInHierarchy(GUTVisitor.this.atypeFactory.ANY)) {
+                Set<AnnotationMirror> ann = type.getAnnotations();
+                if (ann.size() > 1
+                        || (ann.size() == 1 && !ann.contains(GUTVisitor.this.atypeFactory.BOTTOM))) {
+                    // the implicit default is BOTTOM, which cannot be used
+                    // explicitly.
+                    // if there are explicit annotations -> error.
+                    reportError(type, p);
+                }
+            }
+            return super.visitPrimitive(type, p);
+        }
+
+        /**
+         * Each array dimension can only use at most one ownership modifier. The
+         * check of the component type is done by the super method.
+         */
+        @Override
+        public Void visitArray(AnnotatedArrayType type, Tree p) {
+            if (type.getAnnotations().size() > 1) {
+                // only one Universe modifier is allowed on the array
+                reportError(type, p);
+            }
+            return super.visitArray(type, p);
+        }
+    }
+}

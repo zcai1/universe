@@ -1,0 +1,15 @@
+syntax: regexp
+^bin
+^tests/build$
+.vagrant
+\.class$
+
+syntax: glob
+# Emacs and other temporary files
+*~
+.#*
+*.swp
+TAGS
+tags
+*.orig
+
