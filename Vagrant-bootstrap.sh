@@ -1,6 +1,6 @@
 sudo apt-get update
 sudo apt-get -yu dist-upgrade
-sudo apt-get install -y openjdk-7-jdk mercurial ant gradle hevea librsvg2-bin zip unzip
+sudo apt-get install -y openjdk-7-jdk scala mercurial ant gradle hevea librsvg2-bin zip unzip
 
 export JAVA_HOME=${JAVA_HOME:-$(dirname $(dirname $(dirname $(readlink -f $(/usr/bin/which java)))))}
 
