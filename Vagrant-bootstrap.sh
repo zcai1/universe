@@ -33,6 +33,7 @@ fi
 
 if [ ! -d $JSR308/universe ]; then
   hg clone https://bitbucket.org/wmdietl/universe/ universe;
+  mkdir $JSR308/universe/bin;
 fi
 
 cd $JSR308/jsr308-langtools/make
@@ -49,3 +50,8 @@ ant
 
 cd $JSR308/checker-framework-inference
 gradle dist
+
+cd $JSR308/universe
+./scripts/compileGUT.sh
+
+chown -R vagrant.vagrant ~
