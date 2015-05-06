@@ -54,4 +54,17 @@ gradle dist
 cd $JSR308/universe
 ./scripts/compileGUT.sh
 
+cd $JSR308/universe
+
+curl -o sat4j-core.zip http://download.forge.ow2.org/sat4j/sat4j-core-v20130525.zip
+curl -o sat4j-max.zip http://download.forge.ow2.org/sat4j/sat4j-maxsat-v20130525.zip
+unzip sat4j-core.zip -d sat4j 
+unzip sat4j-max.zip -d sat4j
+rm -rf sat4j-core.zip
+rm -rf sat4j-max.zip
+
 chown -R vagrant.vagrant ~
+
+
+
+
