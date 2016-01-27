@@ -1,11 +1,12 @@
 package GUT;
 
 import java.io.File;
-import java.util.Collection;
-
+//import java.util.Collection;
+import java.util.List;
 import javax.annotation.processing.AbstractProcessor;
 
-import org.checkerframework.framework.test.ParameterizedCheckerTest;
+import org.checkerframework.framework.test.CheckerFrameworkTest;
+import org.checkerframework.framework.test.TestUtilities;//newly added
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
 import org.junit.runners.Parameterized.Parameters;
@@ -27,7 +28,7 @@ public class GUTTests {
         org.junit.runner.JUnitCore jc = new org.junit.runner.JUnitCore();
         Result run = jc.run(GUTTestsTopology.class,
                 GUTTestsStrictPurity.class,
-                GUTTestsEncapsulation.class,
+                //GUTTestsEncapsulation.class,/*I think doesn't exist*/
                 GUTTestsLostYes.class,
                 GUTTestsLostNo.class);
 
@@ -44,53 +45,55 @@ public class GUTTests {
     }
 
 
-    public static class GUTTestsTopology extends ParameterizedCheckerTest {
+    public static class GUTTestsTopology extends CheckerFrameworkTest {
         public GUTTestsTopology (File testFile) {
-            super(testFile, GUTTests.checkerClass, "GUT", "-Anomsgtext");
+            super(testFile, GUTTests.checkerClass, "GUT/topol", "-Anomsgtext");
         }
         @Parameters
-        public static Collection<Object[]> data() {
-            return testFiles("GUT/topol");
+        public static String[] getTestDirs() {
+            return new String[]{"GUT/topol"};
         }
     }
 
-    public static class GUTTestsStrictPurity extends ParameterizedCheckerTest {
+    public static class GUTTestsStrictPurity extends CheckerFrameworkTest {
         public GUTTestsStrictPurity(File testFile) {
-            super(testFile, GUTTests.checkerClass, "GUT", "-Anomsgtext", "-Alint=checkStrictPurity");
+            super(testFile, GUTTests.checkerClass, "GUT/strictpurity", "-Anomsgtext", "-Alint=checkStrictPurity");
         }
         @Parameters
-        public static Collection<Object[]> data() {
-            return testFiles("GUT/strictpurity");
+        public static String[] getTestDirs() {
+            return new String[]{"GUT/strictpurity"};
         }
     }
-
-    public static class GUTTestsEncapsulation extends ParameterizedCheckerTest {
+    /*
+    public static class GUTTestsEncapsulation extends CheckerFrameworkTest {
         public GUTTestsEncapsulation(File testFile) {
-            super(testFile, GUTTests.checkerClass, "GUT", "-Anomsgtext", "-Alint=checkOaM");
+            super(testFile, GUTTests.checkerClass, "GUT/encap", "-Anomsgtext", "-Alint=checkOaM");
         }
         @Parameters
-        public static Collection<Object[]> data() {
-            return testFiles("GUT/encap");
-        }
-    }
-
-    public static class GUTTestsLostYes extends ParameterizedCheckerTest {
+	public static String[] getTestDirs() {
+	    return new String[]{"GUT/encap"};
+	    }
+	}
+    *///I think this doesn't exit!
+    public static class GUTTestsLostYes extends CheckerFrameworkTest {
         public GUTTestsLostYes(File testFile) {
-            super(testFile, GUTTests.checkerClass, "GUT", "-Anomsgtext", "-Alint=allowLost");
+            super(testFile, GUTTests.checkerClass, "GUT/lostyes", "-Anomsgtext", "-Alint=allowLost");
         }
         @Parameters
-        public static Collection<Object[]> data() {
-            return testFiles("GUT/lostyes");
+        public static String[] getTestDirs() {
+            return new String[]{"GUT/lostyes"};
         }
     }
 
-    public static class GUTTestsLostNo extends ParameterizedCheckerTest {
-        public GUTTestsLostNo(File testFile) {
-            super(testFile, GUTTests.checkerClass, "GUT", "-Anomsgtext", "-Alint=-allowLost");
+    public static class GUTTestsLostNo extends CheckerFrameworkTest {
+    	public GUTTestsLostNo(File testFile) {
+    		super(testFile, GUTTests.checkerClass, "GUT/lostno",
+    				"-Anomsgtext", 
+    				"-Alint=-allowLost");
         }
         @Parameters
-        public static Collection<Object[]> data() {
-            return testFiles("GUT/lostno");
+        public static String[] getTestDirs() {
+            return new String[]{"GUT/lostno"};
         }
     }
 }
