@@ -1,6 +1,6 @@
 package GUT.lostyes;
 
-import GUT.quals.Lost;
+import GUT.qual.Lost;
 
 public class LostYes {
     @Lost Object lo;

@@ -1,4 +1,4 @@
-import GUT.quals.*;
+import GUT.qual.*;
 
 class GBounds {
     class Data {}

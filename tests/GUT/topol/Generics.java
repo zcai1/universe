@@ -1,6 +1,6 @@
 package GUT.topol;
 
-import GUT.quals.*;
+import GUT.qual.*;
 
 
 class GList<X extends @Any Object> {

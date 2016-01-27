@@ -1,6 +1,6 @@
 package GUT.topol;
 
-import GUT.quals.*;
+import GUT.qual.*;
 
 public class FBound<B extends FBound<B>> {
 

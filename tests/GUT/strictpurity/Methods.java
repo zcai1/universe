@@ -1,6 +1,6 @@
 package GUT.purity;
 
-import GUT.quals.Pure;
+import GUT.qual.Pure;
 
 /**
  *

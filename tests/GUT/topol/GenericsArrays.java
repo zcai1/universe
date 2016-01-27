@@ -1,6 +1,6 @@
 package GUT.topol;
 
-import GUT.quals.*;
+import GUT.qual.*;
 import java.util.List;
 
 // Use of EventList reveals a different problem, add a testcase!
