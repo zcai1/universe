@@ -1,14 +1,14 @@
 package GUT;
 
 
-import GUT.quals.*;
-
 import javax.annotation.processing.SupportedOptions;
 
 import org.checkerframework.common.basetype.BaseTypeChecker;
 import org.checkerframework.framework.qual.TypeQualifiers;
 import org.checkerframework.framework.source.SupportedLintOptions;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
+
+import GUT.qual.*;
 
 
 /**

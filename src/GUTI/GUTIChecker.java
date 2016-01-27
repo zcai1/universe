@@ -7,12 +7,12 @@ import org.checkerframework.framework.source.SupportedLintOptions;
 import javax.annotation.processing.SupportedOptions;
 
 import GUT.GUTAnnotatedTypeFactory;
-import GUT.quals.Any;
-import GUT.quals.Bottom;
-import GUT.quals.Lost;
-import GUT.quals.Peer;
-import GUT.quals.Rep;
-import GUT.quals.Self;
+import GUT.qual.Any;
+import GUT.qual.Bottom;
+import GUT.qual.Lost;
+import GUT.qual.Peer;
+import GUT.qual.Rep;
+import GUT.qual.Self;
 import checkers.inference.BaseInferrableChecker;
 import checkers.inference.InferenceChecker;
 import checkers.inference.InferenceVisitor;

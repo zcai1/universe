@@ -1,4 +1,4 @@
-package GUT.quals;
+package GUT.qual;
 
 import org.checkerframework.framework.qual.DefaultFor;
 import org.checkerframework.framework.qual.DefaultLocation;

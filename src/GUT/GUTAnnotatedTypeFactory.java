@@ -35,14 +35,6 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeVariable;
 
-import GUT.quals.Any;
-import GUT.quals.Bottom;
-import GUT.quals.Lost;
-import GUT.quals.Peer;
-import GUT.quals.Pure;
-import GUT.quals.Rep;
-import GUT.quals.Self;
-
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.CompoundAssignmentTree;
 import com.sun.source.tree.ExpressionTree;
@@ -53,6 +45,15 @@ import com.sun.source.tree.NewArrayTree;
 import com.sun.source.tree.NewClassTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.Tree.Kind;
+
+import GUT.qual.Any;
+import GUT.qual.Bottom;
+import GUT.qual.Lost;
+import GUT.qual.Peer;
+import GUT.qual.Pure;
+import GUT.qual.Rep;
+import GUT.qual.Self;
+
 import com.sun.source.tree.TypeCastTree;
 import com.sun.source.tree.UnaryTree;
 

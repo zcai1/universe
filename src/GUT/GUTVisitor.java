@@ -204,7 +204,7 @@ public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
 
     private boolean isPure(DeclaredType anno) {
         // TODO: Is this the simplest way to do this?
-        return anno.toString().equals(GUT.quals.Pure.class.getName())
+        return anno.toString().equals(GUT.qual.Pure.class.getName())
                 || anno.toString().equals(org.jmlspecs.annotation.Pure.class.getName());
     }
 

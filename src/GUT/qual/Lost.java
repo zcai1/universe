@@ -1,4 +1,4 @@
-package GUT.quals;
+package GUT.qual;
 
 import org.checkerframework.framework.qual.SubtypeOf;
 import org.checkerframework.framework.qual.TypeQualifier;
@@ -10,7 +10,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * The current object owns the referenced object.
+ * Ownership information is not expressible from the current viewpoint. Only
+ * used internally.
  *
  * @author wmdietl
  */
@@ -18,5 +19,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE_PARAMETER, ElementType.TYPE_USE })
 @TypeQualifier
-@SubtypeOf({ Lost.class })
-public @interface Rep {}
+@SubtypeOf({ Any.class })
+public @interface Lost {}

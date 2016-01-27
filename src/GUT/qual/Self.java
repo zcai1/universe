@@ -1,4 +1,4 @@
-package GUT.quals;
+package GUT.qual;
 
 import org.checkerframework.framework.qual.SubtypeOf;
 import org.checkerframework.framework.qual.TypeQualifier;

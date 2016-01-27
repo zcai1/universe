@@ -1,4 +1,4 @@
-package GUT.quals;
+package GUT.qual;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
