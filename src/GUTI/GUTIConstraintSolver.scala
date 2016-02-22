@@ -188,7 +188,7 @@ class GUTIConstraintSolver extends PBSConstraintSolver {
       }
     }
   }
-
+  //maybe the only one that needs to be considered.
   def encodeCombine(target: Slot, decl: Slot, res: Slot): (AndOfOrs, List[BVar]) = {
     if (!res.isInstanceOf[CombVariableSlot]) {
       println("encodeCombine should only be called with a CombVariable as third argument!")

@@ -35,12 +35,14 @@ public class GUTQualifierUtils {
      * @param recv the receiver Universe modifier.
      * @param decl the declared Universe modifier.
      * @return the combined Universe modifier.
-     */
+     *
+     *This is viewpoint adaptaton actually.*/
     private static AnnotationMirror combineModifierWithModifier(GUTAnnotatedTypeFactory atypeFactory,
             AnnotationMirror recv, AnnotationMirror decl) {
         assert recv != null;
         assert decl != null;
-
+        System.out.println("recv: "+recv);
+        System.out.println("decl: "+decl);
         if (AnnotationUtils.areSame(recv, atypeFactory.SELF)) {
             return decl;
         } else if (AnnotationUtils.areSame(recv, atypeFactory.PEER) &&
@@ -51,8 +53,12 @@ public class GUTQualifierUtils {
             return atypeFactory.REP;
         } else if (AnnotationUtils.areSame(decl, atypeFactory.ANY)) {
             return atypeFactory.ANY;
-        } else {
-            return atypeFactory.LOST;
+        } else if (AnnotationUtils.areSame(recv, atypeFactory.BOTTOM)) {
+        	System.out.println("Seeing me means reaches here");
+            return atypeFactory.BOTTOM;
+        }else {
+            //return atypeFactory.LOST;
+        	return atypeFactory.VPLOST;
         }
     }
 
@@ -74,10 +80,12 @@ public class GUTQualifierUtils {
         assert decl != null;
 
         if (decl.getKind().isPrimitive()) {
+        	//System.out.println(decl.toString());
             // Make sure that primitive types have type bottom
             decl.replaceAnnotation(atypeFactory.BOTTOM);
             return decl;
         } else if (decl.getKind() == TypeKind.TYPEVAR ) {
+        	
             if (!isTypeVarExtends) {
                 isTypeVarExtends = true;
 
@@ -102,7 +110,6 @@ public class GUTQualifierUtils {
             }
 
             Map<AnnotatedTypeMirror, AnnotatedTypeMirror> mapping = new HashMap<AnnotatedTypeMirror, AnnotatedTypeMirror>();
-
             // Get the combined main modifier
             AnnotationMirror mainModifier = getUniverseModifier(atypeFactory, declaredType);
             AnnotationMirror combinedMainModifier = combineModifierWithModifier(atypeFactory, recv, mainModifier);
@@ -335,8 +342,10 @@ public class GUTQualifierUtils {
             // Hmm, why do we get here with an unannotated type?
             // Seems to happen for arrays?
             if (GUTChecker.isAnyDefault(type) ) {
+            	
                 return atypeFactory.ANY;
             } else {
+            	
                 return atypeFactory.PEER;
             }
         }
@@ -353,13 +362,15 @@ public class GUTQualifierUtils {
         if (type.hasEffectiveAnnotation(atypeFactory.SELF)) {
             return atypeFactory.SELF;
         }
-
-        return atypeFactory.LOST;
-
+        if(type.hasEffectiveAnnotation(atypeFactory.BOTTOM)){
+        	return atypeFactory.BOTTOM;
+    	}
+        //return atypeFactory.LOST;
+        return atypeFactory.VPLOST;
         // TODO: for some reason the simpler statement below does not work!
         // It gives a different AnnotationMirror for different invocations.
         // Defaulting ensures that there is always one Universe annotation.
-        // return type.getAnnotations().iterator().next();
+        //return type.getAnnotations().iterator().next();
     }
 
 

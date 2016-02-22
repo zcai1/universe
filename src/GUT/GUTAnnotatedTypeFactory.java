@@ -22,10 +22,15 @@ import org.checkerframework.javacutil.Pair;
 import org.checkerframework.javacutil.TreeUtils;
 import org.checkerframework.javacutil.TypesUtils;
 
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
@@ -53,6 +58,13 @@ import GUT.qual.Peer;
 import GUT.qual.Pure;
 import GUT.qual.Rep;
 import GUT.qual.Self;
+import GUT.qual.VPLost;
+import lubglb.quals.A;
+import lubglb.quals.B;
+import lubglb.quals.C;
+import lubglb.quals.D;
+import lubglb.quals.E;
+import lubglb.quals.F;
 
 import com.sun.source.tree.TypeCastTree;
 import com.sun.source.tree.UnaryTree;
@@ -68,19 +80,20 @@ public class GUTAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     // Only public so that the GUTI package can access these fields.
     // Maybe merge the packages again?
     // TODO: change to getters?
-    public AnnotationMirror ANY, PEER, REP, LOST, SELF, BOTTOM, PURE;
+    public AnnotationMirror ANY, PEER, REP, LOST,VPLOST, SELF, BOTTOM, PURE;
 
     public GUTAnnotatedTypeFactory(BaseTypeChecker checker) {
         super(checker, true);
-
+        //fill in AnnotationMirror
         ANY = AnnotationUtils.fromClass(elements, Any.class);
         PEER = AnnotationUtils.fromClass(elements, Peer.class);
         REP = AnnotationUtils.fromClass(elements, Rep.class);
         LOST = AnnotationUtils.fromClass(elements, Lost.class);
+        VPLOST=AnnotationUtils.fromClass(elements, VPLost.class);
         SELF = AnnotationUtils.fromClass(elements, Self.class);
         BOTTOM = AnnotationUtils.fromClass(elements, Bottom.class);
         PURE = AnnotationUtils.fromClass(elements, Pure.class);
-
+        
         addAliasedAnnotation(org.jmlspecs.annotation.Peer.class, PEER);
         addAliasedAnnotation(org.jmlspecs.annotation.Rep.class, REP);
         addAliasedAnnotation(org.jmlspecs.annotation.Readonly.class, ANY);
@@ -88,6 +101,19 @@ public class GUTAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
         this.postInit();
     }
+    
+    @Override
+    protected Set<Class<? extends Annotation>> createSupportedTypeQualifiers() {
+    	// TODO Auto-generated method stub
+    	return super.createSupportedTypeQualifiers();
+    	//return Collections.unmodifiableSet(
+                //new HashSet<Class<? extends Annotation>>(
+                        //Arrays.asList(Any.class, Bottom.class, Lost.class, Peer.class, Pure.class, Rep.class,Self.class)));
+    }
+    	
+    	
+    	
+    
 
     /**
      * The type of "this" is always "self".
@@ -258,7 +284,7 @@ public class GUTAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         // TODO: why is this fromElement and not getAnnotatedType??
         AnnotatedExecutableType method = this.fromElement(methodElt);
 
-        // System.out.println("Declared method: " + method);
+         System.out.println("Declared method: " + method);
 
         Map<AnnotatedTypeMirror, AnnotatedTypeMirror> mappings = new HashMap<AnnotatedTypeMirror, AnnotatedTypeMirror>();
 

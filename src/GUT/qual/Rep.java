@@ -1,7 +1,7 @@
 package GUT.qual;
 
 import org.checkerframework.framework.qual.SubtypeOf;
-import org.checkerframework.framework.qual.TypeQualifier;
+//import org.checkerframework.framework.qual.TypeQualifier;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -17,6 +17,6 @@ import java.lang.annotation.Target;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE_PARAMETER, ElementType.TYPE_USE })
-@TypeQualifier
-@SubtypeOf({ Lost.class })
+//@TypeQualifier
+@SubtypeOf({ VPLost.class})
 public @interface Rep {}

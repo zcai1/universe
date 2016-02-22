@@ -3,7 +3,7 @@ package GUT.qual;
 import org.checkerframework.framework.qual.DefaultQualifierInHierarchy;
 import org.checkerframework.framework.qual.ImplicitFor;
 import org.checkerframework.framework.qual.SubtypeOf;
-import org.checkerframework.framework.qual.TypeQualifier;
+//import org.checkerframework.framework.qual.TypeQualifier;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -21,9 +21,9 @@ import com.sun.source.tree.Tree;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE_PARAMETER, ElementType.TYPE_USE })
-@TypeQualifier
+//@TypeQualifier
 @DefaultQualifierInHierarchy
 // TODO: why is this not happening?
 @ImplicitFor(trees = { Tree.Kind.NEW_ARRAY })
-@SubtypeOf({ Lost.class })
+@SubtypeOf({ VPLost.class })
 public @interface Peer {}

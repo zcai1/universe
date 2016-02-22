@@ -27,6 +27,7 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 
 import com.sun.source.tree.AssignmentTree;
+import com.sun.source.tree.CompoundAssignmentTree;
 import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.tree.MethodTree;
@@ -56,7 +57,9 @@ public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
         this.allowLost = checker.getLintOption("allowLost", false);
         this.checkOaM = checker.getLintOption("checkOaM", false);
         this.checkStrictPurity = checker.getLintOption("checkStrictPurity", false);
-
+        //System.out.println(this.allowLost);
+        //System.out.println(this.checkOaM);
+        //System.out.println("strictpurity is: "+this.checkStrictPurity);
         String warn = checker.getOption("warn", "");
         warn_staticpeer = warn.contains("staticpeer");
     }
@@ -80,21 +83,6 @@ public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
     }
 
     /**
-     * GUT does not use receiver annotations, forbid them.
-     */
-    @Override
-    public Void visitMethod(MethodTree node, Void p) {
-        // System.out.println("MethodTree: " + node);
-
-        if (node.getReceiverParameter() != null &&
-                !node.getReceiverParameter().getModifiers().getAnnotations().isEmpty()) {
-            checker.report(Result.failure("uts.receiver.annotations.forbidden"), node);
-        }
-
-        return super.visitMethod(node, p);
-    }
-
-    /**
      * Ignore method receiver annotations.
      */
     @Override
@@ -104,6 +92,21 @@ public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
     }
 
     /**
+	 * GUT does not use receiver annotations, forbid them.
+	 */
+	@Override
+	public Void visitMethod(MethodTree node, Void p) {
+	    // System.out.println("MethodTree: " + node);
+	
+	    if (node.getReceiverParameter() != null &&
+	            !node.getReceiverParameter().getModifiers().getAnnotations().isEmpty()) {
+	        checker.report(Result.failure("uts.receiver.annotations.forbidden"), node);
+	    }
+	
+	    return super.visitMethod(node, p);
+	}
+
+	/**
      * Ignore constructor receiver annotations.
      */
     @Override
@@ -129,7 +132,8 @@ public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
 
         // Check for @Lost in combined parameter types.
         for (AnnotatedTypeMirror parameterType : constructor.getParameterTypes()) {
-            if (AnnotatedTypes.containsModifier(parameterType, atypeFactory.LOST)) {
+        	//if (AnnotatedTypes.containsModifier(parameterType, atypeFactory.LOST)) {
+            if (AnnotatedTypes.containsModifier(parameterType, atypeFactory.VPLOST)) {
                 checker.report(Result.failure("uts.lost.parameter"), node);
             }
         }
@@ -143,10 +147,23 @@ public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
 
         // TODO: forbid rep in static context
         // TODO: test this. fields, methods, local vars, ... Checker.isValid?
-        if (ElementUtils.isStatic(TreeUtils.elementFromUse(node))
-                && type.hasEffectiveAnnotation(atypeFactory.REP)) {
-            checker.report(Result.failure("uts.static.rep.forbidden"), node);
+        
+        boolean isstatic=false;
+        MethodTree meth = TreeUtils.enclosingMethod(getCurrentPath());
+        if(meth!=null){
+        	ExecutableElement methel = TreeUtils.elementFromDeclaration(meth);
+            
+        	isstatic = ElementUtils.isStatic(methel); 
+        			
+        }else{
+        	VariableTree vartree = TreeUtils.enclosingVariable(getCurrentPath());
+            ModifiersTree mt = vartree.getModifiers();
+        	isstatic = mt.getFlags().contains(Modifier.STATIC);
         }
+        if(isstatic&& type.hasEffectiveAnnotation(atypeFactory.REP)) {
+            	System.out.println("called");
+                checker.report(Result.failure("uts.static.rep.forbidden"), node);
+            }
 
         return super.visitNewClass(node, p);
     }
@@ -167,7 +184,8 @@ public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
 
         // Check for @Lost in combined parameter types.
         for (AnnotatedTypeMirror parameterType : method.getParameterTypes()) {
-            if (AnnotatedTypes.containsModifier(parameterType, atypeFactory.LOST)) {
+            //if (AnnotatedTypes.containsModifier(parameterType, atypeFactory.LOST)) {
+            if (AnnotatedTypes.containsModifier(parameterType, atypeFactory.VPLOST)) {
                 checker.report(Result.failure("uts.lost.parameter"), node);
             }
         }
@@ -222,7 +240,8 @@ public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
 
         // Check for @Lost in left hand side of assignment.
         AnnotatedTypeMirror type = atypeFactory.getAnnotatedType(node.getVariable());
-        if (AnnotatedTypes.containsModifier(type, atypeFactory.LOST)) {
+        //if (AnnotatedTypes.containsModifier(type, atypeFactory.LOST)) {
+        if (AnnotatedTypes.containsModifier(type, atypeFactory.VPLOST)) {
             checker.report(Result.failure("uts.lost.lhs"), node);
         }
 
@@ -243,7 +262,10 @@ public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
         if (checkStrictPurity && true /*TODO environment pure*/) {
             checker.report(Result.failure("purity.assignment.forbidden"), node);
         }
-
+        //System.out.println(node instanceof CompoundAssignmentTree);
+        //if(node instanceof CompoundAssignmentTree){
+        	//visitCompoundAssignment((CompoundAssignmentTree)node, p);
+        //}
         return super.visitAssignment(node, p);
     }
 
@@ -291,7 +313,16 @@ public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
         public Void visitDeclared(AnnotatedDeclaredType type, Tree p) {
             if (p.getKind() == Kind.VARIABLE) {
                 ModifiersTree mt = ((VariableTree) p).getModifiers();
-                if (mt.getFlags().contains(Modifier.STATIC)) {
+                System.out.println("visitDeclared  called");
+                System.out.println(mt.getFlags().contains(Modifier.STATIC));
+            	MethodTree meth = TreeUtils.enclosingMethod(getCurrentPath());
+            	if(meth!=null){
+            		ExecutableElement methel = TreeUtils.elementFromDeclaration(meth);
+            
+            	if (ElementUtils.isStatic(methel) ||
+            			
+            			mt.getFlags().contains(Modifier.STATIC)) {
+
                     if (AnnotatedTypes.containsModifier(type, GUTVisitor.this.atypeFactory.REP)) {
                         checker.report(Result.failure("uts.static.rep.forbidden",
                                 type.getAnnotations(), type.toString()), p);
@@ -303,21 +334,16 @@ public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
                         checker.report(Result.warning("uts.static.peer.warning",
                                 type.getAnnotations(), type.toString()), p);
                     }
-                } else {
-                    // TODO: how do I find if I'm in a static method? selftype
-                    // is non-null :-(
-                    // System.out.println("Self: " +
-                    // GUTVisitor.this.atypeFactory.getSelfType(p));
-                    // System.out.println("Check on tree: " + p);
                 }
+            	}
             }
 
             if (!allowLost &&
                     AnnotatedTypes.containsModifier(type, GUTVisitor.this.atypeFactory.LOST)) {
                 // TODO: find a way to distinguish explicit annotations from viewpoint adaptation result,
                 // e.g. by adding a separate annotation.
-                // checker.report(Result.failure("uts.explicit.lost.forbidden",
-                //       type.getAnnotations(), type.toString()), p);
+                 checker.report(Result.failure("uts.explicit.lost.forbidden",
+                       type.getAnnotations(), type.toString()), p);
             }
 
             if (GUTQualifierUtils.hasMultipleModifiers(type)) {
