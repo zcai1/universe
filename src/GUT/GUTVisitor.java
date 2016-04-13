@@ -58,11 +58,7 @@ public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
         this.allowLost = checker.getLintOption("allowLost", false);
         this.checkOaM = checker.getLintOption("checkOaM", false);
         this.checkStrictPurity = checker.getLintOption("checkStrictPurity", false);
-        //System.out.println(this.allowLost);
-        //System.out.println(this.checkOaM);
-        //System.out.println("strictpurity is: "+this.checkStrictPurity);
         String warn = checker.getOption("warn", "");
-        
         warn_staticpeer = warn.contains("staticpeer");
     }
 
@@ -92,21 +88,21 @@ public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
             MethodInvocationTree node) {
         return;
     }
-
     /**
 	 * GUT does not use receiver annotations, forbid them.
 	 */
 	@Override
 	public Void visitMethod(MethodTree node, Void p) {
-	    // System.out.println("MethodTree: " + node);
-	
+	// System.out.println("MethodTree: " + node);
+
 	    if (node.getReceiverParameter() != null &&
-	            !node.getReceiverParameter().getModifiers().getAnnotations().isEmpty()) {
-	        checker.report(Result.failure("uts.receiver.annotations.forbidden"), node);
+		!node.getReceiverParameter().getModifiers().getAnnotations().isEmpty()) {
+	    checker.report(Result.failure("uts.receiver.annotations.forbidden"), node);
+		}
+
+		return super.visitMethod(node, p);
 	    }
-	
-	    return super.visitMethod(node, p);
-	}
+
 
 	/**
      * Ignore constructor receiver annotations.
@@ -134,7 +130,6 @@ public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
 
         // Check for @Lost in combined parameter types.
         for (AnnotatedTypeMirror parameterType : constructor.getParameterTypes()) {
-        	//if (AnnotatedTypes.containsModifier(parameterType, atypeFactory.LOST)) {
             if (AnnotatedTypes.containsModifier(parameterType, atypeFactory.VPLOST)) {
                 checker.report(Result.failure("uts.lost.parameter"), node);
             }
@@ -192,9 +187,8 @@ public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
 
         AnnotatedExecutableType method = atypeFactory.methodFromUse(node).first;
 
-        // Check for @Lost in combined parameter types.
+        // Check for @VPLost in combined parameter types.
         for (AnnotatedTypeMirror parameterType : method.getParameterTypes()) {
-            //if (AnnotatedTypes.containsModifier(parameterType, atypeFactory.LOST)) {
             if (AnnotatedTypes.containsModifier(parameterType, atypeFactory.VPLOST)) {
                 checker.report(Result.failure("uts.lost.parameter"), node);
             }
@@ -248,9 +242,8 @@ public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
     public Void visitAssignment(AssignmentTree node, Void p) {
         assert node != null;
 
-        // Check for @Lost in left hand side of assignment.
+        // Check for @VPLost in left hand side of assignment.
         AnnotatedTypeMirror type = atypeFactory.getAnnotatedType(node.getVariable());
-        //if (AnnotatedTypes.containsModifier(type, atypeFactory.LOST)) {
         if (AnnotatedTypes.containsModifier(type, atypeFactory.VPLOST)) {
             checker.report(Result.failure("uts.lost.lhs"), node);
         }
@@ -272,10 +265,7 @@ public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
         if (checkStrictPurity && true /*TODO environment pure*/) {
             checker.report(Result.failure("purity.assignment.forbidden"), node);
         }
-        //System.out.println(node instanceof CompoundAssignmentTree);
-        //if(node instanceof CompoundAssignmentTree){
-        	//visitCompoundAssignment((CompoundAssignmentTree)node, p);
-        //}
+
         return super.visitAssignment(node, p);
     }
 
@@ -323,8 +313,6 @@ public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
         public Void visitDeclared(AnnotatedDeclaredType type, Tree p) {
             if (p.getKind() == Kind.VARIABLE) {
                 ModifiersTree mt = ((VariableTree) p).getModifiers();
-                //System.out.println("visitDeclared  called");
-                //System.out.println(mt.getFlags().contains(Modifier.STATIC));
                 boolean isstatic=false;
             	MethodTree meth = TreeUtils.enclosingMethod(getCurrentPath());
             	if(meth!=null){
@@ -374,7 +362,7 @@ public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
         protected Void visitParameterizedType(AnnotatedDeclaredType type, ParameterizedTypeTree tree) {
             final TypeElement element =
                 (TypeElement)type.getUnderlyingType().asElement();
-            System.out.println("visitParameterizedType "+type);
+
             List<AnnotatedTypeParameterBounds> typevars = atypeFactory.typeVariablesFromUse(type, element);
 
             for (AnnotatedTypeParameterBounds atpb : typevars) {
