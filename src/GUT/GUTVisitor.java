@@ -148,25 +148,23 @@ public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
         boolean isstatic = false;
         MethodTree meth = TreeUtils.enclosingMethod(getCurrentPath());
         if(meth != null){
-        	ExecutableElement methel = TreeUtils.elementFromDeclaration(meth);
-            
-        	isstatic = ElementUtils.isStatic(methel); 
+	    ExecutableElement methel = TreeUtils.elementFromDeclaration(meth);
+	    isstatic = ElementUtils.isStatic(methel); 
         			
         }else{
-        	VariableTree vartree = TreeUtils.enclosingVariable(getCurrentPath());
-        	if(vartree != null){
-	            ModifiersTree mt = vartree.getModifiers();
-	        	isstatic = mt.getFlags().contains(Modifier.STATIC);
-        	}
-        	else{
-        		BlockTree blcktree = TreeUtils.enclosingTopLevelBlock(getCurrentPath());
-        		if(blcktree != null){
-        			isstatic=blcktree.isStatic();
-        		}
-        	}
+	    VariableTree vartree = TreeUtils.enclosingVariable(getCurrentPath());
+	    if(vartree != null){
+		ModifiersTree mt = vartree.getModifiers();
+		isstatic = mt.getFlags().contains(Modifier.STATIC);
+	    }
+	    else{
+		BlockTree blcktree = TreeUtils.enclosingTopLevelBlock(getCurrentPath());
+		if(blcktree != null){
+		    isstatic=blcktree.isStatic();
+		}
+	    }
         }
         if(isstatic && type.hasEffectiveAnnotation(atypeFactory.REP)) {
-            	//System.out.println("called");
                 checker.report(Result.failure("uts.static.rep.forbidden"), node);
             }
 
@@ -317,31 +315,31 @@ public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
             	MethodTree meth = TreeUtils.enclosingMethod(getCurrentPath());
             	if(meth!=null){
             		ExecutableElement methel = TreeUtils.elementFromDeclaration(meth);
-            		isstatic=ElementUtils.isStatic(methel);
+            		isstatic = ElementUtils.isStatic(methel);
             	}
+		
             	if(mt.getFlags().contains(Modifier.STATIC)){
             		isstatic=true;
             	}
+		
             	BlockTree blcktree = TreeUtils.enclosingTopLevelBlock(getCurrentPath());
-        		if(blcktree != null){
-        			isstatic=blcktree.isStatic();
-        		}
+		if(blcktree != null){
+			isstatic=blcktree.isStatic();
+		}
+		
             	if (isstatic) {
-            		//System.out.println("reached");
                     if (AnnotatedTypes.containsModifier(type, GUTVisitor.this.atypeFactory.REP)) {
                         checker.report(Result.failure("uts.static.rep.forbidden",
                                 type.getAnnotations(), type.toString()), p);
                     }
-                    
                     if (AnnotatedTypes.containsModifier(type, GUTVisitor.this.atypeFactory.PEER)
-            	&& warn_staticpeer) {
+			&& warn_staticpeer) {
                         // TODO: I would really like to only give the warning if
                         // the modifier was explicit.
                         checker.report(Result.warning("uts.static.peer.warning",
                                 type.getAnnotations(), type.toString()), p);
                     }
                 }
-            	
             }
 
             if (!allowLost &&
