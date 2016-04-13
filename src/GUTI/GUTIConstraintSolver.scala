@@ -1,4 +1,4 @@
-package GUTI
+/*package GUTI
 
 import checkers.inference._
 import checkers.inference.model._
@@ -14,12 +14,14 @@ import com.sun.source.tree.Tree.Kind
 object GUTConstants {
   // call getRealChecker to ensure that it is initialized
   val rc = InferenceMain.getInstance.getRealTypeFactory.asInstanceOf[GUTAnnotatedTypeFactory]
-  val BOTTOM = new ConstantSlot(rc.BOTTOM)
-  val SELF = new ConstantSlot(rc.SELF)
-  val PEER = new ConstantSlot(rc.PEER)
-  val REP = new ConstantSlot(rc.REP)
-  val LOST = new ConstantSlot(rc.LOST)
-  val ANY = new ConstantSlot(rc.ANY)
+  // How to determine the ids?
+  //changes
+  val BOTTOM = new ConstantSlot(rc.BOTTOM,1)
+  val SELF = new ConstantSlot(rc.SELF,2)
+  val PEER = new ConstantSlot(rc.PEER,3)
+  val REP = new ConstantSlot(rc.REP,4)
+  val LOST = new ConstantSlot(rc.LOST,5)
+  val ANY = new ConstantSlot(rc.ANY,6)
 }
 
 class GUTIConstraintSolver extends PBSConstraintSolver {
@@ -454,4 +456,4 @@ class GUTIConstraintSolver extends PBSConstraintSolver {
     */
   }
 
-}
+}*/

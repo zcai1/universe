@@ -3,7 +3,8 @@ package GUT.topol;
 import GUT.qual.*;
 
 public class MethodTypeVars {
-
+void foobar(Object p) {}
+{foobar(null);}
     <T extends @Any Object> T transform(T a) { return null; }
 
     <T extends @Any Object> T [] toArray(T [] a) { return null; }
@@ -24,7 +25,5 @@ public class MethodTypeVars {
         // Hmm, maybe do add the @Poly annotation, mostly for arrays?
         //:: error: (argument.type.incompatible)
         @Rep String @Any [] oa2 = this.toArray(new @Rep String @Any [10]);
-
-        // @Rep String @Any [] oa3 = this.toArray2(new @Rep String @Any [10]);
     }
 }

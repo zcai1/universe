@@ -1,9 +1,10 @@
-package GUTI
+/*package GUTI
 
 import org.checkerframework.javacutil.AnnotationUtils
 import org.checkerframework.framework.`type`.QualifierHierarchy
 
 import checkers.inference.InferenceSolver
+import checkers.inference.InferenceSolution
 import checkers.inference.model._
 
 import javax.lang.model.element.AnnotationMirror
@@ -47,12 +48,12 @@ abstract class PBSConstraintSolver extends InferenceSolver {
 
   // TOOD: use InferenceMain logger
   val DEBUG = true
-
+@Override
   def solve(configuration: Map[String, String],
     variables: Collection[Slot],
     constraints: Collection[Constraint],
     qualHierarchy: QualifierHierarchy,
-    procEnv: ProcessingEnvironment): Map[Integer, AnnotationMirror] = {
+    procEnv: ProcessingEnvironment): InferenceSolution = {
 
     val TIMING = (configuration.get("TIMING") != null)
 
@@ -127,6 +128,7 @@ abstract class PBSConstraintSolver extends InferenceSolver {
         val solution = decode(ssolveroutput)
         solution match {
           case Some(ssolution) => {
+            // Might no need to fix at all?
             ssolution
           }
           case None => {
@@ -376,4 +378,4 @@ abstract class PBSConstraintSolver extends InferenceSolver {
     }
   }
 
-}
+}*/

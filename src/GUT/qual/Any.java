@@ -1,10 +1,8 @@
 package GUT.qual;
 
 import org.checkerframework.framework.qual.DefaultFor;
-import org.checkerframework.framework.qual.DefaultLocation;
-import org.checkerframework.framework.qual.DefaultQualifierInHierarchy;
+import org.checkerframework.framework.qual.TypeUseLocation;
 import org.checkerframework.framework.qual.SubtypeOf;
-//import org.checkerframework.framework.qual.TypeQualifier;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -21,12 +19,7 @@ import java.lang.annotation.Target;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE_PARAMETER, ElementType.TYPE_USE })
-//@TypeQualifier
 @SubtypeOf({})
-@DefaultFor({ DefaultLocation.LOCAL_VARIABLE, DefaultLocation.RESOURCE_VARIABLE,
-    DefaultLocation.IMPLICIT_UPPER_BOUNDS })
-//@DefaultQualifierInHierarchy
-/*
- * @ImplicitFor( trees={ Tree.Kind.CHAR_LITERAL, Tree.Kind.STRING_LITERAL })
- */
+@DefaultFor({ TypeUseLocation.LOCAL_VARIABLE, TypeUseLocation.RESOURCE_VARIABLE,
+    TypeUseLocation.IMPLICIT_UPPER_BOUND })
 public @interface Any {}

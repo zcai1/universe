@@ -3,12 +3,11 @@ package GUT.topol;
 import GUT.qual.*;
 
 public class Boxing {
-	Integer I = 5;
-	
+    Integer I = 5;
+
     void m() {
         Integer I = new Integer(3);
         int i = 5;
-
         I = i;
         i = I;
     }
@@ -20,15 +19,17 @@ public class Boxing {
         I = i;
         i = I;
     }
-	
-	void k(){
-		int i;
-	}
+
+    void k(){
+        int i;
+    }
+ 
     void ops() {
         
         I += 9;
-        //:: error: (compound.assignment.type.incompatible)
+        // Compound assignment works on primitive types, therefore
+        // @Rep qualifier is ignored.
         I += new @Rep Integer(3);
     }
-    
+
 }

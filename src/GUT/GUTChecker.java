@@ -1,14 +1,13 @@
 package GUT;
 
 
+import GUT.qual.*;
+
 import javax.annotation.processing.SupportedOptions;
 
 import org.checkerframework.common.basetype.BaseTypeChecker;
-//import org.checkerframework.framework.qual.TypeQualifiers;
 import org.checkerframework.framework.source.SupportedLintOptions;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
-
-import GUT.qual.*;
 
 
 /**
@@ -20,8 +19,6 @@ import GUT.qual.*;
  * Use this for warning messages:
  * messager.printMessage(javax.tools.Diagnostic.Kind.WARNING, "message");
  */
-//@TypeQualifiers({ Any.class, Peer.class, Rep.class,
-   // Lost.class, Self.class, Bottom.class})
 @SupportedOptions( { "warn" } )
 @SupportedLintOptions({"allowLost", "checkOaM", "checkStrictPurity"})
 public class GUTChecker extends BaseTypeChecker {

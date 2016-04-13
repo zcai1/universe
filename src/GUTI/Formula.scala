@@ -1,4 +1,4 @@
-package GUTI
+/*package GUTI
 
 import checkers.inference.model._
 
@@ -140,4 +140,4 @@ object FormulaTest {
     // val o1 = OrOfElems(List(EqVar(v1, v2), Not(EqVar(v2, v3))))
     // println("O1: " + o1)
   }
-}
+}*/

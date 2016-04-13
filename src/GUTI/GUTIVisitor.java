@@ -94,10 +94,10 @@ public class GUTIVisitor extends InferenceVisitor<GUTIChecker, BaseAnnotatedType
         AnnotatedTypeMirror type = atypeFactory.getAnnotatedType(node);
         ConstraintManager cm = InferenceMain.getInstance().getConstraintManager();
         SlotManager sm = InferenceMain.getInstance().getSlotManager();
-        Slot s = sm.getSlot(type);
+        Slot s = sm.getVariableSlot(type);
         if (s instanceof VariableSlot) {
             VariableSlot vs = (VariableSlot) s;
-            cm.add(new PreferenceConstraint(vs, new ConstantSlot(gutATF.REP), 80));
+            cm.add(new PreferenceConstraint(vs, new ConstantSlot(gutATF.REP, vs.getId()), 80));
         }
         return super.visitVariable(node, p);
     }

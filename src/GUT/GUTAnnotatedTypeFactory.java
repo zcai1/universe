@@ -1,5 +1,7 @@
 package GUT;
 
+import GUT.qual.*;
+
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.common.basetype.BaseTypeChecker;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
@@ -22,15 +24,10 @@ import org.checkerframework.javacutil.Pair;
 import org.checkerframework.javacutil.TreeUtils;
 import org.checkerframework.javacutil.TypesUtils;
 
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
@@ -42,33 +39,14 @@ import javax.lang.model.type.TypeVariable;
 
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.CompoundAssignmentTree;
-import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.IdentifierTree;
-import com.sun.source.tree.MemberSelectTree;
 import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.tree.NewArrayTree;
 import com.sun.source.tree.NewClassTree;
+import com.sun.source.tree.ParameterizedTypeTree;
 import com.sun.source.tree.Tree;
-import com.sun.source.tree.Tree.Kind;
-
-import GUT.qual.Any;
-import GUT.qual.Bottom;
-import GUT.qual.Lost;
-import GUT.qual.Peer;
-import GUT.qual.Pure;
-import GUT.qual.Rep;
-import GUT.qual.Self;
-import GUT.qual.VPLost;
-import lubglb.quals.A;
-import lubglb.quals.B;
-import lubglb.quals.C;
-import lubglb.quals.D;
-import lubglb.quals.E;
-import lubglb.quals.F;
-
 import com.sun.source.tree.TypeCastTree;
 import com.sun.source.tree.UnaryTree;
-
 /**
  * Apply viewpoint adaptation and add implicit annotations to "this" and
  * "super".
@@ -80,20 +58,19 @@ public class GUTAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     // Only public so that the GUTI package can access these fields.
     // Maybe merge the packages again?
     // TODO: change to getters?
-    public AnnotationMirror ANY, PEER, REP, LOST,VPLOST, SELF, BOTTOM, PURE;
+    public AnnotationMirror ANY, PEER, REP, LOST, VPLOST, SELF, BOTTOM, PURE;
 
     public GUTAnnotatedTypeFactory(BaseTypeChecker checker) {
         super(checker, true);
-        //fill in AnnotationMirror
         ANY = AnnotationUtils.fromClass(elements, Any.class);
         PEER = AnnotationUtils.fromClass(elements, Peer.class);
         REP = AnnotationUtils.fromClass(elements, Rep.class);
         LOST = AnnotationUtils.fromClass(elements, Lost.class);
-        VPLOST=AnnotationUtils.fromClass(elements, VPLost.class);
+        VPLOST = AnnotationUtils.fromClass(elements, VPLost.class);
         SELF = AnnotationUtils.fromClass(elements, Self.class);
         BOTTOM = AnnotationUtils.fromClass(elements, Bottom.class);
         PURE = AnnotationUtils.fromClass(elements, Pure.class);
-        
+
         addAliasedAnnotation(org.jmlspecs.annotation.Peer.class, PEER);
         addAliasedAnnotation(org.jmlspecs.annotation.Rep.class, REP);
         addAliasedAnnotation(org.jmlspecs.annotation.Readonly.class, ANY);
@@ -101,19 +78,6 @@ public class GUTAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
         this.postInit();
     }
-    
-    @Override
-    protected Set<Class<? extends Annotation>> createSupportedTypeQualifiers() {
-    	// TODO Auto-generated method stub
-    	return super.createSupportedTypeQualifiers();
-    	//return Collections.unmodifiableSet(
-                //new HashSet<Class<? extends Annotation>>(
-                        //Arrays.asList(Any.class, Bottom.class, Lost.class, Peer.class, Pure.class, Rep.class,Self.class)));
-    }
-    	
-    	
-    	
-    
 
     /**
      * The type of "this" is always "self".
@@ -280,28 +244,27 @@ public class GUTAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         // work!
         // AnnotatedExecutableType method = super.methodFromUse(tree);
 
+        // Set the receiver
+        //AnnotatedTypeMirror receiverType = null;
+        AnnotatedTypeMirror receiverType = getReceiverType(tree);
         ExecutableElement methodElt = TreeUtils.elementFromUse(tree);
-        // TODO: why is this fromElement and not getAnnotatedType??
         AnnotatedExecutableType method = this.fromElement(methodElt);
-
-         System.out.println("Declared method: " + method);
+        this.annotateImplicit(methodElt, method);
 
         Map<AnnotatedTypeMirror, AnnotatedTypeMirror> mappings = new HashMap<AnnotatedTypeMirror, AnnotatedTypeMirror>();
 
-        // Set the receiver
-        AnnotatedTypeMirror receiverType = null;
-        ExpressionTree exprTree = tree.getMethodSelect();
-        if (exprTree.getKind() == Kind.MEMBER_SELECT) {
-            MemberSelectTree memberSelectTree = (MemberSelectTree) exprTree;
-            receiverType = getAnnotatedType(memberSelectTree.getExpression());
-        } else {
-            receiverType = getSelfType(tree);
-            // is the following needed? remove!
-            // receiverType.clearAnnotations();
-            // receiverType.addAnnotation(GUTChecker.SELF);
+        // Modify type parameters
+        for (AnnotatedTypeVariable typaramType : method.getTypeVariables()) {
+		//System.out.println("typearamType: "+ typaramType);
+		AnnotatedTypeMirror atm = typaramType.getLowerBound();
+		//System.out.println("typaram lb " + (atm != null ? "ATM: " + atm : "REAL NULL"));
+		// System.out.println("Method parameter in: " + parameterType);
+		AnnotatedTypeMirror combined = GUTQualifierUtils.combineTypeWithType(this, receiverType, typaramType.getUpperBound());
+		mappings.put(typaramType.getUpperBound(), combined);
+		combined = GUTQualifierUtils.combineTypeWithType(this, receiverType, typaramType.getLowerBound());
+		mappings.put(typaramType.getLowerBound(), combined);
+		//System.out.println("Method parameter out: " + combined);
         }
-        assert receiverType != null;
-        // System.out.println("Receiver: " + receiverType);
 
         // Modify parameters
         for (AnnotatedTypeMirror parameterType : method.getParameterTypes()) {
@@ -403,6 +366,16 @@ public class GUTAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             }
 
             return super.visitIdentifier(node, p);
+        }
+
+        @Override
+        public Void visitParameterizedType(ParameterizedTypeTree node, AnnotatedTypeMirror p) {
+        	//System.out.println("visitParameterizedType: " + node + " " + p);
+        	Tree parent = getPath(node).getParentPath().getLeaf();
+        	if (TreeUtils.isClassTree(parent)) {
+        		p.replaceAnnotation(SELF);        		
+        	}
+        	return super.visitParameterizedType(node, p);
         }
 
         @Override

@@ -1,12 +1,11 @@
 package GUT;
 
 import java.io.File;
-//import java.util.Collection;
 import java.util.List;
 import javax.annotation.processing.AbstractProcessor;
 
 import org.checkerframework.framework.test.CheckerFrameworkTest;
-import org.checkerframework.framework.test.TestUtilities;//newly added
+import org.checkerframework.framework.test.TestUtilities;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
 import org.junit.runners.Parameterized.Parameters;
@@ -28,7 +27,6 @@ public class GUTTests {
         org.junit.runner.JUnitCore jc = new org.junit.runner.JUnitCore();
         Result run = jc.run(GUTTestsTopology.class,
                 GUTTestsStrictPurity.class,
-                //GUTTestsEncapsulation.class,/*I think doesn't exist*/
                 GUTTestsLostYes.class,
                 GUTTestsLostNo.class);
 
@@ -64,17 +62,7 @@ public class GUTTests {
             return new String[]{"GUT/strictpurity"};
         }
     }
-    /*
-    public static class GUTTestsEncapsulation extends CheckerFrameworkTest {
-        public GUTTestsEncapsulation(File testFile) {
-            super(testFile, GUTTests.checkerClass, "GUT/encap", "-Anomsgtext", "-Alint=checkOaM");
-        }
-        @Parameters
-	public static String[] getTestDirs() {
-	    return new String[]{"GUT/encap"};
-	    }
-	}
-    *///I think this doesn't exit!
+
     public static class GUTTestsLostYes extends CheckerFrameworkTest {
         public GUTTestsLostYes(File testFile) {
             super(testFile, GUTTests.checkerClass, "GUT/lostyes", "-Anomsgtext", "-Alint=allowLost");
@@ -87,9 +75,7 @@ public class GUTTests {
 
     public static class GUTTestsLostNo extends CheckerFrameworkTest {
     	public GUTTestsLostNo(File testFile) {
-    		super(testFile, GUTTests.checkerClass, "GUT/lostno",
-    				"-Anomsgtext", 
-    				"-Alint=-allowLost");
+	    super(testFile, GUTTests.checkerClass, "GUT/lostno", "-Anomsgtext", "-Alint=-allowLost");
         }
         @Parameters
         public static String[] getTestDirs() {
