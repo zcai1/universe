@@ -42,7 +42,6 @@ public class SimpleVP {
         @Any Object pra = psv.a;
     }
 
-
     class SubSimpleVP extends SimpleVP {
         void onSuper() {
             @Peer Object po = super.p;

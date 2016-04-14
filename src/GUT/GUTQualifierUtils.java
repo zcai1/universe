@@ -54,7 +54,7 @@ public class GUTQualifierUtils {
         } else if (AnnotationUtils.areSame(recv, atypeFactory.BOTTOM)) {
             return atypeFactory.BOTTOM;
         } else {
-	    return atypeFactory.VPLOST;
+            return atypeFactory.VPLOST;
         }
     }
 
@@ -356,8 +356,8 @@ public class GUTQualifierUtils {
             return atypeFactory.SELF;
         }
         if(type.hasEffectiveAnnotation(atypeFactory.BOTTOM)){
-	    return atypeFactory.BOTTOM;
-    	}
+            return atypeFactory.BOTTOM;
+        }
         return atypeFactory.VPLOST;
         // TODO: for some reason the simpler statement below does not work!
         // It gives a different AnnotationMirror for different invocations.

@@ -1,7 +1,5 @@
 package GUT;
 
-import GUT.qual.*;
-
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.common.basetype.BaseTypeChecker;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
@@ -47,6 +45,15 @@ import com.sun.source.tree.ParameterizedTypeTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.TypeCastTree;
 import com.sun.source.tree.UnaryTree;
+
+import GUT.qual.Any;
+import GUT.qual.Bottom;
+import GUT.qual.Lost;
+import GUT.qual.Peer;
+import GUT.qual.Pure;
+import GUT.qual.Rep;
+import GUT.qual.Self;
+import GUT.qual.VPLost;
 /**
  * Apply viewpoint adaptation and add implicit annotations to "this" and
  * "super".
@@ -255,15 +262,19 @@ public class GUTAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
         // Modify type parameters
         for (AnnotatedTypeVariable typaramType : method.getTypeVariables()) {
-		//System.out.println("typearamType: "+ typaramType);
-		AnnotatedTypeMirror atm = typaramType.getLowerBound();
-		//System.out.println("typaram lb " + (atm != null ? "ATM: " + atm : "REAL NULL"));
-		// System.out.println("Method parameter in: " + parameterType);
-		AnnotatedTypeMirror combined = GUTQualifierUtils.combineTypeWithType(this, receiverType, typaramType.getUpperBound());
-		mappings.put(typaramType.getUpperBound(), combined);
-		combined = GUTQualifierUtils.combineTypeWithType(this, receiverType, typaramType.getLowerBound());
-		mappings.put(typaramType.getLowerBound(), combined);
-		//System.out.println("Method parameter out: " + combined);
+            // System.out.println("typearamType: "+ typaramType);
+            AnnotatedTypeMirror atm = typaramType.getLowerBound();
+            // System.out.println("typaram lb " + (atm != null ? "ATM: " + atm :
+            // "REAL NULL"));
+            // System.out.println("Method parameter in: " + parameterType);
+            AnnotatedTypeMirror combined = GUTQualifierUtils
+                    .combineTypeWithType(this, receiverType,
+                            typaramType.getUpperBound());
+            mappings.put(typaramType.getUpperBound(), combined);
+            combined = GUTQualifierUtils.combineTypeWithType(this, receiverType,
+                    typaramType.getLowerBound());
+            mappings.put(typaramType.getLowerBound(), combined);
+            // System.out.println("Method parameter out: " + combined);
         }
 
         // Modify parameters
@@ -370,12 +381,12 @@ public class GUTAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
         @Override
         public Void visitParameterizedType(ParameterizedTypeTree node, AnnotatedTypeMirror p) {
-        	//System.out.println("visitParameterizedType: " + node + " " + p);
-        	Tree parent = getPath(node).getParentPath().getLeaf();
-        	if (TreeUtils.isClassTree(parent)) {
-        		p.replaceAnnotation(SELF);        		
-        	}
-        	return super.visitParameterizedType(node, p);
+            // System.out.println("visitParameterizedType: " + node + " " + p);
+            Tree parent = getPath(node).getParentPath().getLeaf();
+            if (TreeUtils.isClassTree(parent)) {
+                p.replaceAnnotation(SELF);
+            }
+            return super.visitParameterizedType(node, p);
         }
 
         @Override

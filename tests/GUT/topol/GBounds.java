@@ -1,7 +1,7 @@
 import GUT.qual.*;
 
 class GBounds {
-	
+
     class Data {}
     class SubData extends Data {}
 

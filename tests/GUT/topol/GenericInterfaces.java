@@ -21,5 +21,5 @@ class GenericInterfaces {
         //:: error: (assignment.type.incompatible)
         @Rep Object ro = raw.next();
     }
- 
+
 }

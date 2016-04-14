@@ -34,7 +34,7 @@ public class Methods {
     @Any Methods a_field;
 
     void errors() {
-        
+
         //:: error: (assignment.type.incompatible)
         @Rep Object mo = p_field.m( new @Peer Object() );
         //:: error: (argument.type.incompatible)
@@ -42,8 +42,6 @@ public class Methods {
 
         //:: error: (assignment.type.incompatible)
         @Rep Object ma = p_field.foo( new @Peer Object() );
-
-        
 
         //:: error: (argument.type.incompatible)
         @Any Object ro = r_field.m( new @Peer Object() );

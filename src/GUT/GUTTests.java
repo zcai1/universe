@@ -1,11 +1,11 @@
 package GUT;
 
+import org.checkerframework.framework.test.CheckerFrameworkTest;
+
 import java.io.File;
-import java.util.List;
+
 import javax.annotation.processing.AbstractProcessor;
 
-import org.checkerframework.framework.test.CheckerFrameworkTest;
-import org.checkerframework.framework.test.TestUtilities;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
 import org.junit.runners.Parameterized.Parameters;
@@ -74,8 +74,8 @@ public class GUTTests {
     }
 
     public static class GUTTestsLostNo extends CheckerFrameworkTest {
-    	public GUTTestsLostNo(File testFile) {
-	    super(testFile, GUTTests.checkerClass, "GUT/lostno", "-Anomsgtext", "-Alint=-allowLost");
+        public GUTTestsLostNo(File testFile) {
+            super(testFile, GUTTests.checkerClass, "GUT/lostno", "-Anomsgtext", "-Alint=-allowLost");
         }
         @Parameters
         public static String[] getTestDirs() {
