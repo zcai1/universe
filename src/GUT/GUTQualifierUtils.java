@@ -51,7 +51,9 @@ public class GUTQualifierUtils {
             return atypeFactory.REP;
         } else if (AnnotationUtils.areSame(decl, atypeFactory.ANY)) {
             return atypeFactory.ANY;
-        } else if (AnnotationUtils.areSame(recv, atypeFactory.BOTTOM)) {
+        } else if (AnnotationUtils.areSame(decl, atypeFactory.LOST)) {
+            return atypeFactory.VPLOST;
+        } else if (AnnotationUtils.areSame(decl, atypeFactory.BOTTOM)) {
             return atypeFactory.BOTTOM;
         } else {
             return atypeFactory.VPLOST;
@@ -358,7 +360,13 @@ public class GUTQualifierUtils {
         if(type.hasEffectiveAnnotation(atypeFactory.BOTTOM)){
             return atypeFactory.BOTTOM;
         }
-        return atypeFactory.VPLOST;
+        if (type.hasEffectiveAnnotation(atypeFactory.VPLOST)) {
+            return atypeFactory.VPLOST;
+        }
+        if (type.hasEffectiveAnnotation(atypeFactory.LOST)) {
+            return atypeFactory.LOST;
+        }
+        return null;
         // TODO: for some reason the simpler statement below does not work!
         // It gives a different AnnotationMirror for different invocations.
         // Defaulting ensures that there is always one Universe annotation.

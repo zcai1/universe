@@ -28,7 +28,7 @@ class GBounds {
         @Peer C2<@Rep Object> er2;
         //:: error: (type.argument.type.incompatible)
         @Rep C2<@Any Object> er3;
-        //:: error: (uts.lost.in.bounds)
+        //:: error: (uts.vplost.in.bounds)
         @Any C2<@Peer Object> er4;
 
     }

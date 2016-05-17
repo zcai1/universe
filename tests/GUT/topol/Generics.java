@@ -49,7 +49,7 @@ public class Generics {
 
     void fooPeer() {
         @Peer Generics pg = new @Peer Generics();
-        //:: error: (uts.lost.parameter)
+        //:: error: (uts.vplost.parameter)
         pg.pro.add(new @Rep Object());
 
         @Any Object ao = pg.pro.get();
@@ -60,7 +60,7 @@ public class Generics {
 
     void fooRep() {
         @Rep Generics rg = new @Rep Generics();
-        //:: error: (uts.lost.parameter)
+        //:: error: (uts.vplost.parameter)
         rg.pro.add(new @Rep Object());
 
         @Any Object ao = rg.pro.get();

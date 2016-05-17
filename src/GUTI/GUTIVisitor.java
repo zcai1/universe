@@ -150,14 +150,16 @@ public class GUTIVisitor extends InferenceVisitor<GUTIChecker, BaseAnnotatedType
         Pair<AnnotatedExecutableType, List<AnnotatedTypeMirror>> fromUse = atypeFactory.constructorFromUse(node);
         AnnotatedExecutableType constructor = fromUse.first;
 
-        // Check for @Lost in combined parameter types.
+        // Check for @Lost and @VPLost in combined parameter types.
         for (AnnotatedTypeMirror parameterType : constructor.getParameterTypes()) {
             doesNotContain(parameterType, gutATF.LOST, "uts.lost.parameter", node);
+            doesNotContain(parameterType, gutATF.VPLOST, "uts.vplost.parameter", node);
         }
 
         // Check for @Peer or @Rep as top-level modifier.
         AnnotatedTypeMirror type = atypeFactory.getAnnotatedType(node);
-        mainIsNoneOf(type, new AnnotationMirror[] {gutATF.LOST, gutATF.ANY}, "uts.new.ownership", node);
+        mainIsNoneOf(type, new AnnotationMirror[] { gutATF.LOST, gutATF.VPLOST,
+                gutATF.ANY }, "uts.new.ownership", node);
 
         // Forbid rep in static context
         if (isContextStatic(atypeFactory.getPath(node))) {
@@ -206,9 +208,10 @@ public class GUTIVisitor extends InferenceVisitor<GUTIChecker, BaseAnnotatedType
 
         AnnotatedExecutableType method = atypeFactory.methodFromUse(node).first;
 
-        // Check for @Lost in combined parameter types.
+        // Check for @Lost and @VPLost in combined parameter types.
         for (AnnotatedTypeMirror parameterType : method.getParameterTypes()) {
             doesNotContain(parameterType, gutATF.LOST, "uts.lost.parameter", node);
+            doesNotContain(parameterType, gutATF.VPLOST, "uts.lost.parameter", node);
         }
 
         if (checkOaM) {
@@ -261,9 +264,11 @@ public class GUTIVisitor extends InferenceVisitor<GUTIChecker, BaseAnnotatedType
     public Void visitAssignment(AssignmentTree node, Void p) {
         assert node != null;
 
-        // Check for @Lost in left hand side of assignment.
+        // Check for @Lost and @VPLost in left hand side of assignment.
         AnnotatedTypeMirror type = atypeFactory.getAnnotatedType(node.getVariable());
+
         doesNotContain(type, gutATF.LOST, "uts.lost.lhs", node);
+        doesNotContain(type, gutATF.VPLOST, "uts.vplost.lhs", node);
 
         if (checkOaM) {
             ExpressionTree recvTree = TreeUtils.getReceiverTree(node.getVariable());
@@ -272,7 +277,8 @@ public class GUTIVisitor extends InferenceVisitor<GUTIChecker, BaseAnnotatedType
 
                 if (recvType != null) {
                     // TODO: do we need to treat "this" and "super" specially?
-                    mainIsNoneOf(recvType, new AnnotationMirror[] {gutATF.LOST, gutATF.ANY},
+                    mainIsNoneOf(recvType,
+                            new AnnotationMirror[] { gutATF.LOST, gutATF.VPLOST, gutATF.ANY },
                             "oam.assignment.forbidden", node);
                 }
             }
@@ -295,8 +301,9 @@ public class GUTIVisitor extends InferenceVisitor<GUTIChecker, BaseAnnotatedType
          * by reducing weighting?
          */
         if ((AnnotatedTypes.containsModifier(castty, gutATF.LOST) ||
-                AnnotatedTypes.containsModifier(castty, gutATF.ANY))
-                && !GUTChecker.isAnyDefault(castty)) {
+                AnnotatedTypes.containsModifier(castty, gutATF.VPLOST) ||
+                    AnnotatedTypes.containsModifier(castty, gutATF.ANY)) &&
+                        !GUTChecker.isAnyDefault(castty)) {
             checker.report(Result.warning("uts.cast.type.warning", castty), node);
             // checker.getProcessingEnvironment().getMessager().printMessage(javax.tools.Diagnostic.Kind.WARNING,
             // "Casting to " + type + " is not recommended.");
@@ -320,8 +327,9 @@ public class GUTIVisitor extends InferenceVisitor<GUTIChecker, BaseAnnotatedType
 
         // TODO: See comment at casts above.
         if ((AnnotatedTypes.containsModifier(ioty, gutATF.LOST) ||
-                AnnotatedTypes.containsModifier(ioty, gutATF.ANY))
-                && !GUTChecker.isAnyDefault(ioty)) {
+                AnnotatedTypes.containsModifier(ioty, gutATF.VPLOST) ||
+                    AnnotatedTypes.containsModifier(ioty, gutATF.ANY)) &&
+                        !GUTChecker.isAnyDefault(ioty)) {
             checker.report(Result.warning("uts.instanceof.type.warning", ioty), node);
             // checker.getProcessingEnvironment().getMessager().printMessage(javax.tools.Diagnostic.Kind.WARNING,
             // "Casting to " + type + " is not recommended.");
@@ -407,6 +415,8 @@ public class GUTIVisitor extends InferenceVisitor<GUTIChecker, BaseAnnotatedType
             for (AnnotatedTypeParameterBounds atpb : typeParamBounds) {
                 doesNotContain(atpb.getLowerBound(), gutATF.LOST, "uts.lost.in.bounds", tree);
                 doesNotContain(atpb.getUpperBound(), gutATF.LOST, "uts.lost.in.bounds", tree);
+                doesNotContain(atpb.getLowerBound(), gutATF.VPLOST, "uts.vplost.in.bounds", tree);
+                doesNotContain(atpb.getUpperBound(), gutATF.VPLOST, "uts.vplost.in.bounds", tree);
             }
 
             return super.visitParameterizedType(type, tree);

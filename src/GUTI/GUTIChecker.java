@@ -6,7 +6,6 @@ import org.checkerframework.framework.source.SupportedLintOptions;
 import javax.annotation.processing.SupportedOptions;
 
 import GUT.GUTAnnotatedTypeFactory;
-import GUT.qual.*;
 import checkers.inference.BaseInferrableChecker;
 import checkers.inference.InferenceChecker;
 import checkers.inference.InferenceVisitor;

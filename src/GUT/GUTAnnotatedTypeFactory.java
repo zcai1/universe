@@ -2,6 +2,7 @@ package GUT;
 
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.common.basetype.BaseTypeChecker;
+import org.checkerframework.dataflow.qual.Pure;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedArrayType;
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedDeclaredType;
@@ -22,10 +23,15 @@ import org.checkerframework.javacutil.Pair;
 import org.checkerframework.javacutil.TreeUtils;
 import org.checkerframework.javacutil.TypesUtils;
 
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
@@ -50,7 +56,6 @@ import GUT.qual.Any;
 import GUT.qual.Bottom;
 import GUT.qual.Lost;
 import GUT.qual.Peer;
-import GUT.qual.Pure;
 import GUT.qual.Rep;
 import GUT.qual.Self;
 import GUT.qual.VPLost;
@@ -159,7 +164,11 @@ public class GUTAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         // System.out.println("out type: " + type);
     }
 
-
+    protected Set<Class<? extends Annotation>> createSupportedTypeQualifiers() {
+        Set<Class<? extends Annotation>> annotations = new HashSet<>(Arrays.asList(Any.class, Lost.class, VPLost.class,
+                        Peer.class, Rep.class, Self.class, Bottom.class));
+        return Collections.unmodifiableSet(annotations);
+    }
     @Override
     public List<AnnotatedTypeParameterBounds> typeVariablesFromUse(
             AnnotatedDeclaredType type, TypeElement element) {

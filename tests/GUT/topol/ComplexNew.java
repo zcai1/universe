@@ -26,7 +26,7 @@ public class ComplexNew {
     //:: error: (argument.type.incompatible)
     @Rep Object er = new @Rep ComplexNew(new @Peer Object());
 
-    //:: error: (uts.lost.parameter)
+    //:: error: (uts.vplost.parameter)
     @Peer Object ep2 = new @Peer ComplexNew(new @Rep Object(), 5);
 
     //:: error: (uts.new.ownership)

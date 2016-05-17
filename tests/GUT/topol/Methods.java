@@ -52,7 +52,7 @@ public class Methods {
         //:: error: (argument.type.incompatible)
         @Any Object ra = r_field.foo( new @Peer Object() );
 
-        //:: error: (uts.lost.parameter)
+        //:: error: (uts.vplost.parameter)
         a_field.m(new @Peer Object());
     }
 

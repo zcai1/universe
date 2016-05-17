@@ -131,7 +131,7 @@ public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
         // Check for @VPLost in combined parameter types.
         for (AnnotatedTypeMirror parameterType : constructor.getParameterTypes()) {
             if (AnnotatedTypes.containsModifier(parameterType, atypeFactory.VPLOST)) {
-                checker.report(Result.failure("uts.lost.parameter"), node);
+                checker.report(Result.failure("uts.vplost.parameter"), node);
             }
         }
 
@@ -190,7 +190,7 @@ public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
         // Check for @VPLost in combined parameter types.
         for (AnnotatedTypeMirror parameterType : method.getParameterTypes()) {
             if (AnnotatedTypes.containsModifier(parameterType, atypeFactory.VPLOST)) {
-                checker.report(Result.failure("uts.lost.parameter"), node);
+                checker.report(Result.failure("uts.vplost.parameter"), node);
             }
         }
 
@@ -198,10 +198,11 @@ public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
             ExpressionTree recvTree = TreeUtils.getReceiverTree(node.getMethodSelect());
             if (recvTree != null) {
                 AnnotatedTypeMirror recvType = atypeFactory.getAnnotatedType(recvTree);
-
+                // Forbid additional vplost as the receiver type if OaM is true.
                 if (recvType != null) {
                     if (recvType.hasEffectiveAnnotation(atypeFactory.LOST) ||
-                            recvType.hasEffectiveAnnotation(atypeFactory.ANY)) {
+                            recvType.hasEffectiveAnnotation(atypeFactory.VPLOST) ||
+                                recvType.hasEffectiveAnnotation(atypeFactory.ANY)) {
                         ExecutableElement exelem = TreeUtils.elementFromUse(node);
                         java.util.List<? extends AnnotationMirror> anns = exelem.getAnnotationMirrors();
 
@@ -242,10 +243,14 @@ public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
     public Void visitAssignment(AssignmentTree node, Void p) {
         assert node != null;
 
-        // Check for @VPLost in left hand side of assignment.
+        // Check for @Lost and @VPLost in left hand side of assignment.
         AnnotatedTypeMirror type = atypeFactory.getAnnotatedType(node.getVariable());
-        if (AnnotatedTypes.containsModifier(type, atypeFactory.VPLOST)) {
+        if (AnnotatedTypes.containsModifier(type, atypeFactory.LOST)) {
             checker.report(Result.failure("uts.lost.lhs"), node);
+        }
+
+        if (AnnotatedTypes.containsModifier(type, atypeFactory.VPLOST)) {
+            checker.report(Result.failure("uts.vplost.lhs"), node);
         }
 
         if (checkOaM) {
@@ -255,7 +260,8 @@ public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
 
                 if (recvType != null) {
                     if (recvType.hasEffectiveAnnotation(atypeFactory.LOST) ||
-                            recvType.hasEffectiveAnnotation(atypeFactory.ANY)) {
+                            recvType.hasEffectiveAnnotation(atypeFactory.VPLOST)
+                                || recvType.hasEffectiveAnnotation(atypeFactory.ANY)) {
                         checker.report(Result.failure("oam.assignment.forbidden"), node);
                     }
                 }
@@ -276,8 +282,9 @@ public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
         // atypeFactory.getAnnotatedType(node.getExpression());
 
         if ((AnnotatedTypes.containsModifier(type, atypeFactory.LOST)
-                || AnnotatedTypes.containsModifier(type, atypeFactory.ANY))
-                && !GUTChecker.isAnyDefault(type)) {
+                || AnnotatedTypes.containsModifier(type, atypeFactory.VPLOST)
+                        || AnnotatedTypes.containsModifier(type, atypeFactory.ANY))
+                                && !GUTChecker.isAnyDefault(type)) {
             checker.report(Result.warning("uts.cast.type.warning", type), node);
             // checker.getProcessingEnvironment().getMessager().printMessage(javax.tools.Diagnostic.Kind.WARNING,
             // "Casting to " + type + " is not recommended.");
@@ -372,7 +379,7 @@ public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
                         AnnotatedTypes.containsModifier(atpb.getUpperBound(), GUTVisitor.this.atypeFactory.VPLOST)) ||
                         (atpb.getLowerBound().getKind() != TypeKind.NULL &&
                         AnnotatedTypes.containsModifier(atpb.getLowerBound(), GUTVisitor.this.atypeFactory.VPLOST))) {
-                    checker.report(Result.failure("uts.lost.in.bounds",
+                    checker.report(Result.failure("uts.vplost.in.bounds",
                             atpb.toString(), type.toString()), tree);
                 }
             }

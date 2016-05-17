@@ -63,7 +63,7 @@ public class ArrayVP {
         //:: error: (assignment.type.incompatible)
         po = pavp.rop[0];
 
-        //:: error: (uts.lost.lhs)
+        //:: error: (uts.vplost.lhs)
         pavp.rop = rop;
 
         // ok
