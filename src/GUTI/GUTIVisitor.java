@@ -3,6 +3,7 @@ package GUTI;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.common.basetype.BaseTypeChecker;
 import org.checkerframework.framework.source.Result;
+import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedArrayType;
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedDeclaredType;
@@ -22,6 +23,19 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 
+import com.sun.source.tree.AssignmentTree;
+import com.sun.source.tree.BlockTree;
+import com.sun.source.tree.ExpressionTree;
+import com.sun.source.tree.InstanceOfTree;
+import com.sun.source.tree.MethodInvocationTree;
+import com.sun.source.tree.MethodTree;
+import com.sun.source.tree.NewClassTree;
+import com.sun.source.tree.ParameterizedTypeTree;
+import com.sun.source.tree.Tree;
+import com.sun.source.tree.TypeCastTree;
+import com.sun.source.tree.VariableTree;
+import com.sun.source.util.TreePath;
+
 import GUT.GUTAnnotatedTypeFactory;
 import GUT.GUTChecker;
 import GUT.GUTQualifierUtils;
@@ -35,19 +49,6 @@ import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.PreferenceConstraint;
 import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
-
-import com.sun.source.tree.AssignmentTree;
-import com.sun.source.tree.BlockTree;
-import com.sun.source.tree.ExpressionTree;
-import com.sun.source.tree.InstanceOfTree;
-import com.sun.source.tree.MethodInvocationTree;
-import com.sun.source.tree.MethodTree;
-import com.sun.source.tree.NewClassTree;
-import com.sun.source.tree.ParameterizedTypeTree;
-import com.sun.source.tree.Tree;
-import com.sun.source.tree.TypeCastTree;
-import com.sun.source.tree.VariableTree;
-import com.sun.source.util.TreePath;
 
 /**
  * Type visitor to either enforce or infer the GUT type rules.
@@ -78,6 +79,8 @@ public class GUTIVisitor extends InferenceVisitor<GUTIChecker, BaseAnnotatedType
         warn_staticpeer = warn.contains("staticpeer");
 
         this.gutATF = (GUTAnnotatedTypeFactory) InferenceMain.getInstance().getRealTypeFactory();
+        // System.out.println("gutATF in constructor is: " + this.gutATF);
+
     }
 
     /**
@@ -85,7 +88,19 @@ public class GUTIVisitor extends InferenceVisitor<GUTIChecker, BaseAnnotatedType
      */
     @Override
     protected GUTIInferenceValidator createTypeValidator() {
-        return new GUTIInferenceValidator(checker, this, gutATF);
+        // System.out.println("GUTIInferenceValidator constructor is called!");
+        //System.out.println("gutATF is: " + this.gutATF);
+        // Overriding version of createTypeValidator() needs a parameter which is provided after the call to this method according to super constructor.
+        // But gutATF is not set, so GUTIInferenceValidator's atypeFactory field is null, and causes nullpointer exception.
+        // Fix is: get realtypefactory as soon as possible, and don't wait till gutATF is provided.
+
+        // I think the following line is incorrect. We need
+        // InferenceAnnotatedTypeFactory
+        // rather than GUTAnnotatedTypeFactory.
+        /*
+        GUTAnnotatedTypeFactory gutATFParameter = (GUTAnnotatedTypeFactory) InferenceMain.getInstance().getRealTypeFactory();
+        return new GUTIInferenceValidator(checker, this, gutATFParameter);*/
+        return new GUTIInferenceValidator(checker, this, this.atypeFactory);
     }
 
     // TODO: find a nicer way to set preferences
@@ -145,8 +160,10 @@ public class GUTIVisitor extends InferenceVisitor<GUTIChecker, BaseAnnotatedType
      */
     @Override
     public Void visitNewClass(NewClassTree node, Void p) {
+        // System.out.println("GUTIVisitor: visitNewClass is called!");
         assert node != null;
-
+        //Using GUTAnnotatedTypeFactory is OK! It can still get the VarAnnotations, and add
+        //constraints on them
         Pair<AnnotatedExecutableType, List<AnnotatedTypeMirror>> fromUse = atypeFactory.constructorFromUse(node);
         AnnotatedExecutableType constructor = fromUse.first;
 
@@ -205,9 +222,12 @@ public class GUTIVisitor extends InferenceVisitor<GUTIChecker, BaseAnnotatedType
     @Override
     public Void visitMethodInvocation(MethodInvocationTree node, Void p) {
         assert node != null;
-
+        // System.out.println("================visitMethodInvocation in
+        // GUTIVisitor called!");
         AnnotatedExecutableType method = atypeFactory.methodFromUse(node).first;
-
+        // System.out.println("!!!!!!!!!!!!!!!!visitMethodInvocation in
+        // GUTIVisitor called!");
+        //System.out.println("Return type changed or not?: " + method.getReturnType());
         // Check for @Lost and @VPLost in combined parameter types.
         for (AnnotatedTypeMirror parameterType : method.getParameterTypes()) {
             doesNotContain(parameterType, gutATF.LOST, "uts.lost.parameter", node);
@@ -263,10 +283,10 @@ public class GUTIVisitor extends InferenceVisitor<GUTIChecker, BaseAnnotatedType
     @Override
     public Void visitAssignment(AssignmentTree node, Void p) {
         assert node != null;
-
+        System.out.println("GUTIVisitor: ======visitAssignment is called!!!!");
         // Check for @Lost and @VPLost in left hand side of assignment.
         AnnotatedTypeMirror type = atypeFactory.getAnnotatedType(node.getVariable());
-
+        // System.out.println("GUTIVisitor: type is: " + type);
         doesNotContain(type, gutATF.LOST, "uts.lost.lhs", node);
         doesNotContain(type, gutATF.VPLOST, "uts.vplost.lhs", node);
 
@@ -371,8 +391,13 @@ public class GUTIVisitor extends InferenceVisitor<GUTIChecker, BaseAnnotatedType
     private final class GUTIInferenceValidator extends InferenceValidator {
         public GUTIInferenceValidator(BaseTypeChecker checker,
                 InferenceVisitor<?, ?> visitor,
-                GUTAnnotatedTypeFactory atypeFactory) {
+                // GUTAnnotatedTypeFactory atypeFactory) {
+                // Is it correct? Only debugging.
+                AnnotatedTypeFactory atypeFactory) {
+
             super(checker, visitor, atypeFactory);
+            // System.out.println("atypeFactory in constructor: " +
+            // atypeFactory);
         }
 
         /**
@@ -382,12 +407,20 @@ public class GUTIVisitor extends InferenceVisitor<GUTIChecker, BaseAnnotatedType
          */
         @Override
         public Void visitDeclared(AnnotatedDeclaredType type, Tree p) {
-
+            // System.out.println("==========visitDeclared in GUTIInferenceValidator is called!");
+            // System.out.println(
+            // "GUTIvalidator: visitDeclared is called!");
             // ModifiersTree mt = ((VariableTree) p).getModifiers();
             // if (mt.getFlags().contains(Modifier.STATIC)) {
+            // System.out.println("\n========p is: " + p);
+            //System.out.println("p is null: " + p == null);
+            // System.out.println("atypeFactory is null: ");
+            // System.out.println(atypeFactory == null);
+            // System.out.println("----------------atypeFactory.getPath(p) is: "
+            // + atypeFactory.getPath(p));
             if (GUTIVisitor.isContextStatic(atypeFactory.getPath(p))) {
                 doesNotContain(type, gutATF.REP, "uts.static.rep.forbidden", p);
-
+            
                 if (warn_staticpeer) {
                     // TODO: I would really like to only give the warning if
                     // the modifier was explicit.
@@ -399,18 +432,28 @@ public class GUTIVisitor extends InferenceVisitor<GUTIChecker, BaseAnnotatedType
             if (!allowLost) {
                 doesNotContain(type, gutATF.LOST, "uts.explicit.lost.forbidden", p);
             }
-
-            if (GUTQualifierUtils.hasMultipleModifiers(type)) {
+            // Me: Is it allowed to have multiple universe modifiers? What does
+            // it mean?
+            if (GUTQualifierUtils.hasMultipleModifiersInInference(type)) {
+                System.out.println(
+                        "GUTVisitor$GUTIValidator: Don't know if it's correct: type is: "
+                                + type);
                 reportError(type, p);
             }
             // System.out.println("super.visitDeclared for: " + type);
+            // System.out.println("Reached super call!");
             return super.visitDeclared(type, p);
         }
 
         @Override
         protected Void visitParameterizedType(AnnotatedDeclaredType type, ParameterizedTypeTree tree) {
-            final TypeElement element = (TypeElement) type.getUnderlyingType().asElement();
+            // For debuggin purpose, move the last line to here
+            // return super.visitParameterizedType(type, tree);
+            // System.out.println(
+            // "GUTIvalidator: visitParameterizedType is called!");
 
+            final TypeElement element = (TypeElement) type.getUnderlyingType().asElement();
+            
             List<AnnotatedTypeParameterBounds> typeParamBounds = atypeFactory.typeVariablesFromUse(type, element);
             for (AnnotatedTypeParameterBounds atpb : typeParamBounds) {
                 doesNotContain(atpb.getLowerBound(), gutATF.LOST, "uts.lost.in.bounds", tree);
@@ -418,8 +461,14 @@ public class GUTIVisitor extends InferenceVisitor<GUTIChecker, BaseAnnotatedType
                 doesNotContain(atpb.getLowerBound(), gutATF.VPLOST, "uts.vplost.in.bounds", tree);
                 doesNotContain(atpb.getUpperBound(), gutATF.VPLOST, "uts.vplost.in.bounds", tree);
             }
-
+            // For debugging purpose, move the following line to first. To see if super not overridden
+            // method works or not.
+            // Overriding a method doesn't necessarily mean that it has not
+            // relationship with super method. If overriding version constains
+            // super.method, then we need to look at the super method's
+            // source code too!
             return super.visitParameterizedType(type, tree);
+            // return null;
         }
 
         /**

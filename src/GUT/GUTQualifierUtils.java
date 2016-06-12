@@ -385,4 +385,16 @@ public class GUTQualifierUtils {
 
         return type.getAnnotations().size() > 1;
     }
+
+    /*
+     * Tamier: add this method to adapt to two modifier slots in GUTInference side.
+     */
+    public static boolean hasMultipleModifiersInInference(
+            AnnotatedTypeMirror type) {
+        assert type != null;
+        /*System.out.println("GUTQualifierUtils: type is: " + type);
+        System.out.println("GUTQualifierUtils: multipleModifiers are: "
+                + type.getAnnotations());*/
+        return type.getAnnotations().size() > 2;
+    }
 }

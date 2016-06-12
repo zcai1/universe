@@ -15,15 +15,13 @@ public class GUTIConstraintSerializer<S, T> extends ConstraintSerializer<S, T> {
             Elements elements) {
         super(backEndType);
         try {
+            String refinedBackEndType = backEndType;
             if (backEndType.contains("MaxSat")) {
-                backEndType.replace("maxsatbackend.", "");
+                refinedBackEndType = backEndType.replace("maxsatbackend.", "");
             }
-            Class<?> classObjectOfRealSerializer = Class
-                    .forName("GUTI" + backEndType + "Serializer");
-            Constructor<T> constructor = (Constructor<T>) classObjectOfRealSerializer
-                    .getConstructor(Elements.class);
-            realSerializer = (Serializer<S, T>) constructor
-                    .newInstance(elements);
+            Class<?> classObjectOfRealSerializer = Class.forName("GUTI.GUTI" + refinedBackEndType + "Serializer");
+            Constructor<T> constructor = (Constructor<T>) classObjectOfRealSerializer.getConstructor(Elements.class);
+            realSerializer = (Serializer<S, T>) constructor.newInstance(elements);
         } catch (Exception e) {
             e.printStackTrace();
         }

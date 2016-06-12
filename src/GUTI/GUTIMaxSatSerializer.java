@@ -18,9 +18,9 @@ import GUT.qual.Peer;
 import GUT.qual.Rep;
 import GUT.qual.Self;
 import GUT.qual.VPLost;
+import checkers.inference.model.CombVariableSlot;
 import checkers.inference.model.CombineConstraint;
 import checkers.inference.model.ConstantSlot;
-import checkers.inference.model.EqualityConstraint;
 import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
 import maxsatbackend.MaxSatSerializer;
@@ -32,7 +32,7 @@ public class GUTIMaxSatSerializer extends MaxSatSerializer {
     private AnnotationMirror ANY, PEER, REP, LOST, VPLOST, BOTTOM, SELF;
     private boolean allowLost;
 
-    protected GUTIMaxSatSerializer(Elements elements) {
+    public GUTIMaxSatSerializer(Elements elements) {
         super();
         ANY = AnnotationUtils.fromClass(elements, Any.class);
         PEER = AnnotationUtils.fromClass(elements, Peer.class);
@@ -45,13 +45,16 @@ public class GUTIMaxSatSerializer extends MaxSatSerializer {
 
     @Override
     public VecInt[] serialize(CombineConstraint combineConstraint) {
-        return new VariableCombos<EqualityConstraint>() {
+        return new VariableCombos<CombineConstraint>() {
 
             public VecInt[] accept(Slot target, Slot decl, Slot result,
                     CombineConstraint constraint) {
 
                 final VecInt[] resultClauses;
-
+                if (target instanceof CombVariableSlot) {
+                    Slot realTypeWithoutClassBound = ((CombVariableSlot)target).getSecond();
+                        target = realTypeWithoutClassBound;
+                }
                 if (target instanceof ConstantSlot) {
                     if (decl instanceof ConstantSlot) {
                         resultClauses = constant_constant((ConstantSlot) target,
@@ -77,7 +80,74 @@ public class GUTIMaxSatSerializer extends MaxSatSerializer {
             protected VecInt[] constant_constant(ConstantSlot target,
                     ConstantSlot decl, VariableSlot result,
                     CombineConstraint combineConstraint) {
-                return new VecInt[0];
+                List<VecInt> resultClauses = new ArrayList<VecInt>();
+                if (AnnotationUtils.areSame(target.getValue(), BOTTOM)) {
+                    ErrorReporter.errorAbort("Error: Receiver type is BOTTOM!");
+                }
+                if (!allowLost) {
+                    if (AnnotationUtils.areSame(target.getValue(), LOST)) {
+                        ErrorReporter.errorAbort("Error: Receiver type contains LOST!");
+                    }
+                }
+                if (AnnotationUtils.areSame(decl.getValue(), PEER)) {
+                    if (AnnotationUtils.areSame(target.getValue(), REP)) {
+                        resultClauses.add(VectorUtils.asVec(
+                        MathUtils.mapIdToMatrixEntry(result.getId(), REP)));
+                    }
+                    if (AnnotationUtils.areSame(target.getValue(), SELF)) {
+                        resultClauses.add(VectorUtils.asVec(
+                        MathUtils.mapIdToMatrixEntry(result.getId(), PEER)));
+                    }
+                    if (AnnotationUtils.areSame(target.getValue(), PEER)) {
+                        resultClauses.add(VectorUtils.asVec(
+                        MathUtils.mapIdToMatrixEntry(result.getId(), PEER)));
+                    }
+                    if (AnnotationUtils.areSame(target.getValue(), ANY)) {
+                        resultClauses.add(VectorUtils.asVec(
+                        MathUtils.mapIdToMatrixEntry(result.getId(), VPLOST)));
+                    }
+                    if (AnnotationUtils.areSame(target.getValue(), LOST)) {
+                        resultClauses.add(VectorUtils.asVec(
+                        MathUtils.mapIdToMatrixEntry(result.getId(), VPLOST)));
+                    }
+                    if (AnnotationUtils.areSame(target.getValue(), VPLOST)) {
+                        resultClauses.add(VectorUtils.asVec(
+                        MathUtils.mapIdToMatrixEntry(result.getId(), VPLOST)));
+                    }
+                } else if (AnnotationUtils.areSame(decl.getValue(), REP)) {
+                    if (AnnotationUtils.areSame(target.getValue(), SELF)) {
+                    resultClauses.add(VectorUtils.asVec(
+                            MathUtils.mapIdToMatrixEntry(result.getId(), REP)));
+                    }
+                    else {
+                    resultClauses.add(VectorUtils.asVec(
+                        MathUtils.mapIdToMatrixEntry(result.getId(), VPLOST)));
+                    }
+                } else if (AnnotationUtils.areSame(decl.getValue(), ANY)) {
+                resultClauses.add(VectorUtils.asVec(
+                        MathUtils.mapIdToMatrixEntry(result.getId(), ANY)));
+                } else if (AnnotationUtils.areSame(decl.getValue(), BOTTOM)) {
+                resultClauses.add(VectorUtils.asVec(
+                        MathUtils.mapIdToMatrixEntry(result.getId(), BOTTOM)));
+                } else if (AnnotationUtils.areSame(decl.getValue(), LOST)) {
+                if (!allowLost) {
+                    ErrorReporter.errorAbort(
+                            "Error: Declared type contatins LOST!");
+                }
+                else {
+                    resultClauses.add(VectorUtils.asVec(
+                            MathUtils.mapIdToMatrixEntry(result.getId(), VPLOST)));//change lost to vplost
+                }
+                } else if (AnnotationUtils.areSame(decl.getValue(), VPLOST)) {
+                ErrorReporter.errorAbort(
+                        "Error: Declared type contatins VPLOST!");
+                } else if (AnnotationUtils.areSame(decl.getValue(), SELF)) {
+                ErrorReporter.errorAbort("Error: Declared type contatins SELF!");
+            } else {
+                ErrorReporter.errorAbort("Error: Unknown declared type!");
+            }
+
+                return resultClauses.toArray(new VecInt[resultClauses.size()]);
             }
 
             protected VecInt[] constant_variable(ConstantSlot target,
@@ -98,42 +168,42 @@ public class GUTIMaxSatSerializer extends MaxSatSerializer {
                         -MathUtils.mapIdToMatrixEntry(decl.getId(), BOTTOM),
                         MathUtils.mapIdToMatrixEntry(result.getId(), BOTTOM)));
 
-                if (areSameType(target.getValue(), PEER)){
+                if (AnnotationUtils.areSame(target.getValue(), PEER)) {
                     resultClauses.add(VectorUtils.asVec(
                             -MathUtils.mapIdToMatrixEntry(decl.getId(), PEER),
                             MathUtils.mapIdToMatrixEntry(result.getId(), PEER)));
                     resultClauses.add(VectorUtils.asVec(
                             -MathUtils.mapIdToMatrixEntry(decl.getId(), REP),
                             MathUtils.mapIdToMatrixEntry(result.getId(),VPLOST)));
-                } else if (areSameType(target.getValue(), REP)){
+                } else if (AnnotationUtils.areSame(target.getValue(), REP)) {
                     resultClauses.add(VectorUtils.asVec(
                             -MathUtils.mapIdToMatrixEntry(decl.getId(), PEER),
                             MathUtils.mapIdToMatrixEntry(result.getId(), REP)));
                     resultClauses.add(VectorUtils.asVec(
                             -MathUtils.mapIdToMatrixEntry(decl.getId(), REP),
                             MathUtils.mapIdToMatrixEntry(result.getId(),VPLOST)));
-                } else if (areSameType(target.getValue(), ANY)){
+                } else if (AnnotationUtils.areSame(target.getValue(), ANY)) {
                     resultClauses.add(VectorUtils.asVec(
                                 -MathUtils.mapIdToMatrixEntry(decl.getId(),PEER),
                                 MathUtils.mapIdToMatrixEntry(result.getId(),VPLOST)));
                     resultClauses.add(VectorUtils.asVec(
                                 -MathUtils.mapIdToMatrixEntry(decl.getId(),REP),
                                 MathUtils.mapIdToMatrixEntry(result.getId(),VPLOST)));
-                } else if (areSameType(target.getValue(), SELF)){
+                } else if (AnnotationUtils.areSame(target.getValue(), SELF)) {
                     resultClauses.add(VectorUtils.asVec(
                         -MathUtils.mapIdToMatrixEntry(decl.getId(), PEER),
                         MathUtils.mapIdToMatrixEntry(result.getId(), PEER)));
                     resultClauses.add(VectorUtils.asVec(
                         -MathUtils.mapIdToMatrixEntry(decl.getId(), REP),
                         MathUtils.mapIdToMatrixEntry(result.getId(),REP)));
-                } else if (areSameType(target.getValue(), VPLOST)){
+                } else if (AnnotationUtils.areSame(target.getValue(), VPLOST)) {
                     resultClauses.add(VectorUtils.asVec(
                             -MathUtils.mapIdToMatrixEntry(decl.getId(), PEER),
                             MathUtils.mapIdToMatrixEntry(result.getId(),VPLOST)));
                     resultClauses.add(VectorUtils.asVec(
                             -MathUtils.mapIdToMatrixEntry(decl.getId(), REP),
                         MathUtils.mapIdToMatrixEntry(result.getId(), VPLOST)));
-                } else if (areSameType(target.getValue(), LOST)){
+                } else if (AnnotationUtils.areSame(target.getValue(), LOST)) {
                     if (!allowLost) {
                         ErrorReporter.errorAbort("Error: Receiver type contains LOST!");
                     }
@@ -145,7 +215,7 @@ public class GUTIMaxSatSerializer extends MaxSatSerializer {
                                 -MathUtils.mapIdToMatrixEntry(decl.getId(), REP),
                             MathUtils.mapIdToMatrixEntry(result.getId(), VPLOST)));
                     }
-                } else if (areSameType(target.getValue(), BOTTOM)){
+                } else if (AnnotationUtils.areSame(target.getValue(), BOTTOM)) {
                     ErrorReporter.errorAbort("Error: Receiver type is BOTTOM!");
                 } else {
                     ErrorReporter.errorAbort("Error: Unknown target type!");
@@ -168,7 +238,7 @@ public class GUTIMaxSatSerializer extends MaxSatSerializer {
 
                     resultClauses.add(VectorUtils.asVec(-MathUtils
                             .mapIdToMatrixEntry(target.getId(), BOTTOM)));
-                if (areSameType(decl.getValue(), PEER)) {
+                if (AnnotationUtils.areSame(decl.getValue(), PEER)) {
                         resultClauses.add(VectorUtils.asVec(
                             -MathUtils.mapIdToMatrixEntry(target.getId(), REP),
                             MathUtils.mapIdToMatrixEntry(result.getId(), REP)));
@@ -187,32 +257,32 @@ public class GUTIMaxSatSerializer extends MaxSatSerializer {
                         resultClauses.add(VectorUtils.asVec(
                             -MathUtils.mapIdToMatrixEntry(target.getId(), VPLOST),
                             MathUtils.mapIdToMatrixEntry(result.getId(), VPLOST)));
-                } else if (areSameType(decl.getValue(), REP)) {
+                } else if (AnnotationUtils.areSame(decl.getValue(), REP)) {
                         resultClauses.add(VectorUtils.asVec(
                             MathUtils.mapIdToMatrixEntry(target.getId(), SELF),
                             MathUtils.mapIdToMatrixEntry(result.getId(), VPLOST)));
                         resultClauses.add(VectorUtils.asVec(
                             -MathUtils.mapIdToMatrixEntry(target.getId(), SELF),
                             MathUtils.mapIdToMatrixEntry(result.getId(), REP)));
-                } else if (areSameType(decl.getValue(), ANY)) {
+                } else if (AnnotationUtils.areSame(decl.getValue(), ANY)) {
                     resultClauses.add(VectorUtils.asVec(
                             MathUtils.mapIdToMatrixEntry(result.getId(), ANY)));
-                } else if (areSameType(decl.getValue(), BOTTOM)) {
+                } else if (AnnotationUtils.areSame(decl.getValue(), BOTTOM)) {
                     resultClauses.add(VectorUtils.asVec(
                             MathUtils.mapIdToMatrixEntry(result.getId(), BOTTOM)));
-                } else if (areSameType(decl.getValue(), LOST)) {
+                } else if (AnnotationUtils.areSame(decl.getValue(), LOST)) {
                     if (!allowLost) {
                         ErrorReporter.errorAbort(
                                 "Error: Declared type contatins LOST!");
                     }
                     else {
                         resultClauses.add(VectorUtils.asVec(
-                                MathUtils.mapIdToMatrixEntry(result.getId(), LOST)));
+                                MathUtils.mapIdToMatrixEntry(result.getId(), VPLOST)));//change lost to vplost
                     }
-                } else if (areSameType(decl.getValue(), VPLOST)) {
+                } else if (AnnotationUtils.areSame(decl.getValue(), VPLOST)) {
                     ErrorReporter.errorAbort(
                             "Error: Declared type contatins VPLOST!");
-                } else if (areSameType(decl.getValue(), SELF)) {
+                } else if (AnnotationUtils.areSame(decl.getValue(), SELF)) {
                     ErrorReporter.errorAbort("Error: Declared type contatins SELF!");
                 } else {
                     ErrorReporter.errorAbort("Error: Unknown declared type!");

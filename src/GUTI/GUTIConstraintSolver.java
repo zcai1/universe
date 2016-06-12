@@ -24,7 +24,7 @@ public class GUTIConstraintSolver extends ConstraintSolver {
             ProcessingEnvironment processingEnvironment) {
 
         configure(configuration);
-        Elements elements = realBackEnd.processingEnvironment.getElementUtils();
+        Elements elements = processingEnvironment.getElementUtils();
         Serializer<?, ?> defaultSerializer = createSerializer(backEndType,
                 elements);
         realBackEnd = createBackEnd(backEndType, configuration, slots,
