@@ -14,5 +14,6 @@ tags
 *.orig
 tests/GUT/*.java
 tests/GUTI/*.java
-tests/GUTI/output/
+tests/GUTI/annotated/
+*.class
 
