@@ -13,7 +13,6 @@ TAGS
 tags
 *.orig
 tests/GUT/*.java
-tests/GUTI/*.java
 tests/GUTI/annotated/
 *.class
 
