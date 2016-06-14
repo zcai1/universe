@@ -7,22 +7,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.util.Elements;
 
 import org.sat4j.core.VecInt;
 
-import GUT.qual.Any;
-import GUT.qual.Bottom;
-import GUT.qual.Lost;
-import GUT.qual.Peer;
-import GUT.qual.Rep;
-import GUT.qual.Self;
-import GUT.qual.VPLost;
+import GUT.GUTAnnotatedTypeFactory;
+import checkers.inference.InferenceMain;
 import checkers.inference.model.CombVariableSlot;
 import checkers.inference.model.CombineConstraint;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
+import constraintsolver.VariableCombos;
 import maxsatbackend.MaxSatSerializer;
 import util.MathUtils;
 import util.VectorUtils;
@@ -32,20 +27,22 @@ public class GUTIMaxSatSerializer extends MaxSatSerializer {
     private AnnotationMirror ANY, PEER, REP, LOST, VPLOST, BOTTOM, SELF;
     private boolean allowLost;
 
-    public GUTIMaxSatSerializer(Elements elements) {
+    public GUTIMaxSatSerializer() {
         super();
-        ANY = AnnotationUtils.fromClass(elements, Any.class);
-        PEER = AnnotationUtils.fromClass(elements, Peer.class);
-        REP = AnnotationUtils.fromClass(elements, Rep.class);
-        LOST = AnnotationUtils.fromClass(elements, Lost.class);
-        VPLOST = AnnotationUtils.fromClass(elements, VPLost.class);
-        BOTTOM = AnnotationUtils.fromClass(elements, Bottom.class);
-        SELF = AnnotationUtils.fromClass(elements, Self.class);
+        GUTAnnotatedTypeFactory gutATF = (GUTAnnotatedTypeFactory) InferenceMain
+                .getInstance().getRealTypeFactory();
+        ANY = gutATF.ANY;
+        PEER = gutATF.PEER;
+        REP = gutATF.REP;
+        LOST = gutATF.LOST;
+        VPLOST = gutATF.VPLOST;
+        BOTTOM = gutATF.BOTTOM;
+        SELF = gutATF.SELF;
     }
 
     @Override
     public VecInt[] serialize(CombineConstraint combineConstraint) {
-        return new VariableCombos<CombineConstraint>() {
+        return new VariableCombos<CombineConstraint, VecInt[]>(new VecInt[0]) {
 
             public VecInt[] accept(Slot target, Slot decl, Slot result,
                     CombineConstraint constraint) {

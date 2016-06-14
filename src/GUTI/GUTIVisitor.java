@@ -400,6 +400,17 @@ public class GUTIVisitor extends InferenceVisitor<GUTIChecker, BaseAnnotatedType
             // atypeFactory);
         }
 
+        // Tamier: Not overriding this method will cause InferenceValidator to
+        // perform subtyping checks(in inference, it's to generate constraints)
+        // even before the VariableAnnotator generate constraints. I'm not sure
+        // whether a void operation makes sense or not. Should as professor
+        // about this
+        @Override
+        protected void checkValidUse(AnnotatedDeclaredType elemType,
+                AnnotatedDeclaredType type, Tree tree) {
+            return;
+        }
+
         /**
          * Ensure that only one ownership modifier is used, that ownership
          * modifiers are correctly used in static contexts, and check for

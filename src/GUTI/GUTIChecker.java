@@ -5,7 +5,6 @@ import org.checkerframework.framework.source.SupportedLintOptions;
 
 import javax.annotation.processing.SupportedOptions;
 
-import GUT.GUTAnnotatedTypeFactory;
 import checkers.inference.BaseInferrableChecker;
 import checkers.inference.InferenceChecker;
 import checkers.inference.InferenceVisitor;
@@ -23,7 +22,9 @@ public class GUTIChecker extends BaseInferrableChecker {
 
     @Override
     public BaseAnnotatedTypeFactory createRealTypeFactory() {
-        return new GUTAnnotatedTypeFactory(this);
+        // Return the GUTIAnnotatedTypeFactory so that it can carry
+        // GUTIVariableAnnotator
+        return new GUTIAnnotatedTypeFactory(this);
     }
 
     @Override
