@@ -1,5 +1,23 @@
 package GUT;
 
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeVariable;
+
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.common.basetype.BaseTypeChecker;
 import org.checkerframework.dataflow.qual.Pure;
@@ -22,24 +40,6 @@ import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.Pair;
 import org.checkerframework.javacutil.TreeUtils;
 import org.checkerframework.javacutil.TypesUtils;
-
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeKind;
-import javax.lang.model.type.TypeVariable;
 
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.CompoundAssignmentTree;
@@ -126,40 +126,75 @@ public class GUTAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         }
 
         // TODO: why is this fromElement and not getAnnotatedType??
+	// The declared type of an element
         AnnotatedTypeMirror decltype = this.fromElement(element);
 
-        /*
+
           System.out.println("\npostasmemberof:");
           System.out.println("in type: " + type);
           System.out.println("decl type: " + decltype);
           System.out.println("owner: " + owner);
           System.out.println("element: " + element);
-         */
 
-        // Combine annotations
-        AnnotatedTypeMirror combinedType = GUTQualifierUtils.combineTypeWithType(this, owner, decltype);
-        // System.out.println("combined type: " + combinedType);
+	// Combine annotations
+	/*
+	 * System.out.println("before: type: " + type);
+	 * System.out.println("before: decltype: " + decltype);
+	 */
+	/*
+	 * new AnnotatedTypeScanner<AnnotatedTypeMirror, Void>(){
+	 * 
+	 * @Override protected void scan(AnnotatedTypeMirror type, Void p) {
+	 * if(type instanceof AnnotatedTypeVariable) return super.scan(type, p);
+	 * }
+	 * 
+	 * }.visit(decltype);
+	 */
+	AnnotatedTypeMirror combinedType;
 
-        // Replace annotations
-        type.replaceAnnotation(GUTQualifierUtils.getUniverseModifier(this, combinedType));
-        // System.out.println("result: " + type.toString());
+	boolean util = true;
+	System.out.println("Using vputil: " + util + "\n");
+	if (util) {
+	    combinedType = vputil.combineTypeWithType(owner, decltype, this);
+	    type.replaceAnnotation(vputil.getAnnotation(combinedType, this));
+	    // type = vputil.combineTypeWithType(owner, type, this);
+	} else {
+	    // combinedType has the correct main modifier, because it's used to
+	    // perform actual viewpoint adaptation.
+	    combinedType = GUTQualifierUtils.combineTypeWithType(this, owner, decltype);
+	    // type has the correct type argument annotation which is not
+	    // viewpoint adapted. In the implementation step, we don't viewpoint
+	    // adapt type at all. We only need to replace its main modifier with
+	    // the viewpoint adapted main modifier
+	    type.replaceAnnotation(GUTQualifierUtils.getUniverseModifier(this, combinedType));
+	}
 
-        // TODO: HACK: we needed to make setTypeArguments public to work
-        // around a limitation of the framework.
-        // If the method had a return value, like constructor/methodFromUse, we
-        // could probably get around this.
+	System.out.println("combinedType: " + combinedType);
+	System.out.println("type: " + type);
 
-        if (type.getKind() == TypeKind.DECLARED
-                && combinedType.getKind() == TypeKind.DECLARED) {
-            AnnotatedDeclaredType declaredType = (AnnotatedDeclaredType) type;
-            AnnotatedDeclaredType declaredCombinedType = (AnnotatedDeclaredType) combinedType;
-            declaredType.setTypeArguments(declaredCombinedType.getTypeArguments());
-        } else if (type.getKind() == TypeKind.ARRAY
-                && combinedType.getKind() == TypeKind.ARRAY) {
-            AnnotatedArrayType arrayType = (AnnotatedArrayType) type;
-            AnnotatedArrayType arrayCombinedType = (AnnotatedArrayType) combinedType;
-            arrayType.setComponentType(arrayCombinedType.getComponentType());
-        }
+	if (type.getKind() == TypeKind.DECLARED && combinedType.getKind() == TypeKind.DECLARED) {
+	    AnnotatedDeclaredType Type = (AnnotatedDeclaredType) type;
+	    AnnotatedDeclaredType CombinedType = (AnnotatedDeclaredType) combinedType;
+	    Type.setTypeArguments(CombinedType.getTypeArguments());
+	    System.out.println("Type: " + Type + "\n");
+	} else if (type.getKind() == TypeKind.ARRAY && combinedType.getKind() == TypeKind.ARRAY) {
+	    AnnotatedArrayType arrayType = (AnnotatedArrayType) type;
+	    AnnotatedArrayType arrayCombinedType = (AnnotatedArrayType) combinedType;
+	    arrayType.setComponentType(arrayCombinedType.getComponentType());
+	}
+
+	/*
+	 * if (type.getKind() == TypeKind.DECLARED && combinedType.getKind() ==
+	 * TypeKind.DECLARED) { AnnotatedDeclaredType Type =
+	 * (AnnotatedDeclaredType) type; AnnotatedDeclaredType CombinedType =
+	 * (AnnotatedDeclaredType) combinedType;
+	 * Type.setTypeArguments(CombinedType.getTypeArguments()); } else if
+	 * (type.getKind() == TypeKind.ARRAY && combinedType.getKind() ==
+	 * TypeKind.ARRAY) { AnnotatedArrayType arrayType = (AnnotatedArrayType)
+	 * type; AnnotatedArrayType arrayCombinedType = (AnnotatedArrayType)
+	 * combinedType;
+	 * arrayType.setComponentType(arrayCombinedType.getComponentType()); }
+	 */
 
         // System.out.println("out type: " + type);
     }
@@ -263,9 +298,10 @@ public class GUTAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         // Set the receiver
         //AnnotatedTypeMirror receiverType = null;
         AnnotatedTypeMirror receiverType = getReceiverType(tree);
+        // TODO is it read-only?
         ExecutableElement methodElt = TreeUtils.elementFromUse(tree);
         AnnotatedExecutableType method = this.fromElement(methodElt);
-        this.annotateImplicit(methodElt, method);
+        this.addComputedTypeAnnotations(methodElt, method);
 
         Map<AnnotatedTypeMirror, AnnotatedTypeMirror> mappings = new HashMap<AnnotatedTypeMirror, AnnotatedTypeMirror>();
 
@@ -295,7 +331,11 @@ public class GUTAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         }
 
         // Modify return type
-        AnnotatedTypeMirror returnType = getAnnotatedType(method.getElement()).getReturnType();
+        // AnnotatedTypeMirror returnType =
+        // getAnnotatedType(method.getElement()).getReturnType();
+        // Tamier changes this to directly get return type from method, because
+        // the original one fails to apply vp adaptation return type
+        AnnotatedTypeMirror returnType = method.getReturnType();
         if (returnType.getKind() != TypeKind.VOID) {
             AnnotatedTypeMirror combinedType = GUTQualifierUtils.combineTypeWithType(this, receiverType, returnType);
 
@@ -306,10 +346,16 @@ public class GUTAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         }
 
         // TODO: upper bounds, throws?
-
+	// System.out.println("GUTAnnotatedTypeFactory: method before applying
+	// vp adaptation: " + method);
+	// System.out.println("GUTAnnotatedTypeFactory: mappings is: " +
+	// mappings);
+        // TODO return type is not corretly replaced!!!
         method = (AnnotatedExecutableType) AnnotatedTypeReplacer.replace(method, mappings);
-
+	// System.out.println("GUTAnnotatedTypeFactory: method after applying vp
+	// adaptation: " + method);
         // determine substitution for method type variables
+        // Very effective method invocation to find actual type arguments in ATF already.
         Map<TypeVariable, AnnotatedTypeMirror> typeVarMapping =
                 AnnotatedTypes.findTypeArguments(processingEnv, this, tree, methodElt, method);
         List<AnnotatedTypeMirror> typeargs = new LinkedList<AnnotatedTypeMirror>();
@@ -318,12 +364,20 @@ public class GUTAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             for (AnnotatedTypeVariable tv : method.getTypeVariables()) {
                 typeargs.add(typeVarMapping.get(tv.getUnderlyingType()));
             }
-
-            method = (AnnotatedExecutableType) typeVarSubstitutor.substitute(typeVarMapping, method);
+            // TODO generic method is a method whose some parts depend on type arguments passed from outside.
+            // This method just performs the "manufactoring" new actual method function. It generates the
+            // actual method with the blueprint of generic method. Of course, the type parameters are already
+            // viewpoint adapted according to the GUT rules.
+	    /*
+	     * System.out.println(
+	     * "GUTAnnotatedTypeFactory: method before subsitute: " + method);
+	     */ method = (AnnotatedExecutableType) typeVarSubstitutor.substitute(typeVarMapping, method);
+	    // System.out.println("GUTAnnotatedTypeFactory: method after
+	    // subsitute: " + method);
         }
 
         // System.out.println("adapted method: " + method);
-
+	// System.out.println("GUTAnnotatedTypeFactory: typeargs: " + typeargs);
         return Pair.of(method, typeargs);
     }
 
