@@ -1,11 +1,10 @@
 package GUT;
 
-import org.checkerframework.framework.test.CheckerFrameworkTest;
-
 import java.io.File;
 
 import javax.annotation.processing.AbstractProcessor;
 
+import org.checkerframework.framework.test.CheckerFrameworkPerFileTest;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
 import org.junit.runners.Parameterized.Parameters;
@@ -43,7 +42,7 @@ public class GUTTests {
     }
 
 
-    public static class GUTTestsTopology extends CheckerFrameworkTest {
+    public static class GUTTestsTopology extends CheckerFrameworkPerFileTest {
         public GUTTestsTopology (File testFile) {
             super(testFile, GUTTests.checkerClass, "GUT/topol", "-Anomsgtext");
         }
@@ -53,7 +52,7 @@ public class GUTTests {
         }
     }
 
-    public static class GUTTestsStrictPurity extends CheckerFrameworkTest {
+    public static class GUTTestsStrictPurity extends CheckerFrameworkPerFileTest {
         public GUTTestsStrictPurity(File testFile) {
             super(testFile, GUTTests.checkerClass, "GUT/strictpurity", "-Anomsgtext", "-Alint=checkStrictPurity");
         }
@@ -63,7 +62,7 @@ public class GUTTests {
         }
     }
 
-    public static class GUTTestsLostYes extends CheckerFrameworkTest {
+    public static class GUTTestsLostYes extends CheckerFrameworkPerFileTest {
         public GUTTestsLostYes(File testFile) {
             super(testFile, GUTTests.checkerClass, "GUT/lostyes", "-Anomsgtext", "-Alint=allowLost");
         }
@@ -73,7 +72,7 @@ public class GUTTests {
         }
     }
 
-    public static class GUTTestsLostNo extends CheckerFrameworkTest {
+    public static class GUTTestsLostNo extends CheckerFrameworkPerFileTest {
         public GUTTestsLostNo(File testFile) {
             super(testFile, GUTTests.checkerClass, "GUT/lostno", "-Anomsgtext", "-Alint=-allowLost");
         }

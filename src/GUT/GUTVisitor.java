@@ -69,14 +69,15 @@ public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
         return new GUTTypeValidator(checker, this, atypeFactory);
     }
 
-    /*
+    /**
      * The supermethod is currently OK, it only checks for a subtype relationship between the erased types.
      * Depends on what we use as default modifier. Super meth is ok for Any default, but not for peer.
+     * TODO Is this really correct?
      */
     @Override
     public boolean isValidUse(AnnotatedDeclaredType elemType, AnnotatedDeclaredType use, Tree tree) {
-        return true;
         // return super.isValidUse(elemType, use, tree);
+        return true;
     }
 
     /**
@@ -87,12 +88,13 @@ public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
             MethodInvocationTree node) {
         return;
     }
+
     /**
-        * GUT does not use receiver annotations, forbid them.
-        */
+     * GUT does not use receiver annotations, forbid them.
+     */
     @Override
     public Void visitMethod(MethodTree node, Void p) {
-    // System.out.println("MethodTree: " + node);
+        // System.out.println("MethodTree: " + node);
 
         if (node.getReceiverParameter() != null &&
                 !node.getReceiverParameter().getModifiers().getAnnotations()
@@ -103,13 +105,12 @@ public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
         return super.visitMethod(node, p);
     }
 
-
-        /**
+    /**
      * Ignore constructor receiver annotations.
      */
     @Override
     protected boolean checkConstructorInvocation(AnnotatedDeclaredType dt,
-            AnnotatedExecutableType constructor, Tree src) {
+            AnnotatedExecutableType constructor, NewClassTree src) {
         return true;
     }
 
@@ -128,9 +129,11 @@ public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
         Pair<AnnotatedExecutableType, List<AnnotatedTypeMirror>> fromUse = atypeFactory.constructorFromUse(node);
         AnnotatedExecutableType constructor = fromUse.first;
 
-        // Check for @VPLost in combined parameter types.
+        // Check for @Lost and @VPLost in combined parameter types.
         for (AnnotatedTypeMirror parameterType : constructor.getParameterTypes()) {
-            if (AnnotatedTypes.containsModifier(parameterType, atypeFactory.VPLOST)) {
+            if (AnnotatedTypes.containsModifier(parameterType, atypeFactory.LOST)) {
+                checker.report(Result.failure("uts.lost.parameter"), node);
+            } else if (AnnotatedTypes.containsModifier(parameterType, atypeFactory.VPLOST)) {
                 checker.report(Result.failure("uts.vplost.parameter"), node);
             }
         }
@@ -138,39 +141,36 @@ public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
         // Check for @Peer or @Rep as top-level modifier.
         AnnotatedTypeMirror type = atypeFactory.getAnnotatedType(node);
         if (!(type.hasEffectiveAnnotation(atypeFactory.PEER) || type.hasEffectiveAnnotation(atypeFactory.REP))) {
-            // System.out.println("new got: " + type.toString());
             checker.report(Result.failure("uts.new.ownership"), node);
         }
 
-        // TODO: forbid rep in static context
-        // TODO: test this. fields, methods, local vars, ... Checker.isValid?
-        
-        boolean isstatic = false;
+        // Forbid @Rep in static context
+        if (isInStaticContext() && type.hasEffectiveAnnotation(atypeFactory.REP)) {
+                checker.report(Result.failure("uts.static.rep.forbidden"), node);
+        }
+
+        return super.visitNewClass(node, p);
+    }
+
+    private boolean isInStaticContext(){
+	boolean isstatic = false;
         MethodTree meth = TreeUtils.enclosingMethod(getCurrentPath());
         if(meth != null){
             ExecutableElement methel = TreeUtils.elementFromDeclaration(meth);
             isstatic = ElementUtils.isStatic(methel);
-
         } else {
-            VariableTree vartree = TreeUtils
-                    .enclosingVariable(getCurrentPath());
+            VariableTree vartree = TreeUtils.enclosingVariable(getCurrentPath());
             if (vartree != null) {
                 ModifiersTree mt = vartree.getModifiers();
                 isstatic = mt.getFlags().contains(Modifier.STATIC);
-            }
-            else {
-                BlockTree blcktree = TreeUtils
-                        .enclosingTopLevelBlock(getCurrentPath());
+            } else {
+                BlockTree blcktree = TreeUtils.enclosingTopLevelBlock(getCurrentPath());
                 if (blcktree != null) {
                     isstatic = blcktree.isStatic();
                 }
             }
         }
-        if (isstatic && type.hasEffectiveAnnotation(atypeFactory.REP)) {
-                checker.report(Result.failure("uts.static.rep.forbidden"), node);
-            }
-
-        return super.visitNewClass(node, p);
+        return isstatic;
     }
 
     /**
@@ -189,7 +189,9 @@ public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
 
         // Check for @VPLost in combined parameter types.
         for (AnnotatedTypeMirror parameterType : method.getParameterTypes()) {
-            if (AnnotatedTypes.containsModifier(parameterType, atypeFactory.VPLOST)) {
+            if (AnnotatedTypes.containsModifier(parameterType, atypeFactory.LOST)) {
+                checker.report(Result.failure("uts.lost.parameter"), node);
+            } else if (AnnotatedTypes.containsModifier(parameterType, atypeFactory.VPLOST)) {
                 checker.report(Result.failure("uts.vplost.parameter"), node);
             }
         }
@@ -198,14 +200,13 @@ public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
             ExpressionTree recvTree = TreeUtils.getReceiverTree(node.getMethodSelect());
             if (recvTree != null) {
                 AnnotatedTypeMirror recvType = atypeFactory.getAnnotatedType(recvTree);
-                // Forbid additional vplost as the receiver type if OaM is true.
-                if (recvType != null) {
                     if (recvType.hasEffectiveAnnotation(atypeFactory.LOST) ||
                             recvType.hasEffectiveAnnotation(atypeFactory.VPLOST) ||
                                 recvType.hasEffectiveAnnotation(atypeFactory.ANY)) {
                         ExecutableElement exelem = TreeUtils.elementFromUse(node);
                         java.util.List<? extends AnnotationMirror> anns = exelem.getAnnotationMirrors();
 
+                        // purity
                         boolean hasPure = false;
                         for (AnnotationMirror an : anns) {
                             if (isPure(an.getAnnotationType())) {
@@ -216,11 +217,8 @@ public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
                             checker.report(Result.failure("oam.call.forbidden"), node);
                         }
                     }
-                }
             }
         }
-
-        // TODO purity
 
         return super.visitMethodInvocation(node, p);
     }
@@ -247,9 +245,7 @@ public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
         AnnotatedTypeMirror type = atypeFactory.getAnnotatedType(node.getVariable());
         if (AnnotatedTypes.containsModifier(type, atypeFactory.LOST)) {
             checker.report(Result.failure("uts.lost.lhs"), node);
-        }
-
-        if (AnnotatedTypes.containsModifier(type, atypeFactory.VPLOST)) {
+        } else if (AnnotatedTypes.containsModifier(type, atypeFactory.VPLOST)) {
             checker.report(Result.failure("uts.vplost.lhs"), node);
         }
 
@@ -278,16 +274,12 @@ public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
     @Override
     public Void visitTypeCast(TypeCastTree node, Void p) {
         AnnotatedTypeMirror type = atypeFactory.getAnnotatedType(node.getType());
-        // AnnotatedTypeMirror expr =
-        // atypeFactory.getAnnotatedType(node.getExpression());
 
         if ((AnnotatedTypes.containsModifier(type, atypeFactory.LOST)
                 || AnnotatedTypes.containsModifier(type, atypeFactory.VPLOST)
                         || AnnotatedTypes.containsModifier(type, atypeFactory.ANY))
                                 && !GUTChecker.isAnyDefault(type)) {
             checker.report(Result.warning("uts.cast.type.warning", type), node);
-            // checker.getProcessingEnvironment().getMessager().printMessage(javax.tools.Diagnostic.Kind.WARNING,
-            // "Casting to " + type + " is not recommended.");
         }
 
         // The only part from the super call that we want.
@@ -303,6 +295,7 @@ public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
      * This type validator ensures correct usage of ownership modifiers.
      * It must be run before implicits/defaults, because it should only
      * validate explicitly written qualifiers.
+     * TODO The above statement is incorrect. Defaults are already applied.
      */
     private final class GUTTypeValidator extends BaseTypeValidator {
 
@@ -319,26 +312,7 @@ public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
         @Override
         public Void visitDeclared(AnnotatedDeclaredType type, Tree p) {
             if (p.getKind() == Kind.VARIABLE) {
-                ModifiersTree mt = ((VariableTree) p).getModifiers();
-                boolean isstatic=false;
-                MethodTree meth = TreeUtils.enclosingMethod(getCurrentPath());
-                if (meth != null) {
-                    ExecutableElement methel = TreeUtils
-                            .elementFromDeclaration(meth);
-                    isstatic = ElementUtils.isStatic(methel);
-                }
-
-                if (mt.getFlags().contains(Modifier.STATIC)) {
-                    isstatic = true;
-                }
-
-                BlockTree blcktree = TreeUtils
-                        .enclosingTopLevelBlock(getCurrentPath());
-                if (blcktree != null) {
-                    isstatic = blcktree.isStatic();
-                }
-
-                if (isstatic) {
+                if (isInStaticContext()) {
                     if (AnnotatedTypes.containsModifier(type, GUTVisitor.this.atypeFactory.REP)) {
                         checker.report(Result.failure("uts.static.rep.forbidden",
                                 type.getAnnotations(), type.toString()), p);
@@ -355,13 +329,11 @@ public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
 
             if (!allowLost &&
                     AnnotatedTypes.containsModifier(type, GUTVisitor.this.atypeFactory.LOST)) {
-                // TODO: find a way to distinguish explicit annotations from viewpoint adaptation result,
-                // e.g. by adding a separate annotation.
                  checker.report(Result.failure("uts.explicit.lost.forbidden",
                        type.getAnnotations(), type.toString()), p);
             }
 
-            if (GUTQualifierUtils.hasMultipleModifiers(type)) {
+            if (type.getAnnotations().size() > 1) {
                 reportError(type, p);
             }
             return super.visitDeclared(type, p);

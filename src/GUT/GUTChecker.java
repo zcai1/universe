@@ -1,8 +1,6 @@
 package GUT;
 
 
-import GUT.qual.*;
-
 import javax.annotation.processing.SupportedOptions;
 
 import org.checkerframework.common.basetype.BaseTypeChecker;
@@ -23,11 +21,7 @@ import org.checkerframework.framework.type.AnnotatedTypeMirror;
 @SupportedLintOptions({"allowLost", "checkOaM", "checkStrictPurity"})
 public class GUTChecker extends BaseTypeChecker {
 
-    @Override
-    public void initChecker() {
-        super.initChecker();
-    }
-
+    //TODO Clarify the purpose of this
     public static boolean isAnyDefault(AnnotatedTypeMirror type) {
         // if (!(type instanceof AnnotatedDeclaredType))
         return false;
@@ -36,6 +30,11 @@ public class GUTChecker extends BaseTypeChecker {
         return TypesUtils.isDeclaredOfName(dtype, "java.lang.String") ||
         TypesUtils.isDeclaredOfName(dtype, "java.lang.Character");
         */
+    }
+
+    @Override
+    public boolean withViewpointAdaptatioin() {
+	return true;
     }
 
     /* TODO: purity/OaM checking

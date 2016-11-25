@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
 
 /**
  * Ownership information is not expressible from the current viewpoint. Only
- * used internally.
+ * used internally as intermediate lost; Forbidden to be used explicitly.
  *
  * @author wmdietl
  */

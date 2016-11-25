@@ -24,7 +24,7 @@ import javax.lang.model.type.TypeKind;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE_PARAMETER, ElementType.TYPE_USE })
 @TargetLocations({TypeUseLocation.EXPLICIT_LOWER_BOUND,
-		TypeUseLocation.EXPLICIT_UPPER_BOUND})
+        TypeUseLocation.EXPLICIT_UPPER_BOUND})
 @SubtypeOf({ Self.class, Rep.class })
 @DefaultFor({ TypeUseLocation.IMPLICIT_LOWER_BOUND })
 @ImplicitFor(literals = { LiteralKind.NULL, LiteralKind.STRING },
