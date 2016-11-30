@@ -33,7 +33,7 @@ public class GUTChecker extends BaseTypeChecker {
     }
 
     @Override
-    public boolean withViewpointAdaptatioin() {
+    public boolean withViewpointAdaptation() {
 	return true;
     }
 

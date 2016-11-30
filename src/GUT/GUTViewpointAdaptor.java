@@ -2,26 +2,21 @@ package GUT;
 
 
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.type.TypeKind;
 
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
-import org.checkerframework.framework.util.FrameworkVPUtil;
+import org.checkerframework.framework.util.FrameworkViewpointAdaptor;
 import org.checkerframework.javacutil.AnnotationUtils;
 
-public class GUTVPUtil extends FrameworkVPUtil{
+public class GUTViewpointAdaptor extends FrameworkViewpointAdaptor{
 
     @Override
     protected AnnotationMirror getModifier(AnnotatedTypeMirror atm, AnnotatedTypeFactory f) {
         assert atm != null;
         GUTAnnotatedTypeFactory gutATF = (GUTAnnotatedTypeFactory)f;
-        if (!atm.isAnnotatedInHierarchy(gutATF.ANY)) {
-            // TODO Figure out why we get an unannotated type here, specifically atm
-            if (GUTChecker.isAnyDefault(atm) ) {
-                return gutATF.ANY;
-            } else {
-                return gutATF.PEER;
-            }
-        }
 
         if (atm.hasEffectiveAnnotation(gutATF.PEER)) {
             return gutATF.PEER;
@@ -71,5 +66,17 @@ public class GUTVPUtil extends FrameworkVPUtil{
         } else {
             return gutATF.VPLOST;
         }
+    }
+
+    @Override
+    public boolean shouldNotBeAdapted(AnnotatedTypeMirror type, Element element) {
+        if (type.getKind() != TypeKind.DECLARED && type.getKind() != TypeKind.ARRAY) {
+            return true;
+        }
+        if (element.getKind() == ElementKind.LOCAL_VARIABLE
+                || element.getKind() == ElementKind.PARAMETER) {
+            return true;
+        }
+        return false;
     }
 }
