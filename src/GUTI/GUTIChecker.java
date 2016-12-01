@@ -1,13 +1,18 @@
 package GUTI;
 
+import javax.annotation.processing.SupportedOptions;
+
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.source.SupportedLintOptions;
 
-import javax.annotation.processing.SupportedOptions;
-
+import GUT.GUTAnnotatedTypeFactory;
 import checkers.inference.BaseInferrableChecker;
+import checkers.inference.InferenceAnnotatedTypeFactory;
 import checkers.inference.InferenceChecker;
 import checkers.inference.InferenceVisitor;
+import checkers.inference.InferrableChecker;
+import checkers.inference.SlotManager;
+import checkers.inference.model.ConstraintManager;
 
 
 /**
@@ -24,7 +29,7 @@ public class GUTIChecker extends BaseInferrableChecker {
     public BaseAnnotatedTypeFactory createRealTypeFactory() {
         // Return the GUTIAnnotatedTypeFactory so that it can carry
         // GUTIVariableAnnotator
-        return new GUTIAnnotatedTypeFactory(this);
+        return new GUTAnnotatedTypeFactory(this);
     }
 
     @Override
@@ -36,6 +41,21 @@ public class GUTIChecker extends BaseInferrableChecker {
     @Override
     public boolean withCombineConstraints() {
         return true;
+    }
+
+    /*    @Override
+    public boolean withExistentialVariables() {
+        return false;
+    }*/
+
+    @Override
+    public InferenceAnnotatedTypeFactory createInferenceATF(
+            InferenceChecker inferenceChecker, InferrableChecker realChecker,
+            BaseAnnotatedTypeFactory realTypeFactory, SlotManager slotManager,
+            ConstraintManager constraintManager) {
+        return new GUTIAnnotatedTypeFactory(inferenceChecker,
+        	withCombineConstraints(), realTypeFactory, realChecker,
+                slotManager, constraintManager);
     }
 
 }

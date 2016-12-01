@@ -1,5 +1,13 @@
 package GUTI;
 
+import java.util.List;
+import java.util.Set;
+
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
+
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.common.basetype.BaseTypeChecker;
 import org.checkerframework.framework.source.Result;
@@ -14,14 +22,6 @@ import org.checkerframework.framework.util.AnnotatedTypes;
 import org.checkerframework.javacutil.ElementUtils;
 import org.checkerframework.javacutil.Pair;
 import org.checkerframework.javacutil.TreeUtils;
-
-import java.util.List;
-import java.util.Set;
-
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
 
 import com.sun.source.tree.AssignmentTree;
 import com.sun.source.tree.BlockTree;
@@ -38,15 +38,13 @@ import com.sun.source.util.TreePath;
 
 import GUT.GUTAnnotatedTypeFactory;
 import GUT.GUTChecker;
-import GUT.GUTQualifierUtils;
-import checkers.inference.ConstraintManager;
 import checkers.inference.InferenceChecker;
 import checkers.inference.InferenceMain;
 import checkers.inference.InferenceValidator;
 import checkers.inference.InferenceVisitor;
 import checkers.inference.SlotManager;
 import checkers.inference.model.ConstantSlot;
-import checkers.inference.model.PreferenceConstraint;
+import checkers.inference.model.ConstraintManager;
 import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
 
@@ -107,12 +105,17 @@ public class GUTIVisitor extends InferenceVisitor<GUTIChecker, BaseAnnotatedType
     @Override
     public Void visitVariable(VariableTree node, Void p) {
         AnnotatedTypeMirror type = atypeFactory.getAnnotatedType(node);
+        if (node.getInitializer() != null) {
+            doesNotContain(type, gutATF.LOST, "uts.lost.lhs", node);
+            doesNotContain(type, gutATF.VPLOST, "uts.vplost.lhs", node);
+        }
         ConstraintManager cm = InferenceMain.getInstance().getConstraintManager();
         SlotManager sm = InferenceMain.getInstance().getSlotManager();
         Slot s = sm.getVariableSlot(type);
         if (s instanceof VariableSlot) {
             VariableSlot vs = (VariableSlot) s;
-            cm.add(new PreferenceConstraint(vs, new ConstantSlot(gutATF.REP, vs.getId()), 80));
+            ConstantSlot rep = InferenceMain.getInstance().getSlotManager().createConstantSlot(gutATF.REP);
+            cm.addPreferenceConstraint(vs, rep, 80);
         }
         return super.visitVariable(node, p);
     }
@@ -146,7 +149,7 @@ public class GUTIVisitor extends InferenceVisitor<GUTIChecker, BaseAnnotatedType
      */
     @Override
     protected boolean checkConstructorInvocation(AnnotatedDeclaredType dt,
-            AnnotatedExecutableType constructor, Tree src) {
+            AnnotatedExecutableType constructor, NewClassTree src) {
         return true;
     }
 
@@ -222,12 +225,7 @@ public class GUTIVisitor extends InferenceVisitor<GUTIChecker, BaseAnnotatedType
     @Override
     public Void visitMethodInvocation(MethodInvocationTree node, Void p) {
         assert node != null;
-        // System.out.println("================visitMethodInvocation in
-        // GUTIVisitor called!");
         AnnotatedExecutableType method = atypeFactory.methodFromUse(node).first;
-        // System.out.println("!!!!!!!!!!!!!!!!visitMethodInvocation in
-        // GUTIVisitor called!");
-        //System.out.println("Return type changed or not?: " + method.getReturnType());
         // Check for @Lost and @VPLost in combined parameter types.
         for (AnnotatedTypeMirror parameterType : method.getParameterTypes()) {
             doesNotContain(parameterType, gutATF.LOST, "uts.lost.parameter", node);
@@ -283,10 +281,8 @@ public class GUTIVisitor extends InferenceVisitor<GUTIChecker, BaseAnnotatedType
     @Override
     public Void visitAssignment(AssignmentTree node, Void p) {
         assert node != null;
-        System.out.println("GUTIVisitor: ======visitAssignment is called!!!!");
-        // Check for @Lost and @VPLost in left hand side of assignment.
         AnnotatedTypeMirror type = atypeFactory.getAnnotatedType(node.getVariable());
-        // System.out.println("GUTIVisitor: type is: " + type);
+        // Check for @Lost and @VPLost in left hand side of assignment.
         doesNotContain(type, gutATF.LOST, "uts.lost.lhs", node);
         doesNotContain(type, gutATF.VPLOST, "uts.vplost.lhs", node);
 
@@ -400,17 +396,6 @@ public class GUTIVisitor extends InferenceVisitor<GUTIChecker, BaseAnnotatedType
             // atypeFactory);
         }
 
-        // Tamier: Not overriding this method will cause InferenceValidator to
-        // perform subtyping checks(in inference, it's to generate constraints)
-        // even before the VariableAnnotator generate constraints. I'm not sure
-        // whether a void operation makes sense or not. Should as professor
-        // about this
-        @Override
-        protected void checkValidUse(AnnotatedDeclaredType elemType,
-                AnnotatedDeclaredType type, Tree tree) {
-            return;
-        }
-
         /**
          * Ensure that only one ownership modifier is used, that ownership
          * modifiers are correctly used in static contexts, and check for
@@ -442,10 +427,11 @@ public class GUTIVisitor extends InferenceVisitor<GUTIChecker, BaseAnnotatedType
 
             if (!allowLost) {
                 doesNotContain(type, gutATF.LOST, "uts.explicit.lost.forbidden", p);
+                doesNotContain(type, gutATF.VPLOST, "uts.explicit.lost.forbidden", p);
             }
             // Me: Is it allowed to have multiple universe modifiers? What does
             // it mean?
-            if (GUTQualifierUtils.hasMultipleModifiersInInference(type)) {
+            if (type.getAnnotations().size() > 2) {
                 System.out.println(
                         "GUTVisitor$GUTIValidator: Don't know if it's correct: type is: "
                                 + type);
@@ -464,13 +450,16 @@ public class GUTIVisitor extends InferenceVisitor<GUTIChecker, BaseAnnotatedType
             // "GUTIvalidator: visitParameterizedType is called!");
 
             final TypeElement element = (TypeElement) type.getUnderlyingType().asElement();
-            
             List<AnnotatedTypeParameterBounds> typeParamBounds = atypeFactory.typeVariablesFromUse(type, element);
             for (AnnotatedTypeParameterBounds atpb : typeParamBounds) {
                 doesNotContain(atpb.getLowerBound(), gutATF.LOST, "uts.lost.in.bounds", tree);
                 doesNotContain(atpb.getUpperBound(), gutATF.LOST, "uts.lost.in.bounds", tree);
                 doesNotContain(atpb.getLowerBound(), gutATF.VPLOST, "uts.vplost.in.bounds", tree);
                 doesNotContain(atpb.getUpperBound(), gutATF.VPLOST, "uts.vplost.in.bounds", tree);
+            }
+            for(AnnotatedTypeMirror atm: type.getTypeArguments()){
+                doesNotContain(atm, gutATF.LOST,"uts.lost.in.type.arguments",tree);
+                doesNotContain(atm, gutATF.VPLOST,"uts.lost.in.type.arguments",tree);
             }
             // For debugging purpose, move the following line to first. To see if super not overridden
             // method works or not.
@@ -512,5 +501,10 @@ public class GUTIVisitor extends InferenceVisitor<GUTIChecker, BaseAnnotatedType
             }
             return super.visitArray(type, p);
         }
+        /*
+        @Override
+        protected void checkValidUse(AnnotatedDeclaredType type, Tree tree) {
+            return;// Doesn't check valid use of type in Generic Universe type system
+        }*/
     }
 }

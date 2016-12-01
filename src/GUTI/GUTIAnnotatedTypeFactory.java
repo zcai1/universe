@@ -1,48 +1,80 @@
 package GUTI;
 
-import org.checkerframework.common.basetype.BaseTypeChecker;
+import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
-import org.checkerframework.framework.type.treeannotator.ImplicitsTreeAnnotator;
-import org.checkerframework.framework.type.treeannotator.ListTreeAnnotator;
-import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
+import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedDeclaredType;
+
+import com.sun.source.tree.Tree;
 
 import GUT.GUTAnnotatedTypeFactory;
-import checkers.inference.ConstraintManager;
 import checkers.inference.InferenceAnnotatedTypeFactory;
-import checkers.inference.InferenceTreeAnnotator;
-import checkers.inference.InferrableAnnotatedTypeFactory;
+import checkers.inference.InferenceChecker;
+import checkers.inference.InferenceMain;
 import checkers.inference.InferrableChecker;
 import checkers.inference.SlotManager;
 import checkers.inference.VariableAnnotator;
+import checkers.inference.model.ConstraintManager;
+import checkers.inference.model.VariableSlot;
 
-public class GUTIAnnotatedTypeFactory extends GUTAnnotatedTypeFactory implements InferrableAnnotatedTypeFactory{
+public class GUTIAnnotatedTypeFactory
+        extends InferenceAnnotatedTypeFactory {
 
-    public GUTIAnnotatedTypeFactory(BaseTypeChecker checker) {
-        super(checker);
-        // TODO Auto-generated constructor stub
-    }
-
-    @Override
-    public VariableAnnotator getVariableAnnotator(
-            InferenceAnnotatedTypeFactory typeFactory,
-            AnnotatedTypeFactory realTypeFactory, InferrableChecker realChecker,
-            SlotManager slotManager, ConstraintManager constraintManager) {
-        // TODO Auto-generated method stub
-        return new GUTIVariableAnnotator(typeFactory, realTypeFactory,
+    public GUTIAnnotatedTypeFactory(InferenceChecker inferenceChecker,
+            boolean withCombineConstraints,
+            BaseAnnotatedTypeFactory realTypeFactory,
+            InferrableChecker realChecker, SlotManager slotManager,
+            ConstraintManager constraintManager) {
+        super(inferenceChecker, withCombineConstraints, realTypeFactory,
                 realChecker, slotManager, constraintManager);
+        postInit();
     }
 
+    /**
+     * The type of "this" is always "self".
+     */
     @Override
-    public TreeAnnotator getInferenceTreeAnnotator(
-            InferenceAnnotatedTypeFactory atypeFactory,
-            InferrableChecker realChecker, VariableAnnotator variableAnnotator,
-            SlotManager slotManager) {
-        // TODO Auto-generated method stub
-        // GUTI doesn't need it own tree annotator, and this method is called.
-        // So returns default InferenceTreeAnnotator
-        return new ListTreeAnnotator(new ImplicitsTreeAnnotator(atypeFactory),
-                new InferenceTreeAnnotator(atypeFactory, realChecker, this,
-                        variableAnnotator, slotManager));
+    public AnnotatedDeclaredType getSelfType(Tree tree) {
+        AnnotatedDeclaredType type = super.getSelfType(tree);
+        if (type != null) {
+            GUTAnnotatedTypeFactory gutATF = (GUTAnnotatedTypeFactory) InferenceMain
+                    .getInstance().getRealTypeFactory();
+            type.replaceAnnotation(gutATF.SELF);
+        }
+        return type;
     }
+/*    @Override
+    public VariableAnnotator createVariableAnnotator(
+            InferenceAnnotatedTypeFactory inferenceTypeFactory,
+            BaseAnnotatedTypeFactory realTypeFactory,
+            InferrableChecker realChecker, SlotManager slotManager,
+            ConstraintManager constraintManager) {
+        return new GUTIVariableAnnotator(inferenceTypeFactory, realTypeFactory,
+                realChecker, slotManager, constraintManager);
+    }*/
 
+    static class GUTIVariableAnnotator extends VariableAnnotator {
+
+        public GUTIVariableAnnotator(
+                InferenceAnnotatedTypeFactory inferenceTypeFactory,
+                AnnotatedTypeFactory realTypeFactory,
+                InferrableChecker realChecker, SlotManager slotManager,
+                ConstraintManager constraintManager) {
+            super(inferenceTypeFactory, realTypeFactory, realChecker,
+                    slotManager, constraintManager);
+        }
+
+/*        @Override
+        protected void handleClassDeclarationBound(
+                AnnotatedDeclaredType classType) {
+            return;
+        }
+
+        @Override
+        protected void handleInstantiationConstraint(AnnotatedDeclaredType adt,
+                VariableSlot instantiationSlot) {
+            return;
+        }*/
+
+    }
 }
+
