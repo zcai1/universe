@@ -3,5 +3,4 @@
 export MYDIR=`dirname $0`
 . $MYDIR/setup.sh
 
-$JAVAC -J-ea -processor GUT.GUTChecker $*
-
+java -cp $CLASSPATH GUT.GUTTests
