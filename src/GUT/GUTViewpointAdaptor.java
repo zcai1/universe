@@ -69,14 +69,14 @@ public class GUTViewpointAdaptor extends FrameworkViewpointAdaptor{
     }
 
     @Override
-    public boolean shouldNotBeAdapted(AnnotatedTypeMirror type, Element element) {
+    public boolean shouldBeAdapted(AnnotatedTypeMirror type, Element element) {
         if (type.getKind() != TypeKind.DECLARED && type.getKind() != TypeKind.ARRAY) {
-            return true;
+            return false;
         }
         if (element.getKind() == ElementKind.LOCAL_VARIABLE
                 || element.getKind() == ElementKind.PARAMETER) {
-            return true;
+            return false;
         }
-        return false;
+        return true;
     }
 }
