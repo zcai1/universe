@@ -97,7 +97,7 @@ public class GUTVisitor extends BaseTypeVisitor<GUTAnnotatedTypeFactory> {
         if (node.getReceiverParameter() != null &&
                 !node.getReceiverParameter().getModifiers().getAnnotations()
                         .isEmpty()) {
-                    //checker.report(Result.failure("uts.receiver.annotations.forbidden"),node);
+                    checker.report(Result.failure("uts.receiver.annotations.forbidden"),node);
     }
 
         return super.visitMethod(node, p);

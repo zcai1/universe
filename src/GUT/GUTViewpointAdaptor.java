@@ -1,15 +1,16 @@
 package GUT;
 
 
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.type.TypeKind;
-
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.framework.util.FrameworkViewpointAdaptor;
 import org.checkerframework.javacutil.AnnotationUtils;
+import org.checkerframework.javacutil.ErrorReporter;
+
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.type.TypeKind;
 
 public class GUTViewpointAdaptor extends FrameworkViewpointAdaptor{
 
@@ -51,20 +52,37 @@ public class GUTViewpointAdaptor extends FrameworkViewpointAdaptor{
         GUTAnnotatedTypeFactory gutATF = (GUTAnnotatedTypeFactory)f;
         if (AnnotationUtils.areSame(recvModifier, gutATF.SELF)) {
             return declModifier;
-        } else if (AnnotationUtils.areSame(recvModifier, gutATF.PEER) &&
-                AnnotationUtils.areSame(declModifier, gutATF.PEER)) {
-            return gutATF.PEER;
-        } else if (AnnotationUtils.areSame(recvModifier, gutATF.REP) &&
-                AnnotationUtils.areSame(declModifier, gutATF.PEER)) {
-            return gutATF.REP;
+        } else if (AnnotationUtils.areSame(declModifier, gutATF.SELF)) {
+            return recvModifier;
+        } else if (AnnotationUtils.areSame(declModifier, gutATF.PEER)) {
+            if (AnnotationUtils.areSame(recvModifier, gutATF.PEER)) {
+                return gutATF.PEER;
+            } else if (AnnotationUtils.areSame(recvModifier, gutATF.SELF)) {
+                return gutATF.PEER;
+            } else if (AnnotationUtils.areSame(recvModifier, gutATF.BOTTOM)) {
+                return gutATF.PEER;
+            } else if (AnnotationUtils.areSame(recvModifier, gutATF.REP)) {
+                return gutATF.REP;
+            } else {
+                return gutATF.VPLOST;
+            }
+        } else if (AnnotationUtils.areSame(declModifier, gutATF.REP)) {
+            if (AnnotationUtils.areSame(recvModifier, gutATF.SELF)) {
+                return gutATF.REP;
+            } else {
+                return gutATF.VPLOST;
+            }
         } else if (AnnotationUtils.areSame(declModifier, gutATF.ANY)) {
             return gutATF.ANY;
         } else if (AnnotationUtils.areSame(declModifier, gutATF.LOST)) {
-            return gutATF.VPLOST;// Always use internal representation of lost - @VPLost
+            return gutATF.LOST;
+        } else if (AnnotationUtils.areSame(declModifier, gutATF.VPLOST)) {
+            return gutATF.VPLOST;
         } else if (AnnotationUtils.areSame(declModifier, gutATF.BOTTOM)) {
             return gutATF.BOTTOM;
         } else {
-            return gutATF.VPLOST;
+            ErrorReporter.errorAbort("Unexpected qualifier combination: " + recvModifier + " |> " + declModifier);
+            return null;
         }
     }
 

@@ -55,6 +55,7 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
 import java.util.List;
 
 /**
@@ -195,6 +196,46 @@ public class GUTIVisitor extends InferenceVisitor<GUTIChecker, BaseAnnotatedType
     @Override
     protected void checkMethodInvocability(AnnotatedExecutableType method, MethodInvocationTree node) {
         return;
+    }
+
+    @Override
+    public boolean validateTypeOf(Tree tree) {
+        AnnotatedTypeMirror type;
+        // It's quite annoying that there is no TypeTree
+        switch (tree.getKind()) {
+            case PRIMITIVE_TYPE:
+            case PARAMETERIZED_TYPE:
+            case TYPE_PARAMETER:
+            case ARRAY_TYPE:
+            case UNBOUNDED_WILDCARD:
+            case EXTENDS_WILDCARD:
+            case SUPER_WILDCARD:
+            case ANNOTATED_TYPE:
+                type = atypeFactory.getAnnotatedTypeFromTypeTree(tree);
+                break;
+            case METHOD:
+                type = atypeFactory.getMethodReturnType((MethodTree) tree);
+                if (type == null ||
+                        type.getKind() == TypeKind.VOID) {
+                    // Nothing to do for void methods.
+                    // Note that for a constructor the AnnotatedExecutableType does
+                    // not use void as return type.
+                    return true;
+                }
+                break;
+            default:
+                type = atypeFactory.getAnnotatedType(tree);
+        }
+
+        // basic consistency checks
+/*        if (!AnnotatedTypes.isValidType(atypeFactory.getQualifierHierarchy(), type)) {
+            checker.report(Result.failure("type.invalid", type.getAnnotations(),
+                    type.toString()), tree);
+            return false;
+            //return true;
+        }*/
+
+        return typeValidator.isValid(type, tree);
     }
 
     @Override
