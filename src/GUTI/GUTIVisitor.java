@@ -566,6 +566,8 @@ public class GUTIVisitor extends InferenceVisitor<GUTIChecker, BaseAnnotatedType
                 doesNotContain(atpb.getUpperBound(), LOST, "uts.lost.in.bounds", tree);
                 doesNotContain(atpb.getLowerBound(), VPLOST, "uts.vplost.in.bounds", tree);
                 doesNotContain(atpb.getUpperBound(), VPLOST, "uts.vplost.in.bounds", tree);
+                addPreference(atpb.getUpperBound(), ANY, 80);
+                addPreference(atpb.getLowerBound(), BOTTOM, 80);
             }
             for(AnnotatedTypeMirror atm: type.getTypeArguments()){
                 doesNotContain(atm, LOST,"uts.lost.in.type.arguments",tree);
