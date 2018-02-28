@@ -10,14 +10,14 @@ import org.junit.runners.Parameterized.Parameters;
 
 public class GUTTestsTopology extends CheckerFrameworkPerFileTest {
     public GUTTestsTopology (File testFile) {
-        super(testFile, GUT.GUTChecker.class,
-                "", "-Anomsgtext", "-d", "testTmp");
+        super(testFile, universe.GUTChecker.class,
+                "", "-Anomsgtext", "-AconservativeUninferredTypeArguments", "-d", "testTmp");
     }
 
     @Parameters
     public static List<File> getTestFiles(){
         List<File> testfiles = new ArrayList<>();
-        testfiles.addAll(TestUtilities.findRelativeNestedJavaFiles("testinput", "GUT/topol"));
+        testfiles.addAll(TestUtilities.findRelativeNestedJavaFiles("testinput", "typecheck/topol"));
         return testfiles;
     }
 }

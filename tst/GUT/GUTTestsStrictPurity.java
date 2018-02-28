@@ -10,14 +10,14 @@ import org.junit.runners.Parameterized.Parameters;
 
 public class GUTTestsStrictPurity extends CheckerFrameworkPerFileTest {
     public GUTTestsStrictPurity(File testFile) {
-        super(testFile, GUT.GUTChecker.class, "",
+        super(testFile, universe.GUTChecker.class, "",
                 "-Anomsgtext", "-Alint=checkStrictPurity", "-d", "testTmp");
     }
 
     @Parameters
     public static List<File> getTestFiles(){
         List<File> testfiles = new ArrayList<>();
-        testfiles.addAll(TestUtilities.findRelativeNestedJavaFiles("testinput", "GUT/strictpurity"));
+        testfiles.addAll(TestUtilities.findRelativeNestedJavaFiles("testinput", "typecheck/strictpurity"));
         return testfiles;
     }
 }

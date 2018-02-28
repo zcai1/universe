@@ -8,4 +8,4 @@ export MYDIR=`dirname $0`
 distDir=$CFI/dist
 
 # Start the inference: jar files are used when making inference
-java -cp "$distDir"/checker.jar:"$distDir"/plume.jar:"$distDir"/checker-framework-inference.jar:$CLASSPATH checkers.inference.InferenceLauncher --checker GUTI.GUTIChecker --solver GUTI.GUTIConstraintSolver --solverArgs=useGraph=false --hacks=true --afuOutputDir=./annotated -m ROUNDTRIP $*
+java -cp /home/mier/jsr308/jdepend/inferDebugBuild:/home/mier/Downloads/jodconverter/jodconverter-core/target/classes:"$distDir"/checker.jar:"$distDir"/plume.jar:"$distDir"/checker-framework-inference.jar:$CLASSPATH checkers.inference.InferenceLauncher --checker universe.GUTChecker --solver universe.solver.GUTSolverEngine --solverArgs=useGraph=false,collectStatistic=true --hacks=true --afuOutputDir=./annotated -m ROUNDTRIP $*

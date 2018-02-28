@@ -10,13 +10,13 @@ import org.junit.runners.Parameterized.Parameters;
 
 public class GUTTestsLostNo extends CheckerFrameworkPerFileTest {
     public GUTTestsLostNo(File testFile) {
-        super(testFile, GUT.GUTChecker.class, "", "-Anomsgtext", "-Alint=-allowLost", "-d", "testTmp");
+        super(testFile, universe.GUTChecker.class, "", "-Anomsgtext", "-d", "testTmp");
     }
 
     @Parameters
     public static List<File> getTestFiles(){
         List<File> testfiles = new ArrayList<>();
-        testfiles.addAll(TestUtilities.findRelativeNestedJavaFiles("testinput", "GUT/lostno"));
+        testfiles.addAll(TestUtilities.findRelativeNestedJavaFiles("testinput", "typecheck/lostno"));
         return testfiles;
     }
 }
