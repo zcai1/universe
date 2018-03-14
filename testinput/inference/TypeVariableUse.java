@@ -5,6 +5,7 @@ class D<T extends Object>{}
 public class TypeVariableUse{
 
 	void foo() {
-		D<String> D = new @Peer D<String>();
+		// :: fixable-error: (assignment.type.incompatible)
+		@Rep D<String> D = new D<String>();
 	}
 }

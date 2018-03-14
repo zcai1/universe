@@ -48,31 +48,71 @@ public class GUTCombineConstraintEncoder extends MaxSATAbstractConstraintEncoder
                 -MathUtils.mapIdToMatrixEntry(declared.getId(), id(ANY), lattice),
                 MathUtils.mapIdToMatrixEntry(result.getId(), id(ANY), lattice)));
         resultClauses.add(VectorUtils.asVec(
-                -MathUtils.mapIdToMatrixEntry(declared.getId(), id(LOST), lattice),
-                MathUtils.mapIdToMatrixEntry(result.getId(), id(LOST), lattice)));
-        resultClauses.add(VectorUtils.asVec(
                 -MathUtils.mapIdToMatrixEntry(declared.getId(), id(BOTTOM), lattice),
                 MathUtils.mapIdToMatrixEntry(result.getId(), id(BOTTOM), lattice)));
 
         resultClauses.add(VectorUtils.asVec(
-                MathUtils.mapIdToMatrixEntry(target.getId(), id(SELF), lattice),
+                MathUtils.mapIdToMatrixEntry(target.getId(), id(BOTTOM), lattice),
+                -MathUtils.mapIdToMatrixEntry(declared.getId(), id(LOST), lattice),
+                MathUtils.mapIdToMatrixEntry(result.getId(), id(LOST), lattice)));
+        resultClauses.add(VectorUtils.asVec(
+                -MathUtils.mapIdToMatrixEntry(target.getId(), id(BOTTOM), lattice),
+                -MathUtils.mapIdToMatrixEntry(declared.getId(), id(LOST), lattice),
+                MathUtils.mapIdToMatrixEntry(result.getId(), id(ANY), lattice)));
+
+        // declared is rep
+        resultClauses.add(VectorUtils.asVec(
+                -MathUtils.mapIdToMatrixEntry(target.getId(), id(PEER), lattice),
+                -MathUtils.mapIdToMatrixEntry(declared.getId(), id(REP), lattice),
+                MathUtils.mapIdToMatrixEntry(result.getId(), id(LOST), lattice)));
+        resultClauses.add(VectorUtils.asVec(
+                -MathUtils.mapIdToMatrixEntry(target.getId(), id(REP), lattice),
                 -MathUtils.mapIdToMatrixEntry(declared.getId(), id(REP), lattice),
                 MathUtils.mapIdToMatrixEntry(result.getId(), id(LOST), lattice)));
         resultClauses.add(VectorUtils.asVec(
                 -MathUtils.mapIdToMatrixEntry(target.getId(), id(SELF), lattice),
                 -MathUtils.mapIdToMatrixEntry(declared.getId(), id(REP), lattice),
                 MathUtils.mapIdToMatrixEntry(result.getId(), id(REP), lattice)));
-
         resultClauses.add(VectorUtils.asVec(
-                MathUtils.mapIdToMatrixEntry(target.getId(), id(SELF), lattice),
+                -MathUtils.mapIdToMatrixEntry(target.getId(), id(ANY), lattice),
+                -MathUtils.mapIdToMatrixEntry(declared.getId(), id(REP), lattice),
+                MathUtils.mapIdToMatrixEntry(result.getId(), id(LOST), lattice)));
+        resultClauses.add(VectorUtils.asVec(
+                -MathUtils.mapIdToMatrixEntry(target.getId(), id(BOTTOM), lattice),
+                -MathUtils.mapIdToMatrixEntry(declared.getId(), id(REP), lattice),
+                MathUtils.mapIdToMatrixEntry(result.getId(), id(ANY), lattice)));
+        resultClauses.add(VectorUtils.asVec(
+                -MathUtils.mapIdToMatrixEntry(target.getId(), id(LOST), lattice),
+                -MathUtils.mapIdToMatrixEntry(declared.getId(), id(REP), lattice),
+                MathUtils.mapIdToMatrixEntry(result.getId(), id(LOST), lattice)));
+
+        // declared is self
+        resultClauses.add(VectorUtils.asVec(
+                -MathUtils.mapIdToMatrixEntry(target.getId(), id(PEER), lattice),
+                -MathUtils.mapIdToMatrixEntry(declared.getId(), id(SELF), lattice),
+                MathUtils.mapIdToMatrixEntry(result.getId(), id(LOST), lattice)));
+        resultClauses.add(VectorUtils.asVec(
+                -MathUtils.mapIdToMatrixEntry(target.getId(), id(REP), lattice),
                 -MathUtils.mapIdToMatrixEntry(declared.getId(), id(SELF), lattice),
                 MathUtils.mapIdToMatrixEntry(result.getId(), id(LOST), lattice)));
         resultClauses.add(VectorUtils.asVec(
                 -MathUtils.mapIdToMatrixEntry(target.getId(), id(SELF), lattice),
                 -MathUtils.mapIdToMatrixEntry(declared.getId(), id(SELF), lattice),
                 MathUtils.mapIdToMatrixEntry(result.getId(), id(SELF), lattice)));
+        resultClauses.add(VectorUtils.asVec(
+                -MathUtils.mapIdToMatrixEntry(target.getId(), id(ANY), lattice),
+                -MathUtils.mapIdToMatrixEntry(declared.getId(), id(SELF), lattice),
+                MathUtils.mapIdToMatrixEntry(result.getId(), id(LOST), lattice)));
+        resultClauses.add(VectorUtils.asVec(
+                -MathUtils.mapIdToMatrixEntry(target.getId(), id(BOTTOM), lattice),
+                -MathUtils.mapIdToMatrixEntry(declared.getId(), id(SELF), lattice),
+                MathUtils.mapIdToMatrixEntry(result.getId(), id(ANY), lattice)));
+        resultClauses.add(VectorUtils.asVec(
+                -MathUtils.mapIdToMatrixEntry(target.getId(), id(LOST), lattice),
+                -MathUtils.mapIdToMatrixEntry(declared.getId(), id(SELF), lattice),
+                MathUtils.mapIdToMatrixEntry(result.getId(), id(LOST), lattice)));
 
-
+        // declared is peer
         resultClauses.add(VectorUtils.asVec(
                 -MathUtils.mapIdToMatrixEntry(target.getId(), id(PEER), lattice),
                 -MathUtils.mapIdToMatrixEntry(declared.getId(), id(PEER), lattice),
@@ -92,7 +132,7 @@ public class GUTCombineConstraintEncoder extends MaxSATAbstractConstraintEncoder
         resultClauses.add(VectorUtils.asVec(
                 -MathUtils.mapIdToMatrixEntry(target.getId(), id(BOTTOM), lattice),
                 -MathUtils.mapIdToMatrixEntry(declared.getId(), id(PEER), lattice),
-                MathUtils.mapIdToMatrixEntry(result.getId(), id(LOST), lattice)));
+                MathUtils.mapIdToMatrixEntry(result.getId(), id(ANY), lattice)));
         resultClauses.add(VectorUtils.asVec(
                 -MathUtils.mapIdToMatrixEntry(target.getId(), id(LOST), lattice),
                 -MathUtils.mapIdToMatrixEntry(declared.getId(), id(PEER), lattice),
@@ -111,9 +151,6 @@ public class GUTCombineConstraintEncoder extends MaxSATAbstractConstraintEncoder
         } else if (is(declared, BOTTOM)) {
             resultClauses.add(VectorUtils.asVec(
                     MathUtils.mapIdToMatrixEntry(result.getId(), id(BOTTOM), lattice)));
-        } else if (is(declared, LOST)) {
-            resultClauses.add(VectorUtils.asVec(
-                    MathUtils.mapIdToMatrixEntry(result.getId(), id(LOST), lattice)));
         } else if (is(declared, PEER)) {
             resultClauses.add(VectorUtils.asVec(
                     -MathUtils.mapIdToMatrixEntry(target.getId(), id(PEER), lattice),
@@ -132,21 +169,52 @@ public class GUTCombineConstraintEncoder extends MaxSATAbstractConstraintEncoder
                     MathUtils.mapIdToMatrixEntry(result.getId(), id(LOST), lattice)));
             resultClauses.add(VectorUtils.asVec(
                     -MathUtils.mapIdToMatrixEntry(target.getId(), id(BOTTOM), lattice),
-                    MathUtils.mapIdToMatrixEntry(result.getId(), id(LOST), lattice)));
+                    MathUtils.mapIdToMatrixEntry(result.getId(), id(ANY), lattice)));
         } else if (is(declared, REP)) {
             resultClauses.add(VectorUtils.asVec(
-                    MathUtils.mapIdToMatrixEntry(target.getId(), id(SELF), lattice),
+                    -MathUtils.mapIdToMatrixEntry(target.getId(), id(PEER), lattice),
+                    MathUtils.mapIdToMatrixEntry(result.getId(), id(LOST), lattice)));
+            resultClauses.add(VectorUtils.asVec(
+                    -MathUtils.mapIdToMatrixEntry(target.getId(), id(REP), lattice),
                     MathUtils.mapIdToMatrixEntry(result.getId(), id(LOST), lattice)));
             resultClauses.add(VectorUtils.asVec(
                     -MathUtils.mapIdToMatrixEntry(target.getId(), id(SELF), lattice),
                     MathUtils.mapIdToMatrixEntry(result.getId(), id(REP), lattice)));
+            resultClauses.add(VectorUtils.asVec(
+                    -MathUtils.mapIdToMatrixEntry(target.getId(), id(ANY), lattice),
+                    MathUtils.mapIdToMatrixEntry(result.getId(), id(LOST), lattice)));
+            resultClauses.add(VectorUtils.asVec(
+                    -MathUtils.mapIdToMatrixEntry(target.getId(), id(LOST), lattice),
+                    MathUtils.mapIdToMatrixEntry(result.getId(), id(LOST), lattice)));
+            resultClauses.add(VectorUtils.asVec(
+                    -MathUtils.mapIdToMatrixEntry(target.getId(), id(BOTTOM), lattice),
+                    MathUtils.mapIdToMatrixEntry(result.getId(), id(ANY), lattice)));
         } else if (is(declared, SELF)) {
             resultClauses.add(VectorUtils.asVec(
-                    MathUtils.mapIdToMatrixEntry(target.getId(), id(SELF), lattice),
+                    -MathUtils.mapIdToMatrixEntry(target.getId(), id(PEER), lattice),
+                    MathUtils.mapIdToMatrixEntry(result.getId(), id(LOST), lattice)));
+            resultClauses.add(VectorUtils.asVec(
+                    -MathUtils.mapIdToMatrixEntry(target.getId(), id(REP), lattice),
                     MathUtils.mapIdToMatrixEntry(result.getId(), id(LOST), lattice)));
             resultClauses.add(VectorUtils.asVec(
                     -MathUtils.mapIdToMatrixEntry(target.getId(), id(SELF), lattice),
                     MathUtils.mapIdToMatrixEntry(result.getId(), id(SELF), lattice)));
+            resultClauses.add(VectorUtils.asVec(
+                    -MathUtils.mapIdToMatrixEntry(target.getId(), id(ANY), lattice),
+                    MathUtils.mapIdToMatrixEntry(result.getId(), id(LOST), lattice)));
+            resultClauses.add(VectorUtils.asVec(
+                    -MathUtils.mapIdToMatrixEntry(target.getId(), id(LOST), lattice),
+                    MathUtils.mapIdToMatrixEntry(result.getId(), id(LOST), lattice)));
+            resultClauses.add(VectorUtils.asVec(
+                    -MathUtils.mapIdToMatrixEntry(target.getId(), id(BOTTOM), lattice),
+                    MathUtils.mapIdToMatrixEntry(result.getId(), id(ANY), lattice)));
+        } else if (is(declared, LOST)) {
+            resultClauses.add(VectorUtils.asVec(
+                    MathUtils.mapIdToMatrixEntry(target.getId(), id(BOTTOM), lattice),
+                    MathUtils.mapIdToMatrixEntry(result.getId(), id(LOST), lattice)));
+            resultClauses.add(VectorUtils.asVec(
+                    -MathUtils.mapIdToMatrixEntry(target.getId(), id(BOTTOM), lattice),
+                    MathUtils.mapIdToMatrixEntry(result.getId(), id(ANY), lattice)));
         } else {
             ErrorReporter.errorAbort("Error: Unknown declared type: " + declared.getValue());
         }
@@ -164,9 +232,6 @@ public class GUTCombineConstraintEncoder extends MaxSATAbstractConstraintEncoder
         resultClauses.add(VectorUtils.asVec(
                 -MathUtils.mapIdToMatrixEntry(declared.getId(), id(BOTTOM), lattice),
                 MathUtils.mapIdToMatrixEntry(result.getId(), id(BOTTOM), lattice)));
-        resultClauses.add(VectorUtils.asVec(
-                -MathUtils.mapIdToMatrixEntry(declared.getId(), id(LOST), lattice),
-                MathUtils.mapIdToMatrixEntry(result.getId(), id(LOST), lattice)));
 
         if (is(target, PEER)) {
             resultClauses.add(VectorUtils.asVec(
@@ -178,6 +243,9 @@ public class GUTCombineConstraintEncoder extends MaxSATAbstractConstraintEncoder
             resultClauses.add(VectorUtils.asVec(
                     -MathUtils.mapIdToMatrixEntry(declared.getId(), id(REP), lattice),
                     MathUtils.mapIdToMatrixEntry(result.getId(), id(LOST), lattice)));
+            resultClauses.add(VectorUtils.asVec(
+                    -MathUtils.mapIdToMatrixEntry(declared.getId(), id(LOST), lattice),
+                    MathUtils.mapIdToMatrixEntry(result.getId(), id(LOST), lattice)));
         } else if (is(target, REP)) {
             resultClauses.add(VectorUtils.asVec(
                     -MathUtils.mapIdToMatrixEntry(declared.getId(), id(PEER), lattice),
@@ -187,6 +255,9 @@ public class GUTCombineConstraintEncoder extends MaxSATAbstractConstraintEncoder
                     MathUtils.mapIdToMatrixEntry(result.getId(), id(LOST), lattice)));
             resultClauses.add(VectorUtils.asVec(
                     -MathUtils.mapIdToMatrixEntry(declared.getId(), id(REP), lattice),
+                    MathUtils.mapIdToMatrixEntry(result.getId(), id(LOST), lattice)));
+            resultClauses.add(VectorUtils.asVec(
+                    -MathUtils.mapIdToMatrixEntry(declared.getId(), id(LOST), lattice),
                     MathUtils.mapIdToMatrixEntry(result.getId(), id(LOST), lattice)));
         } else if (is(target, SELF)) {
             resultClauses.add(VectorUtils.asVec(
@@ -198,7 +269,10 @@ public class GUTCombineConstraintEncoder extends MaxSATAbstractConstraintEncoder
             resultClauses.add(VectorUtils.asVec(
                     -MathUtils.mapIdToMatrixEntry(declared.getId(), id(SELF), lattice),
                     MathUtils.mapIdToMatrixEntry(result.getId(), id(SELF), lattice)));
-        } else if (is(target, ANY) || is(target, BOTTOM) || is(target, LOST)) {
+            resultClauses.add(VectorUtils.asVec(
+                    -MathUtils.mapIdToMatrixEntry(declared.getId(), id(LOST), lattice),
+                    MathUtils.mapIdToMatrixEntry(result.getId(), id(LOST), lattice)));
+        } else if (is(target, ANY) || is(target, LOST)) {
             resultClauses.add(VectorUtils.asVec(
                     -MathUtils.mapIdToMatrixEntry(declared.getId(),id(PEER), lattice),
                     MathUtils.mapIdToMatrixEntry(result.getId(), id(LOST), lattice)));
@@ -208,6 +282,22 @@ public class GUTCombineConstraintEncoder extends MaxSATAbstractConstraintEncoder
             resultClauses.add(VectorUtils.asVec(
                     -MathUtils.mapIdToMatrixEntry(declared.getId(), id(SELF), lattice),
                     MathUtils.mapIdToMatrixEntry(result.getId(), id(LOST), lattice)));
+            resultClauses.add(VectorUtils.asVec(
+                    -MathUtils.mapIdToMatrixEntry(declared.getId(), id(LOST), lattice),
+                    MathUtils.mapIdToMatrixEntry(result.getId(), id(LOST), lattice)));
+        } else if (is(target, BOTTOM)) {
+            resultClauses.add(VectorUtils.asVec(
+                    -MathUtils.mapIdToMatrixEntry(declared.getId(),id(PEER), lattice),
+                    MathUtils.mapIdToMatrixEntry(result.getId(), id(ANY), lattice)));
+            resultClauses.add(VectorUtils.asVec(
+                    -MathUtils.mapIdToMatrixEntry(declared.getId(), id(REP), lattice),
+                    MathUtils.mapIdToMatrixEntry(result.getId(), id(ANY), lattice)));
+            resultClauses.add(VectorUtils.asVec(
+                    -MathUtils.mapIdToMatrixEntry(declared.getId(), id(SELF), lattice),
+                    MathUtils.mapIdToMatrixEntry(result.getId(), id(ANY), lattice)));
+            resultClauses.add(VectorUtils.asVec(
+                    -MathUtils.mapIdToMatrixEntry(declared.getId(), id(LOST), lattice),
+                    MathUtils.mapIdToMatrixEntry(result.getId(), id(ANY), lattice)));
         } else {
             ErrorReporter.errorAbort("Error: Unknown target type: " + target.getValue());
         }
@@ -225,6 +315,9 @@ public class GUTCombineConstraintEncoder extends MaxSATAbstractConstraintEncoder
         } else if (is(declared, BOTTOM)) {
             resultClauses.add(VectorUtils.asVec(
                     MathUtils.mapIdToMatrixEntry(result.getId(), id(BOTTOM), lattice)));
+        } else if (is(target, BOTTOM)) {
+            resultClauses.add(VectorUtils.asVec(
+                    MathUtils.mapIdToMatrixEntry(result.getId(), id(ANY), lattice)));
         } else if (is(declared, LOST)) {
             resultClauses.add(VectorUtils.asVec(
                     MathUtils.mapIdToMatrixEntry(result.getId(), id(LOST), lattice)));
@@ -249,7 +342,7 @@ public class GUTCombineConstraintEncoder extends MaxSATAbstractConstraintEncoder
                         MathUtils.mapIdToMatrixEntry(result.getId(), id(LOST), lattice)));
             }
         } else {
-            ErrorReporter.errorAbort("Error: Unknown declared type: " + declared.getValue());
+            ErrorReporter.errorAbort("Error: Unknown declared or target type: " + declared.getValue() + target.getValue());
         }
 
         return resultClauses.toArray(new VecInt[resultClauses.size()]);

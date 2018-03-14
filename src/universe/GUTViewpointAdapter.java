@@ -32,13 +32,18 @@ public class GUTViewpointAdapter extends FrameworkViewpointAdapter {
 
         if (AnnotationUtils.areSame(recvModifier, SELF)) {
             return declModifier;
-        } else if (AnnotationUtils.areSame(declModifier, ANY)) {
-            return ANY;
-        } else if (AnnotationUtils.areSame(declModifier, LOST)) {
-            return LOST;
         } else if (AnnotationUtils.areSame(declModifier, BOTTOM)) {
             return BOTTOM;
-        } else if (AnnotationUtils.areSame(declModifier, PEER)) {
+        } else if (AnnotationUtils.areSame(declModifier, ANY)) {
+            return ANY;
+        } else if (AnnotationUtils.areSame(recvModifier, BOTTOM)) {
+            // If receiver is bottom, has no ownership information. Any member
+            // of it from the viewpoint of self is any, except when declared
+            // type is bottom.
+            return ANY;
+        }  else if (AnnotationUtils.areSame(declModifier, LOST)) {
+            return LOST;
+        }  else if (AnnotationUtils.areSame(declModifier, PEER)) {
             if (AnnotationUtils.areSame(recvModifier, PEER)) {
                 return PEER;
             } else if (AnnotationUtils.areSame(recvModifier, REP)) {

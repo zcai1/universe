@@ -1,10 +1,11 @@
 import universe.qual.Rep;
 import universe.qual.Peer;
 
-public class Test {
+public class Test2 {
     Object foo;
 
     public void init() {
+        // :: fixable-error: (assignment.type.incompatible)
         this.foo = new @Rep Object();
 
         do_something(this.foo);
@@ -12,5 +13,5 @@ public class Test {
 		}
     }
 
-    void do_something(@Peer Object a) {}
+    void do_something(Object a) {}
 }

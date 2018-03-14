@@ -10,7 +10,9 @@ import checkers.inference.model.ConstraintManager;
 import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
 import checkers.inference.util.InferenceViewpointAdapter;
+import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.Tree;
+import com.sun.source.tree.TypeCastTree;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
@@ -20,6 +22,8 @@ import org.checkerframework.framework.type.treeannotator.ListTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.PropagationTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
 
+import static universe.GUTChecker.ANY;
+import static universe.GUTChecker.BOTTOM;
 import static universe.GUTChecker.SELF;
 
 public class GUTInferenceAnnotatedTypeFactory
@@ -87,6 +91,31 @@ public class GUTInferenceAnnotatedTypeFactory
     private class GUTIInferencePropagationTreeAnnotater extends PropagationTreeAnnotator {
         public GUTIInferencePropagationTreeAnnotater(AnnotatedTypeFactory atypeFactory) {
             super(atypeFactory);
+        }
+
+        @Override
+        public Void visitBinary(BinaryTree node, AnnotatedTypeMirror type) {
+            applyImmutableIfImplicitlyImmutable(type);// Usually there isn't existing annotation on binary trees, but to be safe, run it first
+            return super.visitBinary(node, type);
+        }
+
+        @Override
+        public Void visitTypeCast(TypeCastTree node, AnnotatedTypeMirror type) {
+            applyImmutableIfImplicitlyImmutable(type);// Must run before calling super method to respect existing annotation
+            if (type.isAnnotatedInHierarchy(ANY)) {
+                // VarAnnot is guarenteed to not exist on type, because PropagationTreeAnnotator has the highest previledge
+                // So VarAnnot hasn't been inserted to cast type yet.
+                GUTTypeUtil.applyConstant(type, type.getAnnotationInHierarchy(ANY));
+            }
+            return super.visitTypeCast(node, type);
+        }
+
+        /**Because TreeAnnotator runs before ImplicitsTypeAnnotator, implicitly immutable types are not guaranteed
+         to always have immutable annotation. If this happens, we manually add immutable to type. */
+        private void applyImmutableIfImplicitlyImmutable(AnnotatedTypeMirror type) {
+            if (GUTTypeUtil.isImplicitlyBottomType(type)) {
+                GUTTypeUtil.applyConstant(type, BOTTOM);
+            }
         }
     }
 

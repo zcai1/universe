@@ -23,15 +23,14 @@ import java.math.BigInteger;
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target({})
+@Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})
 @TargetLocations({TypeUseLocation.EXPLICIT_LOWER_BOUND})
 @SubtypeOf({ Self.class, Rep.class })
-@DefaultFor({ TypeUseLocation.IMPLICIT_LOWER_BOUND })
+@DefaultFor({ TypeUseLocation.LOWER_BOUND })
 @ImplicitFor(literals = { LiteralKind.ALL},
         types = { TypeKind.INT, TypeKind.BYTE, TypeKind.SHORT, TypeKind.BOOLEAN,
                 TypeKind.LONG, TypeKind.CHAR, TypeKind.FLOAT, TypeKind.DOUBLE },
         typeNames={String.class, Double.class, Boolean.class, Byte.class,
-                Character.class, Float.class, Integer.class, Long.class, Short.class, Number.class,
-                BigDecimal.class, BigInteger.class}
+                Character.class, Float.class, Integer.class, Long.class, Short.class}
         )
 public @interface Bottom {}

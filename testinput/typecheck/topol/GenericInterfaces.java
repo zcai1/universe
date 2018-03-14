@@ -1,3 +1,6 @@
+// @skip-test CF starts using optimistic uninferred type argument
+// subtyping checks. So assignment at line 24 is considerred to
+// by subtype: ? extends @Any Object <: @Rep Object
 package typecheck.topol;
 
 import universe.qual.*;

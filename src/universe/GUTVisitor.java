@@ -178,10 +178,21 @@ public class GUTVisitor extends InferenceVisitor<GUTChecker, BaseAnnotatedTypeFa
         // TODO I would say here by top-level, it's really main modifier instead of upper bounds of
         // type variables, as there is no "new T()" to create a new instance.
         if (infer) {
-            mainIsNoneOf(type, new AnnotationMirror[] { LOST, ANY, SELF, BOTTOM }, "uts.new.ownership", node);
+            if (GUTTypeUtil.isImplicitlyBottomType(type)) {
+                mainIs(type, BOTTOM, "uts.new.ownership", node);
+            } else {
+                mainIsNoneOf(type, new AnnotationMirror[] { LOST, ANY, SELF, BOTTOM }, "uts.new.ownership", node);
+            }
+
         } else {
-            if (!GUTTypeUtil.isImplicitlyBottomType(type) && !(type.hasAnnotation(PEER) || type.hasAnnotation(REP))) {
-                checker.report(Result.failure("uts.new.ownership"), node);
+            if (GUTTypeUtil.isImplicitlyBottomType(type)) {
+                if (!type.hasAnnotation(BOTTOM)) {
+                    checker.report(Result.failure("uts.new.ownership"), node);
+                }
+            } else {
+                if (!(type.hasAnnotation(PEER) || type.hasAnnotation(REP))) {
+                    checker.report(Result.failure("uts.new.ownership"), node);
+                }
             }
         }
     }

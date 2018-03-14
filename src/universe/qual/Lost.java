@@ -16,7 +16,7 @@ import java.lang.annotation.Target;
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target({})
+@Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})
 @SubtypeOf({ Any.class })
 @TargetLocations({})
 public @interface Lost {}
