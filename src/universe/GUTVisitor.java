@@ -21,6 +21,7 @@ import com.sun.source.tree.TypeCastTree;
 import com.sun.source.tree.VariableTree;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.common.basetype.BaseTypeValidator;
+import org.checkerframework.common.basetype.BaseTypeVisitor;
 import org.checkerframework.framework.source.Result;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedDeclaredType;
@@ -134,6 +135,26 @@ public class GUTVisitor extends InferenceVisitor<GUTChecker, BaseAnnotatedTypeFa
             }
         }
         return super.visitMethod(node, p);
+    }
+
+    @Override
+    protected OverrideChecker createOverrideChecker(
+            Tree overriderTree, AnnotatedExecutableType overrider,AnnotatedTypeMirror overridingType,
+            AnnotatedTypeMirror overridingReturnType, AnnotatedExecutableType overridden, AnnotatedDeclaredType overriddenType, AnnotatedTypeMirror overriddenReturnType) {
+
+        return new OverrideChecker(
+                overriderTree,
+                overrider,
+                overridingType,
+                overridingReturnType,
+                overridden,
+                overriddenType,
+                overriddenReturnType) {
+            @Override
+            protected boolean checkReceiverOverride() {
+                return true;
+            }
+        };
     }
 
     /**

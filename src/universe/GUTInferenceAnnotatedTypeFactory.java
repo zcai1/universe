@@ -2,6 +2,7 @@ package universe;
 
 import checkers.inference.InferenceAnnotatedTypeFactory;
 import checkers.inference.InferenceChecker;
+import checkers.inference.InferenceMain;
 import checkers.inference.InferenceTreeAnnotator;
 import checkers.inference.InferrableChecker;
 import checkers.inference.SlotManager;
@@ -22,8 +23,14 @@ import org.checkerframework.framework.type.treeannotator.ListTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.PropagationTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
 
+import javax.lang.model.element.Element;
+import javax.lang.model.type.TypeKind;
+import java.util.Arrays;
+import java.util.List;
+
 import static universe.GUTChecker.ANY;
 import static universe.GUTChecker.BOTTOM;
+import static universe.GUTChecker.PEER;
 import static universe.GUTChecker.SELF;
 
 public class GUTInferenceAnnotatedTypeFactory
@@ -48,7 +55,7 @@ public class GUTInferenceAnnotatedTypeFactory
 
     @Override
     public VariableAnnotator createVariableAnnotator() {
-        return new GUTIVariableAnnotator(this, realTypeFactory, realChecker, slotManager, constraintManager);
+        return new GUTVariableAnnotator(this, realTypeFactory, realChecker, slotManager, constraintManager);
     }
 
     /**
@@ -66,9 +73,9 @@ public class GUTInferenceAnnotatedTypeFactory
         return new GUTInferenceViewpointAdapter();
     }
 
-    static class GUTIVariableAnnotator extends VariableAnnotator {
+    static class GUTVariableAnnotator extends VariableAnnotator {
 
-        public GUTIVariableAnnotator(
+        public GUTVariableAnnotator(
                 InferenceAnnotatedTypeFactory inferenceTypeFactory,
                 AnnotatedTypeFactory realTypeFactory,
                 InferrableChecker realChecker, SlotManager slotManager,
@@ -86,6 +93,56 @@ public class GUTInferenceAnnotatedTypeFactory
         protected void handleInstantiationConstraint(AnnotatedDeclaredType adt, VariableSlot instantiationSlot, Tree tree) {
             return;
         }
+
+        // Copied from super implementation
+        @Override
+        protected boolean handleWasRawDeclaredTypes(AnnotatedDeclaredType adt) {
+            if (adt.wasRaw() && adt.getTypeArguments().size() != 0) {
+                // the type arguments should be wildcards AND if I get the real type of "tree"
+                // it corresponds to the declaration of adt.getUnderlyingType
+                Element declarationEle = adt.getUnderlyingType().asElement();
+                final AnnotatedDeclaredType declaration =
+                        (AnnotatedDeclaredType) inferenceTypeFactory.getAnnotatedType(declarationEle);
+
+                final List<AnnotatedTypeMirror> declarationTypeArgs = declaration.getTypeArguments();
+                final List<AnnotatedTypeMirror> rawTypeArgs = adt.getTypeArguments();
+
+                for (int i = 0; i < declarationTypeArgs.size(); i++) {
+
+                    if (InferenceMain.isHackMode(rawTypeArgs.get(i).getKind() != TypeKind.WILDCARD)) {
+                        return false;
+                    }
+
+                    final AnnotatedTypeMirror.AnnotatedWildcardType rawArg = (AnnotatedTypeMirror.AnnotatedWildcardType) rawTypeArgs.get(i);
+
+                    // The only difference starts: instead of copying bounds of declared type variable to
+                    // type argument wildcard bound, apply default @Mutable(of course equivalent VarAnnot)
+                    // just like the behaviour in typechecking side.
+                    // Previsouly, the behaviour is: "E extends @Readonly Object super @Bottom null".
+                    // Type argument is "? extends Object", so it became "? extends @Readonly Object".
+                    // This type argument then flows to local variable, and passed as actual method receiver.
+                    // Since declared receiver is defaulted to @Mutable, it caused inference to give no solution.
+                    rawArg.getExtendsBound().addMissingAnnotations(
+                            Arrays.asList(GUTTypeUtil.createEquivalentVarAnnotOfRealQualifier(PEER)));
+                    rawArg.getSuperBound().addMissingAnnotations(
+                            Arrays.asList(GUTTypeUtil.createEquivalentVarAnnotOfRealQualifier(BOTTOM)));
+                    // The only different ends
+                }
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public void handleBinaryTree(AnnotatedTypeMirror atm, BinaryTree binaryTree) {
+            if (atm.isAnnotatedInHierarchy(varAnnot)) {
+                // Happens for binary trees whose atm is implicitly immutable and already handled by
+                // PICOInferencePropagationTreeAnnotator
+                return;
+            }
+            super.handleBinaryTree(atm, binaryTree);
+        }
     }
 
     private class GUTIInferencePropagationTreeAnnotater extends PropagationTreeAnnotator {
@@ -95,13 +152,13 @@ public class GUTInferenceAnnotatedTypeFactory
 
         @Override
         public Void visitBinary(BinaryTree node, AnnotatedTypeMirror type) {
-            applyImmutableIfImplicitlyImmutable(type);// Usually there isn't existing annotation on binary trees, but to be safe, run it first
+            applyBottomIfImplicitlyBottom(type);// Usually there isn't existing annotation on binary trees, but to be safe, run it first
             return super.visitBinary(node, type);
         }
 
         @Override
         public Void visitTypeCast(TypeCastTree node, AnnotatedTypeMirror type) {
-            applyImmutableIfImplicitlyImmutable(type);// Must run before calling super method to respect existing annotation
+            applyBottomIfImplicitlyBottom(type);// Must run before calling super method to respect existing annotation
             if (type.isAnnotatedInHierarchy(ANY)) {
                 // VarAnnot is guarenteed to not exist on type, because PropagationTreeAnnotator has the highest previledge
                 // So VarAnnot hasn't been inserted to cast type yet.
@@ -112,7 +169,7 @@ public class GUTInferenceAnnotatedTypeFactory
 
         /**Because TreeAnnotator runs before ImplicitsTypeAnnotator, implicitly immutable types are not guaranteed
          to always have immutable annotation. If this happens, we manually add immutable to type. */
-        private void applyImmutableIfImplicitlyImmutable(AnnotatedTypeMirror type) {
+        private void applyBottomIfImplicitlyBottom(AnnotatedTypeMirror type) {
             if (GUTTypeUtil.isImplicitlyBottomType(type)) {
                 GUTTypeUtil.applyConstant(type, BOTTOM);
             }
