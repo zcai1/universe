@@ -23,6 +23,7 @@ import org.checkerframework.framework.type.treeannotator.ListTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.PropagationTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
 
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.type.TypeKind;
 import java.util.Arrays;
@@ -70,7 +71,7 @@ public class GUTInferenceAnnotatedTypeFactory
 
     @Override
     protected InferenceViewpointAdapter createViewpointAdapter() {
-        return new GUTInferenceViewpointAdapter();
+        return new GUTInferenceViewpointAdapter(this);
     }
 
     static class GUTVariableAnnotator extends VariableAnnotator {
@@ -178,12 +179,17 @@ public class GUTInferenceAnnotatedTypeFactory
 
     public static class GUTInferenceViewpointAdapter extends InferenceViewpointAdapter {
 
+        public GUTInferenceViewpointAdapter(AnnotatedTypeFactory atypeFactory) {
+            super(atypeFactory);
+        }
+
         @Override
-        protected AnnotatedTypeMirror combineModifierWithType(Slot recvModifier, AnnotatedTypeMirror decl, AnnotatedTypeFactory f) {
-            if (GUTTypeUtil.isImplicitlyBottomType(decl)) {
-                return decl;
+        protected AnnotatedTypeMirror combineAnnotationWithType(AnnotationMirror receiverAnnotation,
+                AnnotatedTypeMirror declared) {
+            if (GUTTypeUtil.isImplicitlyBottomType(declared)) {
+                return declared;
             }
-            return super.combineModifierWithType(recvModifier, decl, f);
+            return super.combineAnnotationWithType(receiverAnnotation, declared);
         }
     }
 }
