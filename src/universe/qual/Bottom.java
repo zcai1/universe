@@ -5,9 +5,9 @@ import org.checkerframework.framework.qual.ImplicitFor;
 import org.checkerframework.framework.qual.LiteralKind;
 import org.checkerframework.framework.qual.SubtypeOf;
 import org.checkerframework.framework.qual.TargetLocations;
+import org.checkerframework.framework.qual.TypeKind;
 import org.checkerframework.framework.qual.TypeUseLocation;
 
-import javax.lang.model.type.TypeKind;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
