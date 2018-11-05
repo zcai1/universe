@@ -7,7 +7,6 @@ import checkers.inference.solver.backend.maxsat.MathUtils;
 import checkers.inference.solver.backend.maxsat.VectorUtils;
 import checkers.inference.solver.backend.maxsat.encoder.MaxSATAbstractConstraintEncoder;
 import checkers.inference.solver.frontend.Lattice;
-import checkers.inference.util.ConstraintVerifier;
 import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.BugInCF;
 import org.sat4j.core.VecInt;
@@ -26,8 +25,8 @@ import static universe.GUTChecker.SELF;
 
 public class GUTCombineConstraintEncoder extends MaxSATAbstractConstraintEncoder implements CombineConstraintEncoder<VecInt[]> {
 
-    public GUTCombineConstraintEncoder(Lattice lattice, ConstraintVerifier verifier, Map<AnnotationMirror, Integer> typeToInt) {
-        super(lattice, verifier, typeToInt);
+    public GUTCombineConstraintEncoder(Lattice lattice, Map<AnnotationMirror, Integer> typeToInt) {
+        super(lattice, typeToInt);
     }
 
     /**
