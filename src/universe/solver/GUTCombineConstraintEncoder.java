@@ -9,7 +9,7 @@ import checkers.inference.solver.backend.maxsat.encoder.MaxSATAbstractConstraint
 import checkers.inference.solver.frontend.Lattice;
 import checkers.inference.util.ConstraintVerifier;
 import org.checkerframework.javacutil.AnnotationUtils;
-import org.checkerframework.javacutil.ErrorReporter;
+import org.checkerframework.javacutil.BugInCF;
 import org.sat4j.core.VecInt;
 
 import javax.lang.model.element.AnnotationMirror;
@@ -216,7 +216,7 @@ public class GUTCombineConstraintEncoder extends MaxSATAbstractConstraintEncoder
                     -MathUtils.mapIdToMatrixEntry(target.getId(), id(BOTTOM), lattice),
                     MathUtils.mapIdToMatrixEntry(result.getId(), id(ANY), lattice)));
         } else {
-            ErrorReporter.errorAbort("Error: Unknown declared type: " + declared.getValue());
+            throw new BugInCF("Error: Unknown declared type: " + declared.getValue());
         }
 
         return resultClauses.toArray(new VecInt[resultClauses.size()]);
@@ -299,7 +299,7 @@ public class GUTCombineConstraintEncoder extends MaxSATAbstractConstraintEncoder
                     -MathUtils.mapIdToMatrixEntry(declared.getId(), id(LOST), lattice),
                     MathUtils.mapIdToMatrixEntry(result.getId(), id(ANY), lattice)));
         } else {
-            ErrorReporter.errorAbort("Error: Unknown target type: " + target.getValue());
+            throw new BugInCF("Error: Unknown target type: " + target.getValue());
         }
 
         return resultClauses.toArray(new VecInt[resultClauses.size()]);
@@ -342,7 +342,7 @@ public class GUTCombineConstraintEncoder extends MaxSATAbstractConstraintEncoder
                         MathUtils.mapIdToMatrixEntry(result.getId(), id(LOST), lattice)));
             }
         } else {
-            ErrorReporter.errorAbort("Error: Unknown declared or target type: " + declared.getValue() + target.getValue());
+            throw new BugInCF("Error: Unknown declared or target type: " + declared.getValue() + target.getValue());
         }
 
         return resultClauses.toArray(new VecInt[resultClauses.size()]);
