@@ -8,7 +8,6 @@ import checkers.inference.model.Slot;
 import com.sun.source.tree.ClassTree;
 import com.sun.source.util.TreePath;
 import org.checkerframework.framework.qual.ImplicitFor;
-import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.javacutil.TreeUtils;
 import org.checkerframework.javacutil.TypesUtils;
@@ -32,8 +31,8 @@ public class GUTTypeUtil {
         ImplicitFor implicitFor = Bottom.class.getAnnotation(ImplicitFor.class);
         assert implicitFor != null;
         assert implicitFor.types() != null;
-        for (TypeKind typeKind : implicitFor.types()) {
-            if (typeKind == atm.getKind()) return true;
+        for (org.checkerframework.framework.qual.TypeKind typeKind : implicitFor.types()) {
+            if (TypeKind.valueOf(typeKind.name()) == atm.getKind()) return true;
         }
         return false;
     }
