@@ -5,7 +5,6 @@ import checkers.inference.solver.backend.encoder.combine.CombineConstraintEncode
 import checkers.inference.solver.backend.maxsat.MaxSatFormatTranslator;
 import checkers.inference.solver.backend.maxsat.encoder.MaxSATConstraintEncoderFactory;
 import checkers.inference.solver.frontend.Lattice;
-import checkers.inference.util.ConstraintVerifier;
 import org.sat4j.core.VecInt;
 
 public class GUTFormatTranslator extends MaxSatFormatTranslator {
@@ -16,11 +15,11 @@ public class GUTFormatTranslator extends MaxSatFormatTranslator {
     }
 
     @Override
-    protected ConstraintEncoderFactory<VecInt[]> createConstraintEncoderFactory(ConstraintVerifier verifier) {
-        return new MaxSATConstraintEncoderFactory(lattice, verifier, typeToInt, this){
+    protected ConstraintEncoderFactory<VecInt[]> createConstraintEncoderFactory() {
+        return new MaxSATConstraintEncoderFactory(lattice, typeToInt, this){
             @Override
             public CombineConstraintEncoder<VecInt[]> createCombineConstraintEncoder() {
-                return new GUTCombineConstraintEncoder(lattice, verifier, typeToInt);
+                return new GUTCombineConstraintEncoder(lattice, typeToInt);
             }
         };
     }
