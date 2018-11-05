@@ -61,7 +61,7 @@ public class GUTValidator extends InferenceValidator {
             return null;
         }
 
-        List<AnnotatedTypeParameterBounds> typeParamBounds = atypeFactory.typeVariablesFromUse(type, element, tree);
+        List<AnnotatedTypeParameterBounds> typeParamBounds = atypeFactory.typeVariablesFromUse(type, element);
         for (AnnotatedTypeParameterBounds atpb : typeParamBounds) {
             if (infer) {
                 ((GUTVisitor)visitor).doesNotContain(atpb.getLowerBound(), LOST, "uts.lost.in.bounds", tree);
