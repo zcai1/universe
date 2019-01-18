@@ -74,7 +74,7 @@ public class GUTInferenceAnnotatedTypeFactory
         return new GUTInferenceViewpointAdapter(this);
     }
 
-    static class GUTVariableAnnotator extends VariableAnnotator {
+    class GUTVariableAnnotator extends VariableAnnotator {
 
         public GUTVariableAnnotator(
                 InferenceAnnotatedTypeFactory inferenceTypeFactory,
@@ -137,7 +137,7 @@ public class GUTInferenceAnnotatedTypeFactory
 
         @Override
         public void handleBinaryTree(AnnotatedTypeMirror atm, BinaryTree binaryTree) {
-            if (atm.isAnnotatedInHierarchy(varAnnot)) {
+            if (atm.isAnnotatedInHierarchy(getVarAnnot())) {
                 // Happens for binary trees whose atm is implicitly immutable and already handled by
                 // PICOInferencePropagationTreeAnnotator
                 return;
