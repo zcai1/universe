@@ -56,7 +56,7 @@ public class GUTChecker extends BaseInferrableChecker {
     }
 
     @Override
-    public boolean withCombineConstraints() {
+    public boolean withVPAConstraints() {
         return true;
     }
 
@@ -66,7 +66,7 @@ public class GUTChecker extends BaseInferrableChecker {
             BaseAnnotatedTypeFactory realTypeFactory, SlotManager slotManager,
             ConstraintManager constraintManager) {
         return new GUTInferenceAnnotatedTypeFactory(inferenceChecker,
-                withCombineConstraints(), realTypeFactory, realChecker,
+                withVPAConstraints(), realTypeFactory, realChecker,
                 slotManager, constraintManager);
     }
 

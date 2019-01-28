@@ -2,7 +2,7 @@ package universe.solver;
 
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.VariableSlot;
-import checkers.inference.solver.backend.encoder.combine.CombineConstraintEncoder;
+import checkers.inference.solver.backend.encoder.vpa.VPAConstraintEncoder;
 import checkers.inference.solver.backend.maxsat.MathUtils;
 import checkers.inference.solver.backend.maxsat.VectorUtils;
 import checkers.inference.solver.backend.maxsat.encoder.MaxSATAbstractConstraintEncoder;
@@ -23,7 +23,7 @@ import static universe.GUTChecker.PEER;
 import static universe.GUTChecker.REP;
 import static universe.GUTChecker.SELF;
 
-public class GUTCombineConstraintEncoder extends MaxSATAbstractConstraintEncoder implements CombineConstraintEncoder<VecInt[]> {
+public class GUTCombineConstraintEncoder extends MaxSATAbstractConstraintEncoder implements VPAConstraintEncoder<VecInt[]> {
 
     public GUTCombineConstraintEncoder(Lattice lattice, Map<AnnotationMirror, Integer> typeToInt) {
         super(lattice, typeToInt);
@@ -37,7 +37,7 @@ public class GUTCombineConstraintEncoder extends MaxSATAbstractConstraintEncoder
     }
 
     private final boolean is(ConstantSlot cs, AnnotationMirror am) {
-        return AnnotationUtils.areSame(cs.getValue(), am);
+        return AnnotationUtils.areSame(cs.getAnnotation(), am);
     }
 
     @Override
@@ -215,7 +215,7 @@ public class GUTCombineConstraintEncoder extends MaxSATAbstractConstraintEncoder
                     -MathUtils.mapIdToMatrixEntry(target.getId(), id(BOTTOM), lattice),
                     MathUtils.mapIdToMatrixEntry(result.getId(), id(ANY), lattice)));
         } else {
-            throw new BugInCF("Error: Unknown declared type: " + declared.getValue());
+            throw new BugInCF("Error: Unknown declared type: " + declared.getAnnotation());
         }
 
         return resultClauses.toArray(new VecInt[resultClauses.size()]);
@@ -298,7 +298,7 @@ public class GUTCombineConstraintEncoder extends MaxSATAbstractConstraintEncoder
                     -MathUtils.mapIdToMatrixEntry(declared.getId(), id(LOST), lattice),
                     MathUtils.mapIdToMatrixEntry(result.getId(), id(ANY), lattice)));
         } else {
-            throw new BugInCF("Error: Unknown target type: " + target.getValue());
+            throw new BugInCF("Error: Unknown target type: " + target.getAnnotation());
         }
 
         return resultClauses.toArray(new VecInt[resultClauses.size()]);
@@ -325,7 +325,7 @@ public class GUTCombineConstraintEncoder extends MaxSATAbstractConstraintEncoder
                 resultClauses.add(VectorUtils.asVec(
                         MathUtils.mapIdToMatrixEntry(result.getId(), id(REP), lattice)));
             } else if (is(target, SELF) ||
-                            AnnotationUtils.areSame(target.getValue(), PEER)) {
+                            AnnotationUtils.areSame(target.getAnnotation(), PEER)) {
                 resultClauses.add(VectorUtils.asVec(
                         MathUtils.mapIdToMatrixEntry(result.getId(), id(PEER), lattice)));
             } else {
@@ -335,13 +335,13 @@ public class GUTCombineConstraintEncoder extends MaxSATAbstractConstraintEncoder
         } else if (is(declared, REP) || is(declared, SELF)) {
             if (is(target, SELF)) {
                 resultClauses.add(VectorUtils.asVec(
-                        MathUtils.mapIdToMatrixEntry(result.getId(), id(declared.getValue()), lattice)));
+                        MathUtils.mapIdToMatrixEntry(result.getId(), id(declared.getAnnotation()), lattice)));
             } else {
                 resultClauses.add(VectorUtils.asVec(
                         MathUtils.mapIdToMatrixEntry(result.getId(), id(LOST), lattice)));
             }
         } else {
-            throw new BugInCF("Error: Unknown declared or target type: " + declared.getValue() + target.getValue());
+            throw new BugInCF("Error: Unknown declared or target type: " + declared.getAnnotation() + target.getAnnotation());
         }
 
         return resultClauses.toArray(new VecInt[resultClauses.size()]);

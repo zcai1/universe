@@ -97,7 +97,7 @@ public class GUTVisitor extends InferenceVisitor<GUTChecker, BaseAnnotatedTypeFa
             // In infer mode, add preference constraint
             AnnotatedTypeMirror type = atypeFactory.getAnnotatedType(node);
             SlotManager slotManager = InferenceMain.getInstance().getSlotManager();
-            VariableSlot slot = slotManager.getVariableSlot(type);
+            VariableSlot slot = slotManager.getSlot(type);
             if (slot != null) {
                 ConstraintManager constraintManager = InferenceMain.getInstance().getConstraintManager();
                 ConstantSlot rep = slotManager.createConstantSlot(REP);
@@ -360,8 +360,8 @@ public class GUTVisitor extends InferenceVisitor<GUTChecker, BaseAnnotatedTypeFa
         // comparablecast
         final ConstraintManager constraintManager = InferenceMain.getInstance().getConstraintManager();
         final SlotManager slotManager = InferenceMain.getInstance().getSlotManager();
-        final Slot castSlot = slotManager.getVariableSlot(castType);
-        final Slot exprSlot = slotManager.getVariableSlot(exprType);
+        final Slot castSlot = slotManager.getSlot(castType);
+        final Slot exprSlot = slotManager.getSlot(exprType);
 
         if (castSlot instanceof ConstantSlot && exprSlot instanceof ConstantSlot) {
             ConstantSlot castCSSlot = (ConstantSlot) castSlot;

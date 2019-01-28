@@ -1,7 +1,7 @@
 package universe.solver;
 
 import checkers.inference.solver.backend.encoder.ConstraintEncoderFactory;
-import checkers.inference.solver.backend.encoder.combine.CombineConstraintEncoder;
+import checkers.inference.solver.backend.encoder.vpa.VPAConstraintEncoder;
 import checkers.inference.solver.backend.maxsat.MaxSatFormatTranslator;
 import checkers.inference.solver.backend.maxsat.encoder.MaxSATConstraintEncoderFactory;
 import checkers.inference.solver.frontend.Lattice;
@@ -18,7 +18,7 @@ public class GUTFormatTranslator extends MaxSatFormatTranslator {
     protected ConstraintEncoderFactory<VecInt[]> createConstraintEncoderFactory() {
         return new MaxSATConstraintEncoderFactory(lattice, typeToInt, this){
             @Override
-            public CombineConstraintEncoder<VecInt[]> createCombineConstraintEncoder() {
+            public VPAConstraintEncoder<VecInt[]> createVPAConstraintEncoder() {
                 return new GUTCombineConstraintEncoder(lattice, typeToInt);
             }
         };

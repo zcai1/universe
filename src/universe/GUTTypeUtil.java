@@ -62,7 +62,7 @@ public class GUTTypeUtil {
         // Might be null. It's normal. In typechecking side, we use addMissingAnnotations(). Only if
         // there is existing annotation in code, then here is non-null. Otherwise, VariableAnnotator
         // hasn't come into the picture yet, so no VarAnnot exists here, which is normal.
-        Slot shouldBeAppliedTo = slotManager.getVariableSlot(type);
+        Slot shouldBeAppliedTo = slotManager.getSlot(type);
         ConstantSlot constant = slotManager.createConstantSlot(am);
         if (shouldBeAppliedTo == null) {
             type.addAnnotation(slotManager.getAnnotation(constant));
