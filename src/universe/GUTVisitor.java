@@ -23,7 +23,7 @@ import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.common.basetype.BaseTypeValidator;
 import org.checkerframework.common.basetype.BaseTypeVisitor;
 import org.checkerframework.framework.source.Result;
-import org.checkerframework.framework.type.AnnotatedTypeFactory.ParameterizedMethodType;
+import org.checkerframework.framework.type.AnnotatedTypeFactory.ParameterizedExecutableType;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedDeclaredType;
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedExecutableType;
@@ -168,8 +168,8 @@ public class GUTVisitor extends InferenceVisitor<GUTChecker, BaseAnnotatedTypeFa
      */
     @Override
     public Void visitNewClass(NewClassTree node, Void p) {
-        ParameterizedMethodType fromUse = atypeFactory.constructorFromUse(node);
-        AnnotatedExecutableType constructor = fromUse.methodType;
+        ParameterizedExecutableType fromUse = atypeFactory.constructorFromUse(node);
+        AnnotatedExecutableType constructor = fromUse.executableType;
 
         // Check for @Lost in combined parameter types deeply.
         for (AnnotatedTypeMirror parameterType : constructor.getParameterTypes()) {
@@ -230,7 +230,7 @@ public class GUTVisitor extends InferenceVisitor<GUTChecker, BaseAnnotatedTypeFa
     @Override
     public Void visitMethodInvocation(MethodInvocationTree node, Void p) {
 
-        AnnotatedExecutableType methodType = atypeFactory.methodFromUse(node).methodType;
+        AnnotatedExecutableType methodType = atypeFactory.methodFromUse(node).executableType;
         // Check for @Lost in combined parameter types deeply.
         for (AnnotatedTypeMirror parameterType : methodType.getParameterTypes()) {
             if (infer) {
