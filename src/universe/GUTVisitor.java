@@ -9,6 +9,7 @@ import checkers.inference.model.ConstraintManager;
 import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
 import com.sun.source.tree.AssignmentTree;
+import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.InstanceOfTree;
 import com.sun.source.tree.MethodInvocationTree;
@@ -429,4 +430,8 @@ public class GUTVisitor extends InferenceVisitor<GUTChecker, BaseAnnotatedTypeFa
         // validity check always returns true.
         return true;
     }
+    
+    @Override
+    // GUT does not need to check extends and implements
+    protected void checkExtendsImplements(ClassTree classTree) {}
 }
