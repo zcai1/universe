@@ -51,6 +51,8 @@ public class GUTViewpointAdapter extends AbstractViewpointAdapter {
             } else if (AnnotationUtils.areSame(receiverAnnotation, REP)) {
                 return REP;
             }
+        } else if (AnnotationUtils.areSame(declaredAnnotation, SELF)) {
+        	return receiverAnnotation;
         }
         return LOST;
     }
