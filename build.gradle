@@ -83,7 +83,7 @@ afterEvaluate {
         group 'Verification'
 
         systemProperties = [
-                'path.afu.scripts'     : "${afu}/scripts",
+                'path.afu.scripts' : "${afu}/scripts",
                 'path.inference.script': "${cfiPath}/scripts/inference"
         ]
         environment "external_checker_classpath", "$jsr308/universe/bin/src"
