@@ -43,19 +43,18 @@ dependencies {
 sourceSets {
     main {
         java {
-            srcDirs = ["src"]
+            srcDir "src"
         }
 
         resources {
-            srcDirs = ["src"]
+            srcDir "src"
             exclude "**/*.java"
         }
     }
 
     test {
         java {
-            // TODO: we shouldn't need source level dependency on CFITest
-            srcDirs = ["tst", "${cfiPath}/tests/checkers/inference/test"]
+            srcDirs = ["tst"]
         }
     }
 }
@@ -84,7 +83,7 @@ afterEvaluate {
         group 'Verification'
 
         systemProperties = [
-                'path.afu.scripts': "${afu}/scripts",
+                'path.afu.scripts'     : "${afu}/scripts",
                 'path.inference.script': "${cfiPath}/scripts/inference"
         ]
         environment "external_checker_classpath", "$jsr308/universe/bin/src"
@@ -124,36 +123,8 @@ afterEvaluate {
     }
 }
 
-        environment "external_checker_classpath", "${gutPath}/build/classes/java/main:${gutPath}/build/resources/main"
-
-        jvmArgs "-Xbootclasspath/p:${cfiPath}/dist/javac.jar"
-
-        testLogging {
-            // Always run the tests
-            outputs.upToDateWhen { false }
-            // The following prints out each time a test is passed.
-            events "passed", "skipped", "failed", "standardOut", "standardError"
-
-            // Show the found unexpected diagnostics and expected diagnostics not found.
-            exceptionFormat "full"
-            showExceptions true
-            showCauses true
-            showStackTraces true
-            showStandardStreams true
-        }
-
-        // After each test, print a summary.
-        afterSuite { desc, result ->
-            if (desc.getClassName() != null) {
-                long mils = result.getEndTime() - result.getStartTime()
-                double seconds = mils / 1000.0
-
-                println "Testsuite: ${desc.getClassName()}\n" +
-                        "Tests run: ${result.testCount}, " +
-                        "Failures: ${result.failedTestCount}, " +
-                        "Skipped: ${result.skippedTestCount}, " +
-                        "Time elapsed: ${seconds} sec\n"
-            }
-        }
-    }
+tasks.clean {
+    delete 'bin', 'dist', 'testTmp', 'annotated',
+            fileTree('.') { include '**/*.jaif', '**/*.txt' },
+            fileTree('testinput') { include '**/*.class' }
 }
