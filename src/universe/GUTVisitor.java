@@ -168,7 +168,7 @@ public class GUTVisitor extends InferenceVisitor<GUTChecker, BaseAnnotatedTypeFa
      */
     @Override
     public Void visitNewClass(NewClassTree node, Void p) {
-    	ParameterizedExecutableType fromUse = atypeFactory.constructorFromUse(node);
+        ParameterizedExecutableType fromUse = atypeFactory.constructorFromUse(node);
         AnnotatedExecutableType constructor = fromUse.executableType;
 
         // Check for @Lost in combined parameter types deeply.
