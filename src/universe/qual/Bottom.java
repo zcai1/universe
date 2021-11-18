@@ -1,8 +1,8 @@
 package universe.qual;
 
 import org.checkerframework.framework.qual.DefaultFor;
-import org.checkerframework.framework.qual.ImplicitFor;
 import org.checkerframework.framework.qual.LiteralKind;
+import org.checkerframework.framework.qual.QualifierForLiterals;
 import org.checkerframework.framework.qual.SubtypeOf;
 import org.checkerframework.framework.qual.TargetLocations;
 import org.checkerframework.framework.qual.TypeKind;
@@ -26,11 +26,11 @@ import java.math.BigInteger;
 @Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})
 @TargetLocations({TypeUseLocation.EXPLICIT_LOWER_BOUND})
 @SubtypeOf({ Self.class, Rep.class })
-@DefaultFor({ TypeUseLocation.LOWER_BOUND })
-@ImplicitFor(literals = { LiteralKind.ALL},
-        types = { TypeKind.INT, TypeKind.BYTE, TypeKind.SHORT, TypeKind.BOOLEAN,
+@QualifierForLiterals({LiteralKind.ALL})
+@DefaultFor(value = {TypeUseLocation.LOWER_BOUND},
+        typeKinds = { TypeKind.INT, TypeKind.BYTE, TypeKind.SHORT, TypeKind.BOOLEAN,
                 TypeKind.LONG, TypeKind.CHAR, TypeKind.FLOAT, TypeKind.DOUBLE },
-        typeNames={String.class, Double.class, Boolean.class, Byte.class,
+        types = {String.class, Double.class, Boolean.class, Byte.class,
                 Character.class, Float.class, Integer.class, Long.class, Short.class}
         )
 public @interface Bottom {}

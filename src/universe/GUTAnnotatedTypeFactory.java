@@ -1,11 +1,12 @@
 package universe;
 
+import checkers.inference.BaseInferenceRealTypeFactory;
 import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.MethodTree;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
-import org.checkerframework.framework.type.treeannotator.ImplicitsTreeAnnotator;
+import org.checkerframework.framework.type.typeannotator.DefaultForTypeAnnotator;
+import org.checkerframework.framework.type.treeannotator.LiteralTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.PropagationTreeAnnotator;
-import org.checkerframework.framework.type.typeannotator.ImplicitsTypeAnnotator;
 import org.checkerframework.javacutil.Pair;
 import universe.qual.Any;
 import universe.qual.Bottom;
@@ -52,10 +53,10 @@ import static universe.GUTChecker.SELF;
  *
  * @author wmdietl
  */
-public class GUTAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
+public class GUTAnnotatedTypeFactory extends BaseInferenceRealTypeFactory {
 
-    public GUTAnnotatedTypeFactory(BaseTypeChecker checker) {
-        super(checker, true);
+    public GUTAnnotatedTypeFactory(BaseTypeChecker checker, boolean infer) {
+        super(checker, infer);
 
 //        addAliasedAnnotation(org.jmlspecs.annotation.Peer.class, PEER);
 //        addAliasedAnnotation(org.jmlspecs.annotation.Rep.class, REP);
@@ -89,7 +90,7 @@ public class GUTAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     protected TreeAnnotator createTreeAnnotator() {
         return new ListTreeAnnotator(
                 new GUTPropagationTreeAnnotator(this),
-                new ImplicitsTreeAnnotator(this),
+                new LiteralTreeAnnotator(this),
                 new GUTTreeAnnotator()
                 );
     }
@@ -105,6 +106,16 @@ public class GUTAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     public void addComputedTypeAnnotations(Element elt, AnnotatedTypeMirror type) {
         GUTTypeUtil.defaultConstructorReturnToSelf(elt, type);
         super.addComputedTypeAnnotations(elt, type);
+    }
+
+    /**
+     * Replace annotation of extends or implements clause with SELF in GUT.
+     */
+    @Override
+    public AnnotatedTypeMirror getTypeOfExtendsImplements(Tree clause) {
+        AnnotatedTypeMirror s = super.getTypeOfExtendsImplements(clause);
+        s.replaceAnnotation(SELF);
+        return s;
     }
 
     /**
@@ -159,14 +170,10 @@ public class GUTAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             return super.visitMethod(node, p);
         }
     }
-    
-    @Override
-    // GUT does not need to inherit from the class declaration
-    protected void annotateInheritedFromClass(AnnotatedTypeMirror type) {}
 
     private class GUTPropagationTreeAnnotator extends PropagationTreeAnnotator {
         /**
-         * Creates a {@link ImplicitsTypeAnnotator}
+         * Creates a {@link DefaultForTypeAnnotator}
          * from the given checker, using that checker's type hierarchy.
          *
          * @param atypeFactory
@@ -265,7 +272,7 @@ public class GUTAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             return super.visitTypeCast(node, type);
         }
 
-        /**Because TreeAnnotator runs before ImplicitsTypeAnnotator, implicitly immutable types are not guaranteed
+        /**Because TreeAnnotator runs before DefaultForTypeAnnotator, implicitly immutable types are not guaranteed
          to always have immutable annotation. If this happens, we manually add immutable to type. We use
          addMissingAnnotations because we want to respect existing annotation on type*/
         private void applyImmutableIfImplicitlyBottom(AnnotatedTypeMirror type) {

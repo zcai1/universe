@@ -7,8 +7,9 @@ import checkers.inference.model.ConstraintManager;
 import checkers.inference.model.Slot;
 import com.sun.source.tree.ClassTree;
 import com.sun.source.util.TreePath;
-import org.checkerframework.framework.qual.ImplicitFor;
+import org.checkerframework.framework.qual.DefaultFor;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
+import org.checkerframework.javacutil.TreePathUtil;
 import org.checkerframework.javacutil.TreeUtils;
 import org.checkerframework.javacutil.TypesUtils;
 import universe.qual.Bottom;
@@ -28,10 +29,10 @@ import static universe.GUTChecker.SELF;
 public class GUTTypeUtil {
 
     private static boolean isInTypesOfImplicitForOfBottom(AnnotatedTypeMirror atm) {
-        ImplicitFor implicitFor = Bottom.class.getAnnotation(ImplicitFor.class);
-        assert implicitFor != null;
-        assert implicitFor.types() != null;
-        for (org.checkerframework.framework.qual.TypeKind typeKind : implicitFor.types()) {
+        DefaultFor defaultFor = Bottom.class.getAnnotation(DefaultFor.class);
+        assert defaultFor != null;
+        assert defaultFor.typeKinds() != null;
+        for (org.checkerframework.framework.qual.TypeKind typeKind : defaultFor.typeKinds()) {
             if (TypeKind.valueOf(typeKind.name()) == atm.getKind()) return true;
         }
         return false;
@@ -41,10 +42,10 @@ public class GUTTypeUtil {
         if (atm.getKind() != TypeKind.DECLARED) {
             return false;
         }
-        ImplicitFor implicitFor = Bottom.class.getAnnotation(ImplicitFor.class);
-        assert implicitFor != null;
-        assert implicitFor.typeNames() != null;
-        Class<?>[] typeNames = implicitFor.typeNames();
+        DefaultFor defaultFor = Bottom.class.getAnnotation(DefaultFor.class);
+        assert defaultFor != null;
+        assert defaultFor.types() != null;
+        Class<?>[] typeNames = defaultFor.types();
         String fqn = TypesUtils.getQualifiedName((DeclaredType) atm.getUnderlyingType()).toString();
         for (int i = 0; i < typeNames.length; i++) {
             if (typeNames[i].getCanonicalName().toString().contentEquals(fqn)) return true;
@@ -62,7 +63,7 @@ public class GUTTypeUtil {
         // Might be null. It's normal. In typechecking side, we use addMissingAnnotations(). Only if
         // there is existing annotation in code, then here is non-null. Otherwise, VariableAnnotator
         // hasn't come into the picture yet, so no VarAnnot exists here, which is normal.
-        Slot shouldBeAppliedTo = slotManager.getVariableSlot(type);
+        Slot shouldBeAppliedTo = slotManager.getSlot(type);
         ConstantSlot constant = slotManager.createConstantSlot(am);
         if (shouldBeAppliedTo == null) {
             type.addAnnotation(slotManager.getAnnotation(constant));
@@ -96,10 +97,10 @@ public class GUTTypeUtil {
 
     public static boolean inStaticScope(TreePath treePath) {
         boolean in = false;
-        if (TreeUtils.isTreeInStaticScope(treePath)) {
+        if (TreePathUtil.isTreeInStaticScope(treePath)) {
             in = true;
             // Exclude case in which enclosing class is static
-            ClassTree classTree = TreeUtils.enclosingClass(treePath);
+            ClassTree classTree = TreePathUtil.enclosingClass(treePath);
             if (classTree != null && classTree.getModifiers().getFlags().contains((Modifier.STATIC))) {
                 in = false;
             }

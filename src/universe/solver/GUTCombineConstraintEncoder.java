@@ -1,5 +1,6 @@
 package universe.solver;
 
+import checkers.inference.model.CombVariableSlot;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.VariableSlot;
 import checkers.inference.solver.backend.encoder.combine.CombineConstraintEncoder;
@@ -41,7 +42,7 @@ public class GUTCombineConstraintEncoder extends MaxSATAbstractConstraintEncoder
     }
 
     @Override
-    public VecInt[] encodeVariable_Variable(VariableSlot target, VariableSlot declared, VariableSlot result) {
+    public VecInt[] encodeVariable_Variable(VariableSlot target, VariableSlot declared, CombVariableSlot result) {
         List<VecInt> resultClauses = new ArrayList<VecInt>();
         resultClauses.add(VectorUtils.asVec(
                 -MathUtils.mapIdToMatrixEntry(declared.getId(), id(ANY), lattice),
@@ -141,7 +142,7 @@ public class GUTCombineConstraintEncoder extends MaxSATAbstractConstraintEncoder
     }
 
     @Override
-    public VecInt[] encodeVariable_Constant(VariableSlot target, ConstantSlot declared, VariableSlot result) {
+    public VecInt[] encodeVariable_Constant(VariableSlot target, ConstantSlot declared, CombVariableSlot result) {
         List<VecInt> resultClauses = new ArrayList<VecInt>();
 
         if (is(declared, ANY)) {
@@ -222,7 +223,7 @@ public class GUTCombineConstraintEncoder extends MaxSATAbstractConstraintEncoder
     }
 
     @Override
-    public VecInt[] encodeConstant_Variable(ConstantSlot target, VariableSlot declared, VariableSlot result) {
+    public VecInt[] encodeConstant_Variable(ConstantSlot target, VariableSlot declared, CombVariableSlot result) {
         List<VecInt> resultClauses = new ArrayList<>();
 
         resultClauses.add(VectorUtils.asVec(
@@ -305,7 +306,7 @@ public class GUTCombineConstraintEncoder extends MaxSATAbstractConstraintEncoder
     }
 
     @Override
-    public VecInt[] encodeConstant_Constant(ConstantSlot target, ConstantSlot declared, VariableSlot result) {
+    public VecInt[] encodeConstant_Constant(ConstantSlot target, ConstantSlot declared, CombVariableSlot result) {
         List<VecInt> resultClauses = new ArrayList<>();
 
         if (is(declared, ANY)) {

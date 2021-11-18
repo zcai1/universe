@@ -11,33 +11,25 @@ import checkers.inference.model.VariableSlot;
 import com.sun.source.tree.AssignmentTree;
 import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.ExpressionTree;
-import com.sun.source.tree.InstanceOfTree;
 import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.NewArrayTree;
 import com.sun.source.tree.NewClassTree;
 import com.sun.source.tree.Tree;
-import com.sun.source.tree.Tree.Kind;
 import com.sun.source.tree.TypeCastTree;
 import com.sun.source.tree.VariableTree;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
-import org.checkerframework.common.basetype.BaseTypeValidator;
-import org.checkerframework.common.basetype.BaseTypeVisitor;
-import org.checkerframework.framework.source.Result;
 import org.checkerframework.framework.type.AnnotatedTypeFactory.ParameterizedExecutableType;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedDeclaredType;
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedExecutableType;
 import org.checkerframework.framework.type.QualifierHierarchy;
 import org.checkerframework.framework.util.AnnotatedTypes;
-import org.checkerframework.javacutil.Pair;
 import org.checkerframework.javacutil.TreeUtils;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.TypeKind;
-import java.lang.annotation.Annotation;
-import java.util.List;
 
 import static universe.GUTChecker.ANY;
 import static universe.GUTChecker.BOTTOM;
@@ -97,11 +89,11 @@ public class GUTVisitor extends InferenceVisitor<GUTChecker, BaseAnnotatedTypeFa
             // In infer mode, add preference constraint
             AnnotatedTypeMirror type = atypeFactory.getAnnotatedType(node);
             SlotManager slotManager = InferenceMain.getInstance().getSlotManager();
-            VariableSlot slot = slotManager.getVariableSlot(type);
-            if (slot != null) {
+            Slot slot = slotManager.getSlot(type);
+            if (slot instanceof VariableSlot) {
                 ConstraintManager constraintManager = InferenceMain.getInstance().getConstraintManager();
                 ConstantSlot rep = slotManager.createConstantSlot(REP);
-                constraintManager.addPreferenceConstraint(slot, rep, 80);
+                constraintManager.addPreferenceConstraint((VariableSlot)slot, rep, 80);
             }
         }
         return super.visitVariable(node, p);
@@ -120,7 +112,7 @@ public class GUTVisitor extends InferenceVisitor<GUTChecker, BaseAnnotatedTypeFa
                 GUTTypeUtil.applyConstant(constructorReturnType, SELF);
             } else {
                 if (!constructorReturnType.hasAnnotation(SELF)) {
-                    checker.report(Result.failure("uts.constructor.not.self"), node);
+                    checker.reportError(node, "uts.constructor.not.self");
                 }
             }
         } else {
@@ -130,7 +122,7 @@ public class GUTVisitor extends InferenceVisitor<GUTChecker, BaseAnnotatedTypeFa
                     GUTTypeUtil.applyConstant(declaredReceiverType, SELF);
                 } else {
                     if (!declaredReceiverType.hasAnnotation(SELF)) {
-                        checker.report(Result.failure("uts.receiver.not.self"), node);
+                        checker.reportError(node, "uts.receiver.not.self");
                     }
                 }
             }
@@ -159,6 +151,13 @@ public class GUTVisitor extends InferenceVisitor<GUTChecker, BaseAnnotatedTypeFa
     }
 
     /**
+     * There is no need to issue a warning if the result type of the constructor is not top in GUT.
+     */
+    @Override
+    protected void checkConstructorResult(
+            AnnotatedTypeMirror.AnnotatedExecutableType constructorType, ExecutableElement constructorElement) {}
+
+    /**
      * Validate a new object creation.
      *
      * @param node
@@ -177,7 +176,7 @@ public class GUTVisitor extends InferenceVisitor<GUTChecker, BaseAnnotatedTypeFa
                 doesNotContain(parameterType, LOST, "uts.lost.parameter", node);
             } else {
                 if (AnnotatedTypes.containsModifier(parameterType, LOST)) {
-                    checker.report(Result.failure("uts.lost.parameter"), node);
+                    checker.reportError(node, "uts.lost.parameter");
                 }
             }
         }
@@ -201,7 +200,7 @@ public class GUTVisitor extends InferenceVisitor<GUTChecker, BaseAnnotatedTypeFa
         // type variables, as there is no "new T()" to create a new instance.
         if (infer) {
             if (GUTTypeUtil.isImplicitlyBottomType(type)) {
-                mainIs(type, BOTTOM, "uts.new.ownership", node);
+                effectiveIs(type, BOTTOM, "uts.new.ownership", node);
             } else {
                 mainIsNoneOf(type, new AnnotationMirror[] { LOST, ANY, SELF, BOTTOM }, "uts.new.ownership", node);
             }
@@ -209,11 +208,11 @@ public class GUTVisitor extends InferenceVisitor<GUTChecker, BaseAnnotatedTypeFa
         } else {
             if (GUTTypeUtil.isImplicitlyBottomType(type)) {
                 if (!type.hasAnnotation(BOTTOM)) {
-                    checker.report(Result.failure("uts.new.ownership"), node);
+                    checker.reportError(node, "uts.new.ownership");
                 }
             } else {
                 if (!(type.hasAnnotation(PEER) || type.hasAnnotation(REP))) {
-                    checker.report(Result.failure("uts.new.ownership"), node);
+                    checker.reportError(node, "uts.new.ownership");
                 }
             }
         }
@@ -237,7 +236,7 @@ public class GUTVisitor extends InferenceVisitor<GUTChecker, BaseAnnotatedTypeFa
                 doesNotContain(parameterType, LOST, "uts.lost.parameter", node);
             } else {
                 if (AnnotatedTypes.containsModifier(parameterType, LOST)) {
-                    checker.report(Result.failure("uts.lost.parameter"), node);
+                    checker.reportError(node, "uts.lost.parameter");
                 }
             }
         }
@@ -256,7 +255,7 @@ public class GUTVisitor extends InferenceVisitor<GUTChecker, BaseAnnotatedTypeFa
                             // I would say this non-lost and non-any restriction is really for declared
                             // types, not for type variables. As type variables can't have methods to invoke.
                             if (receiverType.hasAnnotation(LOST) || receiverType.hasAnnotation(ANY)) {
-                                checker.report(Result.failure("oam.call.forbidden"), node);
+                                checker.reportError(node, "oam.call.forbidden");
                             }
                         }
                     }
@@ -283,7 +282,7 @@ public class GUTVisitor extends InferenceVisitor<GUTChecker, BaseAnnotatedTypeFa
             doesNotContain(type, LOST, "uts.lost.lhs", node);
         } else {
             if (AnnotatedTypes.containsModifier(type, LOST)) {
-                checker.report(Result.failure("uts.lost.lhs"), node);
+                checker.reportError(node, "uts.lost.lhs");
             }
         }
 
@@ -300,7 +299,7 @@ public class GUTVisitor extends InferenceVisitor<GUTChecker, BaseAnnotatedTypeFa
                         // Still, I think receiver can still only be declared types, so effectiveAnnotation
                         // is not needed.
                         if (receiverType.hasAnnotation(LOST) || receiverType.hasAnnotation(ANY)) {
-                            checker.report(Result.failure("oam.assignment.forbidden"), node);
+                            checker.reportError(node, "oam.assignment.forbidden");
                         }
                     }
                 }
@@ -308,7 +307,7 @@ public class GUTVisitor extends InferenceVisitor<GUTChecker, BaseAnnotatedTypeFa
         }
 
         if (checkStrictPurity && true /* TODO environment pure */) {
-            checker.report(Result.failure("purity.assignment.forbidden"), node);
+            checker.reportError(node, "purity.assignment.forbidden");
         }
 
         return super.visitAssignment(node, p);
@@ -323,7 +322,7 @@ public class GUTVisitor extends InferenceVisitor<GUTChecker, BaseAnnotatedTypeFa
             doesNotContain(castty, LOST, "uts.cast.type.warning", node);
         } else {
             if ((AnnotatedTypes.containsModifier(castty, LOST))) {
-                checker.report(Result.warning("uts.cast.type.warning", castty), node);
+                checker.reportWarning(node, "uts.cast.type.warning", castty);
             }
         }
 
@@ -341,9 +340,7 @@ public class GUTVisitor extends InferenceVisitor<GUTChecker, BaseAnnotatedTypeFa
         // the input types to be subtypes according to Java
         if (!isTypeCastSafe(castType, exprType, node)) {
             // This is only warning message, so even though enterred this line, it doesn't cause PICOInfer to exit.
-            checker.report(
-                    Result.warning("cast.unsafe", exprType.toString(true), castType.toString(true)),
-                    node);
+            checker.reportWarning(node, "cast.unsafe", exprType.toString(true), castType.toString(true));
         }
     }
 
@@ -360,8 +357,8 @@ public class GUTVisitor extends InferenceVisitor<GUTChecker, BaseAnnotatedTypeFa
         // comparablecast
     	final QualifierHierarchy qualHierarchy = InferenceMain.getInstance().getRealTypeFactory().getQualifierHierarchy();
         final SlotManager slotManager = InferenceMain.getInstance().getSlotManager();
-        final Slot castSlot = slotManager.getVariableSlot(castType);
-        final Slot exprSlot = slotManager.getVariableSlot(exprType);
+        final Slot castSlot = slotManager.getSlot(castType);
+        final Slot exprSlot = slotManager.getSlot(exprType);
 
         if (castSlot instanceof ConstantSlot && exprSlot instanceof ConstantSlot) {
             ConstantSlot castCSSlot = (ConstantSlot) castSlot;
@@ -372,7 +369,7 @@ public class GUTVisitor extends InferenceVisitor<GUTChecker, BaseAnnotatedTypeFa
             return qualHierarchy.isSubtype(castCSSlot.getValue(), exprCSSlot.getValue())
             		|| qualHierarchy.isSubtype(exprCSSlot.getValue(), castCSSlot.getValue());
         } else {
-            // But if there is at least on VariableSlot, PICOInfer guarantees that solutions don't include
+            // But if there is at least on Slot, PICOInfer guarantees that solutions don't include
             // incomparable casts.
             areComparable(castType, exprType, "uts.cast.type.error", node);
             return true;
