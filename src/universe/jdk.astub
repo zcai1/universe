@@ -12,10 +12,14 @@ class String {
 
 package java.util;
 
-class List<X extends @Any Object> {
-  void add(X p);
+interface List<E extends @Any Object> extends Collection<E>  {
+  public boolean add(E p);
 }
 
-interface Collection<E> {
+class ArrayList<E extends @Any Object> extends List<E>  {
+  public boolean add(E p);
+}
+
+interface Collection<E extends @Any Object> {
     boolean contains(@Any Object o);
 }
