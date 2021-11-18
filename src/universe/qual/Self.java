@@ -20,7 +20,7 @@ import java.lang.annotation.Target;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})
-@TargetLocations({TypeUseLocation.RECEIVER})
+@TargetLocations({TypeUseLocation.RECEIVER, TypeUseLocation.CONSTRUCTOR_RESULT})
 @SubtypeOf({ Peer.class })
-@DefaultFor({TypeUseLocation.RECEIVER})
+@DefaultFor({TypeUseLocation.RECEIVER, TypeUseLocation.CONSTRUCTOR_RESULT})
 public @interface Self {}
