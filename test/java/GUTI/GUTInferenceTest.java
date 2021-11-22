@@ -15,7 +15,7 @@ public class GUTInferenceTest extends CFInferenceTest {
 
     public GUTInferenceTest(File testFile) {
         super(testFile, universe.GUTChecker.class, "",
-                "-Anomsgtext", "-Astubs=src/universe/jdk.astub", "-d", "testTmp");
+                "-Anomsgtext", "-Astubs=src/universe/jdk.astub", "-d", "testTmp", "-doe");
     }
 
     @Override
