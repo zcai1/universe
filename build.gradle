@@ -1,0 +1,131 @@
+apply plugin: 'java'
+
+ext {
+    jsr308 = System.getenv('JSR308') ?: file(new File("..")).absolutePath
+    cfPath = "${jsr308}/checker-framework"
+    cfiPath = "${jsr308}/checker-framework-inference"
+    afu = "${jsr308}/annotation-tools/annotation-file-utilities"
+    universePath = "${jsr308}/universe"
+}
+
+println '==================================='
+println '         Universe Checker          '
+println '==================================='
+println ''
+println '-------------------------------'
+println 'Important Environment Variables'
+println '-------------------------------'
+println 'JSR308:   ' + jsr308
+println 'CF:       ' + cfPath
+println 'CFI:      ' + cfiPath
+println 'UNIVERSE: ' + universePath
+
+repositories {
+    mavenCentral()
+}
+
+def framework_test_files = fileTree(dir: "${cfPath}/framework-test/build/libs", include: "framework-test-*.jar")
+List<File> list_of_files = new ArrayList<>(framework_test_files.getFiles())
+Collections.sort(list_of_files)
+// pick the last element in the sorted list corresponding to the most recent framework-test-*.*.*.jar
+def framework_test_jar = files(list_of_files[list_of_files.size()-1])
+
+dependencies {
+    implementation fileTree(dir: "${cfPath}/checker/dist", include: "checker.jar")
+    implementation fileTree(dir: "${cfiPath}/dist", include: "checker-framework-inference.jar")
+    implementation fileTree(dir: "${cfiPath}/dist", include: "inference-framework-test-lib.jar")
+    implementation group: 'log4j', name: 'log4j', version: '1.2.16'
+    implementation 'commons-logging:commons-logging:1.2'
+    testImplementation framework_test_jar
+    testImplementation 'junit:junit:4.13'
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir "src"
+        }
+
+        resources {
+            srcDir "src"
+            exclude "**/*.java"
+        }
+    }
+
+    test {
+        java {
+            srcDirs = ["test"]
+        }
+    }
+}
+
+compileJava {
+    options.compilerArgs = [
+            '-implicit:class',
+            '-Awarns',
+            '-Xmaxwarns', '10000',
+    ]
+}
+
+afterEvaluate {
+    // Create a task for each JUnit test class whose name is the same as the JUnit class name.
+    sourceSets.test.allJava.filter { it.path.contains("${universePath}/test") }.forEach { file ->
+        String junitClassName = file.name.replaceAll(".java", "")
+        String testName = junitClassName.replaceAll("Test", "")
+        tasks.create(name: "${junitClassName}", type: Test) {
+            description "Run ${testName} tests."
+            include "**/${name}.class"
+        }
+    }
+
+    // Configure JUnit tests
+    tasks.withType(Test) {
+        group 'Verification'
+
+        systemProperties = [
+                'path.afu.scripts' : "${afu}/scripts",
+                'path.inference.script': "${cfiPath}/scripts/inference"
+        ]
+
+        environment "external_checker_classpath", "${universePath}/build/classes/java/main:${universePath}/build/libs/universe.jar"
+
+
+        if (JavaVersion.current() == JavaVersion.VERSION_1_8) {
+            jvmArgs "-Xbootclasspath/p:${cfiPath}/dist/javac.jar"
+        }
+
+        testLogging {
+            // Always run the tests
+            outputs.upToDateWhen { false }
+            // The following prints out each time a test is passed.
+            events "passed", "skipped", "failed", "standardOut", "standardError"
+
+            // Show the found unexpected diagnostics and expected diagnostics not found.
+            exceptionFormat "full"
+            showExceptions true
+            showCauses true
+            showStackTraces true
+            showStandardStreams true
+        }
+
+        // After each test, print a summary.
+        afterSuite { desc, result ->
+            if (desc.getClassName() != null) {
+                long mils = result.getEndTime() - result.getStartTime()
+                double seconds = mils / 1000.0
+
+                println "Testsuite: ${desc.getClassName()}\n" +
+                        "Tests run: ${result.testCount}, " +
+                        "Failures: ${result.failedTestCount}, " +
+                        "Skipped: ${result.skippedTestCount}, " +
+                        "Time elapsed: ${seconds} sec\n"
+            }
+        }
+    }
+}
+
+tasks.clean {
+    delete 'bin', 'dist', 'testTmp', 'annotated',
+            fileTree('.') { include '**/*.jaif', '**/*.txt' },
+            fileTree('tests') { include '**/*.class' }
+}
