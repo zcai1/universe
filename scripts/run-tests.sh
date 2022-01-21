@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 export MYDIR=`dirname $0`
 . $MYDIR/setup.sh

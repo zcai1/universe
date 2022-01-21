@@ -6,7 +6,9 @@ export MYDIR=`dirname $0`
 
 CHECKER=universe.UniverseInferenceChecker
 
-SOLVER=universe.solver.UniverseSolverEngine
 IS_HACK=true
+
+DEBUG_SOLVER=checkers.inference.solver.DebugSolver
+SOLVER="$DEBUG_SOLVER"
 
 $CFI/scripts/inference-dev --checker "$CHECKER" --solver "$SOLVER" --solverArgs="collectStatistics=true" --hacks="$IS_HACK" -m ROUNDTRIP -afud ./annotated "$@"
