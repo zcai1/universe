@@ -20,9 +20,9 @@ public class SimpleVP {
         @Rep Object roe = this.r;
         @Any Object aoe = this.a;
 
-        //:: error: (assignment.type.incompatible)
+        // :: error: (assignment.type.incompatible)
         @Rep Object epo = this.p;
-        //:: error: (assignment.type.incompatible)
+        // :: error: (assignment.type.incompatible)
         @Peer Object ero = this.r;
     }
 
@@ -36,7 +36,7 @@ public class SimpleVP {
         @Any SimpleVP asv = new @Peer SimpleVP();
         @Any Object oa = asv.p;
 
-        //:: error: (assignment.type.incompatible)
+        // :: error: (assignment.type.incompatible)
         @Rep Object pr = psv.r;
 
         @Any Object pra = psv.a;
@@ -48,9 +48,9 @@ public class SimpleVP {
             @Rep Object ro = super.r;
             @Any Object ao = super.a;
 
-            //:: error: (assignment.type.incompatible)
+            // :: error: (assignment.type.incompatible)
             @Rep Object epo = super.p;
-            //:: error: (assignment.type.incompatible)
+            // :: error: (assignment.type.incompatible)
             @Peer Object ero = super.r;
         }
     }

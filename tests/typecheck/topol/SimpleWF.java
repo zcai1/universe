@@ -11,42 +11,42 @@ class SimpleWF {
     // OK
     @Any Object f;
 
-    //:: error: (type.invalid)
+    // :: error: (type.invalid.conflicting.annos)
     @Any @Peer Object g;
 
     // this is ensured by Java already
     // @Peer @Peer Object h;
 
-    //:: error: (type.invalid)
+    // :: error: (type.invalid.conflicting.annos)
     @Rep @Peer Object i;
 
-    //:: error: (type.invalid)
+    // :: error: (type.invalid.conflicting.annos)
     List<@Rep @Peer Object> l;
 
     void m() {
         @Peer Object o = null;
-        //:: error: (type.invalid)
-        if (o instanceof @Peer @Rep Object) { 
+        // :: error: (type.invalid.conflicting.annos)
+        if (o instanceof @Peer @Rep Object) {
             //ha!
         }
     }
 
-    //:: error: (type.invalid)
+    // :: error: (type.invalid.conflicting.annos)
     @Rep @Peer int rpi;
-    //:: error: (type.invalid)
+    // :: error: (type.invalid.annotations.on.use)
     @Peer int pi;
-    //:: error: (type.invalid)
+    // :: error: (type.invalid.annotations.on.use)
     @Rep long rl;
-    //:: error: (type.invalid)
+    // :: error: (type.invalid.annotations.on.use)
     @Any boolean ab;
 
-    // OK
+    // :: error: (type.invalid.annotations.on.use)
     @Peer Boolean bw;
     boolean sb;
 
     @Peer Object pothis = this;
 
-    //:: error: (type.invalid)
+    // :: error: (type.invalid.conflicting.annos)
     List<@Rep @Peer Object> error;
 
     void testerror() {

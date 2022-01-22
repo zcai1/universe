@@ -29,13 +29,13 @@ public class SimpleSub {
     }
 
     void errors() {
-        //:: error: (assignment.type.incompatible)
+        // :: error: (assignment.type.incompatible)
         r = a1;
-        //:: error: (assignment.type.incompatible)
+        // :: error: (assignment.type.incompatible)
         p = a1;
-        //:: error: (assignment.type.incompatible)
+        // :: error: (assignment.type.incompatible)
         r = p;
-        //:: error: (assignment.type.incompatible)
+        // :: error: (assignment.type.incompatible)
         p = r;
     }
 }

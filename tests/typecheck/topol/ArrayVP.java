@@ -18,10 +18,10 @@ public class ArrayVP {
         @Rep Object xro = this.ri;
         @Any Object xao = this.ai;
 
-        //:: error: (assignment.type.incompatible)
+        // :: error: (assignment.type.incompatible)
         @Rep Object epo = this.pi;
 
-        //:: error: (assignment.type.incompatible)
+        // :: error: (assignment.type.incompatible)
         @Peer Object ero = this.ri;
 
         int i = pi[0];
@@ -34,7 +34,7 @@ public class ArrayVP {
         int @Rep[] o = rav.pi;
 
         @Peer ArrayVP pav = new @Peer ArrayVP();
-        //:: error: (assignment.type.incompatible)
+        // :: error: (assignment.type.incompatible)
         int @Rep[] o2 = pav.ri;
         // ok
         int @Any[] o3 = pav.ri;
@@ -60,29 +60,29 @@ public class ArrayVP {
         po = pavp.por[0];
         po = pavp.rop;
 
-        //:: error: (assignment.type.incompatible)
+        // :: error: (assignment.type.incompatible)
         po = pavp.rop[0];
 
-        //:: error: (uts.vplost.lhs)
+        // :: error: (uts.lost.lhs)
         pavp.rop = rop;
 
         // ok
         roa = ravp.por;
         ro = ravp.por[0];
 
-        //:: error: (assignment.type.incompatible)
+        // :: error: (assignment.type.incompatible)
         ro = pavp.rop[0];
     }
 
     void objOnThis() {
         //ok
         @Peer Object po = this.por[0];
-        //:: error: (assignment.type.incompatible)
+        // :: error: (assignment.type.incompatible)
         po = this.rop[0];
 
         // ok
         @Rep Object ro = this.rop[0];
-        //:: error: (assignment.type.incompatible)
+        // :: error: (assignment.type.incompatible)
         ro = this.por[0];
 
         // ok
@@ -91,18 +91,18 @@ public class ArrayVP {
         ro = por;
         ro = aor;
 
-        //:: error: (assignment.type.incompatible)
+        // :: error: (assignment.type.incompatible)
         po = por;
-        //:: error: (assignment.type.incompatible)
+        // :: error: (assignment.type.incompatible)
         po = aor;
-        //:: error: (assignment.type.incompatible)
+        // :: error: (assignment.type.incompatible)
         po = poa;
 
-        //:: error: (assignment.type.incompatible)
+        // :: error: (assignment.type.incompatible)
         ro = rop;
-        //:: error: (assignment.type.incompatible)
+        // :: error: (assignment.type.incompatible)
         ro = aop;
-        //:: error: (assignment.type.incompatible)
+        // :: error: (assignment.type.incompatible)
         ro = roa;
     }
 
@@ -112,9 +112,9 @@ public class ArrayVP {
             @Rep Object ro = super.ri;
             @Any Object ao = super.ai;
 
-            //:: error: (assignment.type.incompatible)
+            // :: error: (assignment.type.incompatible)
             @Rep Object epo = super.pi;
-            //:: error: (assignment.type.incompatible)
+            // :: error: (assignment.type.incompatible)
             @Peer Object ero = super.ri;
         }
     }

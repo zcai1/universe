@@ -13,6 +13,6 @@ public class SimpleNew {
     @Peer Object p = new @Peer Object();
     @Rep Object r = new @Rep Object();
 
-    //:: error: (uts.new.ownership)
+    // :: error: (uts.new.ownership)
     @Any Object a = new @Any Object();
 }

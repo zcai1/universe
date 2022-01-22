@@ -1,4 +1,4 @@
-package typecheck.strictpurity;
+package universe.strictpurity;
 
 import universe.qual.Pure;
 /**
@@ -9,7 +9,7 @@ public class Methods {
 
     int x;
     @Pure void m() {
-        //:: error: (purity.assignment.forbidden)
+        // :: error: (purity.assignment.forbidden)
         this.x = 5;
     }
 }

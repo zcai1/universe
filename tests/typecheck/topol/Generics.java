@@ -32,14 +32,14 @@ public class Generics {
     void bar() {
         @Peer Object po = pro;
 
-        //:: error: (assignment.type.incompatible)
+        // :: error: (assignment.type.incompatible)
         @Rep Object ro = pro;
 
-        //:: error: (assignment.type.incompatible)
+        // :: error: (assignment.type.incompatible)
         po = pro.get();
         ro = pro.get();
 
-        //:: error: (argument.type.incompatible)
+        // :: error: (argument.type.incompatible)
         pro.add(new @Peer Object());
 
         pro.add(new @Rep Object());
@@ -49,22 +49,22 @@ public class Generics {
 
     void fooPeer() {
         @Peer Generics pg = new @Peer Generics();
-        //:: error: (uts.vplost.parameter)
+        // :: error: (uts.lost.parameter)
         pg.pro.add(new @Rep Object());
 
         @Any Object ao = pg.pro.get();
-        //:: error: (assignment.type.incompatible)
+        // :: error: (assignment.type.incompatible)
         @Rep Object ro = pg.pro;
         @Peer Object po = pg.pro;
     }
 
     void fooRep() {
         @Rep Generics rg = new @Rep Generics();
-        //:: error: (uts.vplost.parameter)
+        // :: error: (uts.lost.parameter)
         rg.pro.add(new @Rep Object());
 
         @Any Object ao = rg.pro.get();
-        //:: error: (assignment.type.incompatible)
+        // :: error: (assignment.type.incompatible)
         @Peer Object ro = rg.pro;
         @Rep Object po = rg.pro;
     }

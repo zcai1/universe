@@ -13,7 +13,7 @@ class GBounds {
             return f;
         }
     }
-    
+
     class C2<X extends @Peer Object> {}
     class C3<Y extends @Peer Data> {
         @Peer C2<Y> f;
@@ -24,13 +24,13 @@ class GBounds {
         @Rep C2<@Rep SubData> g;
         @Rep Object h = new @Rep C2<@Rep SubData>();
 
-        //:: error: (type.argument.type.incompatible)
+        // :: error: (type.argument.type.incompatible)
         @Rep C2<@Peer Object> er1;
-        //:: error: (type.argument.type.incompatible)
+        // :: error: (type.argument.type.incompatible)
         @Peer C2<@Rep Object> er2;
-        //:: error: (type.argument.type.incompatible)
+        // :: error: (type.argument.type.incompatible)
         @Rep C2<@Any Object> er3;
-        //:: error: (uts.vplost.in.bounds)
+        // :: error: (uts.lost.in.bounds)
         @Any C2<@Peer Object> er4;
 
     }
@@ -40,7 +40,7 @@ class GBounds {
 
     class C5<Y extends @Rep Object> {}
     class C6 extends C5<@Rep Data> {}
-    //:: error: (type.argument.type.incompatible)
+    // :: error: (type.argument.type.incompatible)
     class C7 extends C5<@Peer Data> {}
 
 }

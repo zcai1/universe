@@ -10,7 +10,7 @@ import universe.qual.Rep;
  */
 public class Methods {
 
-    //:: error: (uts.receiver.annotations.forbidden)
+    // :: error: (uts.receiver.not.self)
     void receiver(@Any Methods this) {
     }
 
@@ -35,34 +35,34 @@ public class Methods {
 
     void errors() {
 
-        //:: error: (assignment.type.incompatible)
+        // :: error: (assignment.type.incompatible)
         @Rep Object mo = p_field.m( new @Peer Object() );
-        //:: error: (argument.type.incompatible)
+        // :: error: (argument.type.incompatible)
         @Peer Object mo2 = p_field.m( new @Rep Object() );
 
-        //:: error: (assignment.type.incompatible)
+        // :: error: (assignment.type.incompatible)
         @Rep Object ma = p_field.foo( new @Peer Object() );
 
-        //:: error: (argument.type.incompatible)
+        // :: error: (argument.type.incompatible)
         @Any Object ro = r_field.m( new @Peer Object() );
 
-        //:: error: (assignment.type.incompatible)
+        // :: error: (assignment.type.incompatible)
         @Peer Object ro2 = r_field.m( null );
 
-        //:: error: (argument.type.incompatible)
+        // :: error: (argument.type.incompatible)
         @Any Object ra = r_field.foo( new @Peer Object() );
 
-        //:: error: (uts.vplost.parameter)
+        // :: error: (uts.lost.parameter)
         a_field.m(new @Peer Object());
     }
 
     class SubMethods1 extends Methods {
-        //:: error: (override.return.invalid)
+        // :: error: (override.return.invalid)
         @Rep Object m(@Peer Object o) { return null; }
     }
 
     class SubMethods2 extends Methods {
-        //:: error: (override.param.invalid)
+        // :: error: (override.param.invalid)
         @Peer Object m(@Rep Object o) { return null; }
     }
 

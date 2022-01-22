@@ -20,17 +20,17 @@ public class ComplexNew {
     @Peer Object p = new @Peer ComplexNew(new @Peer Object());
     @Rep Object r = new @Rep ComplexNew(new @Rep Object());
 
-    //:: error: (argument.type.incompatible)
+    // :: error: (argument.type.incompatible)
     @Peer Object ep = new @Peer ComplexNew(new @Rep Object());
 
-    //:: error: (argument.type.incompatible)
+    // :: error: (argument.type.incompatible)
     @Rep Object er = new @Rep ComplexNew(new @Peer Object());
 
-    //:: error: (uts.vplost.parameter)
+    // :: error: (uts.lost.parameter)
     @Peer Object ep2 = new @Peer ComplexNew(new @Rep Object(), 5);
 
-    //:: error: (uts.new.ownership)
-    @Any Object a = new @Any ComplexNew(new @Peer Object(), new @Peer Object());    
+    // :: error: (uts.new.ownership)
+    @Any Object a = new @Any ComplexNew(new @Peer Object(), new @Peer Object());
 
     class SubComplexNew extends ComplexNew {
         SubComplexNew() {
@@ -38,7 +38,7 @@ public class ComplexNew {
         }
 
         SubComplexNew(int i) {
-            //:: error: (argument.type.incompatible)
+            // :: error: (argument.type.incompatible)
             super(new @Peer Object(), i);
         }
     }
