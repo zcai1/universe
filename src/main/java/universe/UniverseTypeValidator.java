@@ -1,7 +1,13 @@
 package universe;
 
+import static universe.UniverseAnnotationMirrorHolder.BOTTOM;
+import static universe.UniverseAnnotationMirrorHolder.LOST;
+import static universe.UniverseAnnotationMirrorHolder.REP;
+
 import com.sun.source.tree.ParameterizedTypeTree;
 import com.sun.source.tree.Tree;
+import java.util.List;
+import javax.lang.model.element.TypeElement;
 import org.checkerframework.common.basetype.BaseTypeChecker;
 import org.checkerframework.common.basetype.BaseTypeValidator;
 import org.checkerframework.common.basetype.BaseTypeVisitor;
@@ -11,31 +17,23 @@ import org.checkerframework.framework.type.AnnotatedTypeParameterBounds;
 import org.checkerframework.framework.util.AnnotatedTypes;
 import org.checkerframework.javacutil.TreeUtils;
 
-import javax.lang.model.element.TypeElement;
-import java.util.List;
+/** This type validator ensures correct usage of ownership modifiers to ensure well-formedness. */
+public class UniverseTypeValidator extends BaseTypeValidator {
 
-import static universe.UniverseAnnotationMirrorHolder.BOTTOM;
-import static universe.UniverseAnnotationMirrorHolder.LOST;
-import static universe.UniverseAnnotationMirrorHolder.REP;
-
-/**
- * This type validator ensures correct usage of ownership modifiers
- * to ensure well-formedness.
- */
-public class UniverseTypeValidator extends BaseTypeValidator{
-
-    public UniverseTypeValidator(BaseTypeChecker checker, BaseTypeVisitor<?> visitor, AnnotatedTypeFactory atypeFactory) {
+    public UniverseTypeValidator(
+            BaseTypeChecker checker,
+            BaseTypeVisitor<?> visitor,
+            AnnotatedTypeFactory atypeFactory) {
         super(checker, visitor, atypeFactory);
     }
 
     /**
-     * Ensure that only one ownership modifier is used, that ownership
-     * modifiers are correctly used in static contexts, and check for
-     * explicit use of lost.
+     * Ensure that only one ownership modifier is used, that ownership modifiers are correctly used
+     * in static contexts, and check for explicit use of lost.
      */
     @Override
     public Void visitDeclared(AnnotatedTypeMirror.AnnotatedDeclaredType type, Tree p) {
-        if (checkTopLevelDeclaredOrPrimitiveType){
+        if (checkTopLevelDeclaredOrPrimitiveType) {
             checkImplicitlyBottomTypeError(type, p);
         }
         checkStaticRepError(type, p);
@@ -47,7 +45,8 @@ public class UniverseTypeValidator extends BaseTypeValidator{
     }
 
     @Override
-    protected Void visitParameterizedType(AnnotatedTypeMirror.AnnotatedDeclaredType type, ParameterizedTypeTree tree) {
+    protected Void visitParameterizedType(
+            AnnotatedTypeMirror.AnnotatedDeclaredType type, ParameterizedTypeTree tree) {
         if (TreeUtils.isDiamondTree(tree)) {
             return null;
         }
@@ -56,11 +55,12 @@ public class UniverseTypeValidator extends BaseTypeValidator{
             return null;
         }
 
-        List<AnnotatedTypeParameterBounds> typeParamBounds = atypeFactory.typeVariablesFromUse(type, element);
+        List<AnnotatedTypeParameterBounds> typeParamBounds =
+                atypeFactory.typeVariablesFromUse(type, element);
         for (AnnotatedTypeParameterBounds atpb : typeParamBounds) {
             // Previously, here also checks two bounds are not TypeKind.NULL. What's the reason?
-            if (AnnotatedTypes.containsModifier(atpb.getUpperBound(), LOST) ||
-                    AnnotatedTypes.containsModifier(atpb.getLowerBound(), LOST)) {
+            if (AnnotatedTypes.containsModifier(atpb.getUpperBound(), LOST)
+                    || AnnotatedTypes.containsModifier(atpb.getLowerBound(), LOST)) {
                 checker.reportError(tree, "uts.lost.in.bounds", atpb.toString(), type.toString());
             }
         }
@@ -85,7 +85,8 @@ public class UniverseTypeValidator extends BaseTypeValidator{
     private void checkStaticRepError(AnnotatedTypeMirror type, Tree tree) {
         if (UniverseTypeUtil.inStaticScope(visitor.getCurrentPath())) {
             if (AnnotatedTypes.containsModifier(type, REP)) {
-                checker.reportError(tree, "uts.static.rep.forbidden", type.getAnnotations(), type.toString());
+                checker.reportError(
+                        tree, "uts.static.rep.forbidden", type.getAnnotations(), type.toString());
             }
         }
     }

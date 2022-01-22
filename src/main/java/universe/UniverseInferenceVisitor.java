@@ -1,5 +1,11 @@
 package universe;
 
+import static universe.UniverseAnnotationMirrorHolder.ANY;
+import static universe.UniverseAnnotationMirrorHolder.BOTTOM;
+import static universe.UniverseAnnotationMirrorHolder.LOST;
+import static universe.UniverseAnnotationMirrorHolder.REP;
+import static universe.UniverseAnnotationMirrorHolder.SELF;
+
 import checkers.inference.InferenceChecker;
 import checkers.inference.InferenceMain;
 import checkers.inference.InferenceVisitor;
@@ -18,6 +24,9 @@ import com.sun.source.tree.NewClassTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.TypeCastTree;
 import com.sun.source.tree.VariableTree;
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.type.TypeKind;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeFactory.ParameterizedExecutableType;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
@@ -26,52 +35,47 @@ import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedExecutab
 import org.checkerframework.framework.type.QualifierHierarchy;
 import org.checkerframework.javacutil.TreeUtils;
 
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.type.TypeKind;
-
-import static universe.UniverseAnnotationMirrorHolder.ANY;
-import static universe.UniverseAnnotationMirrorHolder.BOTTOM;
-import static universe.UniverseAnnotationMirrorHolder.LOST;
-import static universe.UniverseAnnotationMirrorHolder.REP;
-import static universe.UniverseAnnotationMirrorHolder.SELF;
-
 /**
  * Type visitor to either enforce or infer the universe type rules.
  *
  * @author wmdietl
  */
-public class UniverseInferenceVisitor extends InferenceVisitor<UniverseInferenceChecker, BaseAnnotatedTypeFactory> {
+public class UniverseInferenceVisitor
+        extends InferenceVisitor<UniverseInferenceChecker, BaseAnnotatedTypeFactory> {
 
     private final boolean checkOaM;
     private final boolean checkStrictPurity;
 
-    public UniverseInferenceVisitor(UniverseInferenceChecker checker, InferenceChecker ichecker, BaseAnnotatedTypeFactory factory, boolean infer) {
+    public UniverseInferenceVisitor(
+            UniverseInferenceChecker checker,
+            InferenceChecker ichecker,
+            BaseAnnotatedTypeFactory factory,
+            boolean infer) {
         super(checker, ichecker, factory, infer);
 
         checkOaM = checker.getLintOption("checkOaM", false);
         checkStrictPurity = checker.getLintOption("checkStrictPurity", false);
     }
 
-    /**
-     * The type validator to ensure correct usage of ownership modifiers.
-     */
+    /** The type validator to ensure correct usage of ownership modifiers. */
     @Override
     protected UniverseInferenceValidator createTypeValidator() {
         return new UniverseInferenceValidator(checker, this, atypeFactory);
     }
 
     @Override
-    public boolean isValidUse(AnnotatedDeclaredType declarationType, AnnotatedDeclaredType useType, Tree tree) {
+    public boolean isValidUse(
+            AnnotatedDeclaredType declarationType, AnnotatedDeclaredType useType, Tree tree) {
         return true;
     }
 
     /**
-     * Ignore constructor receiver annotations as result type of the constructor is always SELF for universe.
+     * Ignore constructor receiver annotations as result type of the constructor is always SELF for
+     * universe.
      */
     @Override
-    protected void checkConstructorInvocation(AnnotatedDeclaredType dt,
-                                              AnnotatedExecutableType constructor, NewClassTree src) {}
+    protected void checkConstructorInvocation(
+            AnnotatedDeclaredType dt, AnnotatedExecutableType constructor, NewClassTree src) {}
 
     @Override
     public Void visitVariable(VariableTree node, Void p) {
@@ -81,23 +85,23 @@ public class UniverseInferenceVisitor extends InferenceVisitor<UniverseInference
             SlotManager slotManager = InferenceMain.getInstance().getSlotManager();
             Slot slot = slotManager.getSlot(type);
             if (slot instanceof VariableSlot) {
-                ConstraintManager constraintManager = InferenceMain.getInstance().getConstraintManager();
+                ConstraintManager constraintManager =
+                        InferenceMain.getInstance().getConstraintManager();
                 ConstantSlot rep = slotManager.createConstantSlot(REP);
-                constraintManager.addPreferenceConstraint((VariableSlot)slot, rep, 80);
+                constraintManager.addPreferenceConstraint((VariableSlot) slot, rep, 80);
             }
         }
         return super.visitVariable(node, p);
     }
 
-    /**
-     * Universe does not use receiver annotations, forbid them.
-     */
+    /** Universe does not use receiver annotations, forbid them. */
     @Override
     public Void visitMethod(MethodTree node, Void p) {
         AnnotatedExecutableType executableType = atypeFactory.getAnnotatedType(node);
 
         if (TreeUtils.isConstructor(node)) {
-            AnnotatedDeclaredType constructorReturnType = (AnnotatedDeclaredType) executableType.getReturnType();
+            AnnotatedDeclaredType constructorReturnType =
+                    (AnnotatedDeclaredType) executableType.getReturnType();
             mainIs(constructorReturnType, SELF, "uts.constructor.not.self", node);
         } else {
             AnnotatedDeclaredType declaredReceiverType = executableType.getReceiverType();
@@ -111,8 +115,13 @@ public class UniverseInferenceVisitor extends InferenceVisitor<UniverseInference
 
     @Override
     protected OverrideChecker createOverrideChecker(
-            Tree overriderTree, AnnotatedExecutableType overrider,AnnotatedTypeMirror overridingType,
-            AnnotatedTypeMirror overridingReturnType, AnnotatedExecutableType overridden, AnnotatedDeclaredType overriddenType, AnnotatedTypeMirror overriddenReturnType) {
+            Tree overriderTree,
+            AnnotatedExecutableType overrider,
+            AnnotatedTypeMirror overridingType,
+            AnnotatedTypeMirror overridingReturnType,
+            AnnotatedExecutableType overridden,
+            AnnotatedDeclaredType overriddenType,
+            AnnotatedTypeMirror overriddenReturnType) {
 
         return new OverrideChecker(
                 overriderTree,
@@ -130,19 +139,19 @@ public class UniverseInferenceVisitor extends InferenceVisitor<UniverseInference
     }
 
     /**
-     * There is no need to issue a warning if the result type of the constructor is not top in Universe.
+     * There is no need to issue a warning if the result type of the constructor is not top in
+     * Universe.
      */
     @Override
     protected void checkConstructorResult(
-            AnnotatedTypeMirror.AnnotatedExecutableType constructorType, ExecutableElement constructorElement) {}
+            AnnotatedTypeMirror.AnnotatedExecutableType constructorType,
+            ExecutableElement constructorElement) {}
 
     /**
      * Validate a new object creation.
      *
-     * @param node
-     *            the new object creation.
-     * @param p
-     *            not used.
+     * @param node the new object creation.
+     * @param p not used.
      */
     @Override
     public Void visitNewClass(NewClassTree node, Void p) {
@@ -174,17 +183,19 @@ public class UniverseInferenceVisitor extends InferenceVisitor<UniverseInference
         if (UniverseTypeUtil.isImplicitlyBottomType(type)) {
             effectiveIs(type, BOTTOM, "uts.new.ownership", node);
         } else {
-            mainIsNoneOf(type, new AnnotationMirror[] { LOST, ANY, SELF, BOTTOM }, "uts.new.ownership", node);
+            mainIsNoneOf(
+                    type,
+                    new AnnotationMirror[] {LOST, ANY, SELF, BOTTOM},
+                    "uts.new.ownership",
+                    node);
         }
     }
 
     /**
      * Validate a method invocation.
      *
-     * @param node
-     *            the method invocation.
-     * @param p
-     *            not used.
+     * @param node the method invocation.
+     * @param p not used.
      */
     @Override
     public Void visitMethodInvocation(MethodInvocationTree node, Void p) {
@@ -203,7 +214,11 @@ public class UniverseInferenceVisitor extends InferenceVisitor<UniverseInference
                 if (receiverType != null) {
                     ExecutableElement methodElement = TreeUtils.elementFromUse(node);
                     if (!UniverseTypeUtil.isPure(methodElement)) {
-                        mainIsNoneOf(receiverType, new AnnotationMirror[]{ LOST, ANY }, "oam.call.forbidden", node);
+                        mainIsNoneOf(
+                                receiverType,
+                                new AnnotationMirror[] {LOST, ANY},
+                                "oam.call.forbidden",
+                                node);
                     }
                 }
             }
@@ -215,10 +230,8 @@ public class UniverseInferenceVisitor extends InferenceVisitor<UniverseInference
     /**
      * Validate an assignment.
      *
-     * @param node
-     *            the assignment.
-     * @param p
-     *            not used.
+     * @param node the assignment.
+     * @param p not used.
      */
     @Override
     public Void visitAssignment(AssignmentTree node, Void p) {
@@ -232,8 +245,12 @@ public class UniverseInferenceVisitor extends InferenceVisitor<UniverseInference
                 AnnotatedTypeMirror receiverType = atypeFactory.getAnnotatedType(receiverTree);
 
                 if (receiverType != null) {
-                        // TODO: do we need to treat "this" and "super" specially?
-                        mainIsNoneOf(receiverType, new AnnotationMirror[]{ LOST, ANY }, "oam.assignment.forbidden", node);
+                    // TODO: do we need to treat "this" and "super" specially?
+                    mainIsNoneOf(
+                            receiverType,
+                            new AnnotationMirror[] {LOST, ANY},
+                            "oam.assignment.forbidden",
+                            node);
                 }
             }
         }
@@ -265,12 +282,15 @@ public class UniverseInferenceVisitor extends InferenceVisitor<UniverseInference
         // We cannot do a simple test of casting, as isSubtypeOf requires
         // the input types to be subtypes according to Java
         if (!isTypeCastSafe(castType, exprType, node)) {
-            // This is only warning message, so even though enterred this line, it doesn't cause inference to exit.
-            checker.reportWarning(node, "cast.unsafe", exprType.toString(true), castType.toString(true));
+            // This is only warning message, so even though enterred this line, it doesn't cause
+            // inference to exit.
+            checker.reportWarning(
+                    node, "cast.unsafe", exprType.toString(true), castType.toString(true));
         }
     }
 
-    private boolean isTypeCastSafe(AnnotatedTypeMirror castType, AnnotatedTypeMirror exprType, TypeCastTree node) {
+    private boolean isTypeCastSafe(
+            AnnotatedTypeMirror castType, AnnotatedTypeMirror exprType, TypeCastTree node) {
         if (infer) {
             return isCompatibleCastInInfer(castType, exprType, node);
         } else {
@@ -279,10 +299,12 @@ public class UniverseInferenceVisitor extends InferenceVisitor<UniverseInference
         }
     }
 
-    private boolean isCompatibleCastInInfer(AnnotatedTypeMirror castType, AnnotatedTypeMirror exprType, TypeCastTree node) {
+    private boolean isCompatibleCastInInfer(
+            AnnotatedTypeMirror castType, AnnotatedTypeMirror exprType, TypeCastTree node) {
         // TODO: Can be shifted to CFI?
         // comparablecast
-        final QualifierHierarchy qualHierarchy = InferenceMain.getInstance().getRealTypeFactory().getQualifierHierarchy();
+        final QualifierHierarchy qualHierarchy =
+                InferenceMain.getInstance().getRealTypeFactory().getQualifierHierarchy();
         final SlotManager slotManager = InferenceMain.getInstance().getSlotManager();
         final Slot castSlot = slotManager.getSlot(castType);
         final Slot exprSlot = slotManager.getSlot(exprType);
@@ -290,7 +312,8 @@ public class UniverseInferenceVisitor extends InferenceVisitor<UniverseInference
         if (castSlot instanceof ConstantSlot && exprSlot instanceof ConstantSlot) {
             ConstantSlot castCSSlot = (ConstantSlot) castSlot;
             ConstantSlot exprCSSlot = (ConstantSlot) exprSlot;
-            // Special handling for case with two ConstantSlots: even though they may not be comparable,
+            // Special handling for case with two ConstantSlots: even though they may not be
+            // comparable,
             // but to infer more program, let this case fall back to "anycast" silently and continue
             // inference.
             return qualHierarchy.isSubtype(castCSSlot.getValue(), exprCSSlot.getValue())
@@ -320,8 +343,7 @@ public class UniverseInferenceVisitor extends InferenceVisitor<UniverseInference
                 break;
             case METHOD:
                 type = atypeFactory.getMethodReturnType((MethodTree) tree);
-                if (type == null ||
-                        type.getKind() == TypeKind.VOID) {
+                if (type == null || type.getKind() == TypeKind.VOID) {
                     // Nothing to do for void methods.
                     // Note that for a constructor the AnnotatedExecutableType does
                     // not use void as return type.

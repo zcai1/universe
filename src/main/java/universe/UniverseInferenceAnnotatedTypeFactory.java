@@ -1,5 +1,11 @@
 package universe;
 
+import static universe.UniverseAnnotationMirrorHolder.ANY;
+import static universe.UniverseAnnotationMirrorHolder.BOTTOM;
+import static universe.UniverseAnnotationMirrorHolder.PEER;
+import static universe.UniverseAnnotationMirrorHolder.REP;
+import static universe.UniverseAnnotationMirrorHolder.SELF;
+
 import checkers.inference.InferenceAnnotatedTypeFactory;
 import checkers.inference.InferenceChecker;
 import checkers.inference.InferenceTreeAnnotator;
@@ -12,32 +18,32 @@ import checkers.inference.util.InferenceViewpointAdapter;
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.TypeCastTree;
+import javax.lang.model.element.AnnotationMirror;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedDeclaredType;
-import org.checkerframework.framework.type.treeannotator.LiteralTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.ListTreeAnnotator;
+import org.checkerframework.framework.type.treeannotator.LiteralTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.PropagationTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
 
-import javax.lang.model.element.AnnotationMirror;
-
-import static universe.UniverseAnnotationMirrorHolder.ANY;
-import static universe.UniverseAnnotationMirrorHolder.BOTTOM;
-import static universe.UniverseAnnotationMirrorHolder.PEER;
-import static universe.UniverseAnnotationMirrorHolder.REP;
-import static universe.UniverseAnnotationMirrorHolder.SELF;
-
 public class UniverseInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFactory {
 
-    public UniverseInferenceAnnotatedTypeFactory(InferenceChecker inferenceChecker,
-                                                 boolean withCombineConstraints,
-                                                 BaseAnnotatedTypeFactory realTypeFactory,
-                                                 InferrableChecker realChecker, SlotManager slotManager,
-                                                 ConstraintManager constraintManager) {
-        super(inferenceChecker, withCombineConstraints, realTypeFactory,
-                realChecker, slotManager, constraintManager);
+    public UniverseInferenceAnnotatedTypeFactory(
+            InferenceChecker inferenceChecker,
+            boolean withCombineConstraints,
+            BaseAnnotatedTypeFactory realTypeFactory,
+            InferrableChecker realChecker,
+            SlotManager slotManager,
+            ConstraintManager constraintManager) {
+        super(
+                inferenceChecker,
+                withCombineConstraints,
+                realTypeFactory,
+                realChecker,
+                slotManager,
+                constraintManager);
 
         addAliasedTypeAnnotation(org.jmlspecs.annotation.Peer.class, PEER);
         addAliasedTypeAnnotation(org.jmlspecs.annotation.Rep.class, REP);
@@ -47,19 +53,20 @@ public class UniverseInferenceAnnotatedTypeFactory extends InferenceAnnotatedTyp
 
     @Override
     public TreeAnnotator createTreeAnnotator() {
-        return new ListTreeAnnotator(new LiteralTreeAnnotator(this),
+        return new ListTreeAnnotator(
+                new LiteralTreeAnnotator(this),
                 new UniverseInferencePropagationTreeAnnotater(this),
-                new InferenceTreeAnnotator(this, realChecker, realTypeFactory, variableAnnotator, slotManager));
+                new InferenceTreeAnnotator(
+                        this, realChecker, realTypeFactory, variableAnnotator, slotManager));
     }
 
     @Override
     public VariableAnnotator createVariableAnnotator() {
-        return new UniverseVariableAnnotator(this, realTypeFactory, realChecker, slotManager, constraintManager);
+        return new UniverseVariableAnnotator(
+                this, realTypeFactory, realChecker, slotManager, constraintManager);
     }
 
-    /**
-     * The type of "this" is always "self".
-     */
+    /** The type of "this" is always "self". */
     @Override
     public AnnotatedDeclaredType getSelfType(Tree tree) {
         AnnotatedDeclaredType type = super.getSelfType(tree);
@@ -77,10 +84,15 @@ public class UniverseInferenceAnnotatedTypeFactory extends InferenceAnnotatedTyp
         public UniverseVariableAnnotator(
                 InferenceAnnotatedTypeFactory inferenceTypeFactory,
                 AnnotatedTypeFactory realTypeFactory,
-                InferrableChecker realChecker, SlotManager slotManager,
+                InferrableChecker realChecker,
+                SlotManager slotManager,
                 ConstraintManager constraintManager) {
-            super(inferenceTypeFactory, realTypeFactory, realChecker,
-                    slotManager, constraintManager);
+            super(
+                    inferenceTypeFactory,
+                    realTypeFactory,
+                    realChecker,
+                    slotManager,
+                    constraintManager);
         }
 
         @Override
@@ -102,30 +114,38 @@ public class UniverseInferenceAnnotatedTypeFactory extends InferenceAnnotatedTyp
         }
     }
 
-    private static class UniverseInferencePropagationTreeAnnotater extends PropagationTreeAnnotator {
+    private static class UniverseInferencePropagationTreeAnnotater
+            extends PropagationTreeAnnotator {
         public UniverseInferencePropagationTreeAnnotater(AnnotatedTypeFactory atypeFactory) {
             super(atypeFactory);
         }
 
         @Override
         public Void visitBinary(BinaryTree node, AnnotatedTypeMirror type) {
-            applyBottomIfImplicitlyBottom(type);// Usually there isn't existing annotation on binary trees, but to be safe, run it first
+            applyBottomIfImplicitlyBottom(
+                    type); // Usually there isn't existing annotation on binary trees, but to be
+            // safe, run it first
             return super.visitBinary(node, type);
         }
 
         @Override
         public Void visitTypeCast(TypeCastTree node, AnnotatedTypeMirror type) {
-            applyBottomIfImplicitlyBottom(type);// Must run before calling super method to respect existing annotation
+            applyBottomIfImplicitlyBottom(
+                    type); // Must run before calling super method to respect existing annotation
             if (type.isAnnotatedInHierarchy(ANY)) {
-                // VarAnnot is guarenteed to not exist on type, because PropagationTreeAnnotator has the highest previledge
+                // VarAnnot is guarenteed to not exist on type, because PropagationTreeAnnotator has
+                // the highest previledge
                 // So VarAnnot hasn't been inserted to cast type yet.
                 UniverseTypeUtil.applyConstant(type, type.getAnnotationInHierarchy(ANY));
             }
             return super.visitTypeCast(node, type);
         }
 
-        /**Because TreeAnnotator runs before ImplicitsTypeAnnotator, implicitly immutable types are not guaranteed
-         to always have immutable annotation. If this happens, we manually add immutable to type. */
+        /**
+         * Because TreeAnnotator runs before ImplicitsTypeAnnotator, implicitly immutable types are
+         * not guaranteed to always have immutable annotation. If this happens, we manually add
+         * immutable to type.
+         */
         private void applyBottomIfImplicitlyBottom(AnnotatedTypeMirror type) {
             if (UniverseTypeUtil.isImplicitlyBottomType(type)) {
                 UniverseTypeUtil.applyConstant(type, BOTTOM);
@@ -140,8 +160,8 @@ public class UniverseInferenceAnnotatedTypeFactory extends InferenceAnnotatedTyp
         }
 
         @Override
-        protected AnnotatedTypeMirror combineAnnotationWithType(AnnotationMirror receiverAnnotation,
-                                                                AnnotatedTypeMirror declared) {
+        protected AnnotatedTypeMirror combineAnnotationWithType(
+                AnnotationMirror receiverAnnotation, AnnotatedTypeMirror declared) {
             if (UniverseTypeUtil.isImplicitlyBottomType(declared)) {
                 return declared;
             }

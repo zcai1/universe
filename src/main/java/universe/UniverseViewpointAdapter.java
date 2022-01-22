@@ -8,7 +8,6 @@ import static universe.UniverseAnnotationMirrorHolder.REP;
 import static universe.UniverseAnnotationMirrorHolder.SELF;
 
 import javax.lang.model.element.AnnotationMirror;
-
 import org.checkerframework.framework.type.AbstractViewpointAdapter;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
@@ -27,8 +26,8 @@ public class UniverseViewpointAdapter extends AbstractViewpointAdapter {
     }
 
     @Override
-    protected AnnotationMirror combineAnnotationWithAnnotation(AnnotationMirror receiverAnnotation,
-            AnnotationMirror declaredAnnotation) {
+    protected AnnotationMirror combineAnnotationWithAnnotation(
+            AnnotationMirror receiverAnnotation, AnnotationMirror declaredAnnotation) {
         assert receiverAnnotation != null;
         assert declaredAnnotation != null;
 
@@ -39,7 +38,7 @@ public class UniverseViewpointAdapter extends AbstractViewpointAdapter {
         } else if (AnnotationUtils.areSame(declaredAnnotation, ANY)) {
             return ANY;
         } else if (AnnotationUtils.areSame(declaredAnnotation, SELF)) {
-        	return receiverAnnotation;
+            return receiverAnnotation;
         } else if (AnnotationUtils.areSame(receiverAnnotation, BOTTOM)) {
             // If receiver is bottom, has no ownership information. Any member
             // of it from the viewpoint of self is any, except when declared

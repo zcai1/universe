@@ -1,9 +1,6 @@
 package universe;
 
-import universe.UniverseAnnotationMirrorHolder;
-
 import javax.annotation.processing.SupportedOptions;
-
 import org.checkerframework.common.basetype.BaseTypeChecker;
 import org.checkerframework.common.basetype.BaseTypeVisitor;
 import org.checkerframework.framework.source.SupportedLintOptions;
@@ -17,7 +14,7 @@ import org.checkerframework.framework.source.SupportedLintOptions;
  * Use this for warning messages:
  * messager.printMessage(javax.tools.Diagnostic.Kind.WARNING, "message");
  */
-@SupportedOptions( { "warn" } )
+@SupportedOptions({"warn"})
 @SupportedLintOptions({"allowLost", "checkOaM", "checkStrictPurity"})
 public class UniverseChecker extends BaseTypeChecker {
 
@@ -31,5 +28,4 @@ public class UniverseChecker extends BaseTypeChecker {
     protected BaseTypeVisitor<?> createSourceVisitor() {
         return new UniverseVisitor(this, new UniverseAnnotatedTypeFactory(this, false));
     }
-
 }

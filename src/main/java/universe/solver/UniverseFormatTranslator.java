@@ -11,12 +11,11 @@ public class UniverseFormatTranslator extends MaxSatFormatTranslator {
 
     public UniverseFormatTranslator(Lattice lattice) {
         super(lattice);
-
     }
 
     @Override
     protected ConstraintEncoderFactory<VecInt[]> createConstraintEncoderFactory() {
-        return new MaxSATConstraintEncoderFactory(lattice, typeToInt, this){
+        return new MaxSATConstraintEncoderFactory(lattice, typeToInt, this) {
             @Override
             public CombineConstraintEncoder<VecInt[]> createCombineConstraintEncoder() {
                 return new UniverseCombineConstraintEncoder(lattice, typeToInt);

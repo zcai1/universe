@@ -1,26 +1,33 @@
 package universe;
 
 import checkers.inference.test.CFInferenceTest;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.checkerframework.framework.test.TestUtilities;
 import org.checkerframework.javacutil.Pair;
 import org.junit.runners.Parameterized.Parameters;
 import universe.solver.UniverseSolverEngine;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 public class UniverseInferenceTest extends CFInferenceTest {
 
     public UniverseInferenceTest(File testFile) {
-        super(testFile, UniverseInferenceChecker.class, "",
-                "-Anomsgtext", "-Astubs=src/main/java/universe/jdk.astub", "-d", "testTmp", "-doe");
+        super(
+                testFile,
+                UniverseInferenceChecker.class,
+                "",
+                "-Anomsgtext",
+                "-Astubs=src/main/java/universe/jdk.astub",
+                "-d",
+                "testTmp",
+                "-doe");
     }
 
     @Override
     public Pair<String, List<String>> getSolverNameAndOptions() {
-        return Pair.of(UniverseSolverEngine.class.getCanonicalName(),
+        return Pair.of(
+                UniverseSolverEngine.class.getCanonicalName(),
                 new ArrayList<String>(Arrays.asList("useGraph=false", "collectStatistic=true")));
     }
 
@@ -30,7 +37,7 @@ public class UniverseInferenceTest extends CFInferenceTest {
     }
 
     @Parameters
-    public static List<File> getTestFiles(){
+    public static List<File> getTestFiles() {
         List<File> testfiles = new ArrayList<>();
         testfiles.addAll(TestUtilities.findRelativeNestedJavaFiles("tests", "inference"));
         return testfiles;

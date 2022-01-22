@@ -7,12 +7,8 @@ import checkers.inference.model.ConstraintManager;
 import checkers.inference.model.Slot;
 import com.sun.source.tree.ClassTree;
 import com.sun.source.util.TreePath;
-import org.checkerframework.framework.qual.DefaultFor;
-import org.checkerframework.framework.type.AnnotatedTypeMirror;
-import org.checkerframework.javacutil.TreePathUtil;
-import org.checkerframework.javacutil.TypesUtils;
-import universe.qual.Bottom;
-
+import java.util.Arrays;
+import java.util.List;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -20,8 +16,11 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
-import java.util.Arrays;
-import java.util.List;
+import org.checkerframework.framework.qual.DefaultFor;
+import org.checkerframework.framework.type.AnnotatedTypeMirror;
+import org.checkerframework.javacutil.TreePathUtil;
+import org.checkerframework.javacutil.TypesUtils;
+import universe.qual.Bottom;
 
 public class UniverseTypeUtil {
 
@@ -86,7 +85,8 @@ public class UniverseTypeUtil {
         return hasPure;
     }
 
-    public static AnnotationMirror createEquivalentVarAnnotOfRealQualifier(final AnnotationMirror am) {
+    public static AnnotationMirror createEquivalentVarAnnotOfRealQualifier(
+            final AnnotationMirror am) {
         final SlotManager slotManager = InferenceMain.getInstance().getSlotManager();
         ConstantSlot constantSlot = slotManager.createConstantSlot(am);
         return slotManager.getAnnotation(constantSlot);
@@ -98,7 +98,8 @@ public class UniverseTypeUtil {
             in = true;
             // Exclude case in which enclosing class is static
             ClassTree classTree = TreePathUtil.enclosingClass(treePath);
-            if (classTree != null && classTree.getModifiers().getFlags().contains(Modifier.STATIC)) {
+            if (classTree != null
+                    && classTree.getModifiers().getFlags().contains(Modifier.STATIC)) {
                 in = false;
             }
         }
@@ -106,8 +107,11 @@ public class UniverseTypeUtil {
     }
 
     public static void defaultConstructorReturnToSelf(Element elt, AnnotatedTypeMirror type) {
-        if (elt.getKind() == ElementKind.CONSTRUCTOR && type instanceof AnnotatedTypeMirror.AnnotatedExecutableType) {
-            ((AnnotatedTypeMirror.AnnotatedExecutableType) type).getReturnType().addMissingAnnotations(Arrays.asList(UniverseAnnotationMirrorHolder.SELF));
+        if (elt.getKind() == ElementKind.CONSTRUCTOR
+                && type instanceof AnnotatedTypeMirror.AnnotatedExecutableType) {
+            ((AnnotatedTypeMirror.AnnotatedExecutableType) type)
+                    .getReturnType()
+                    .addMissingAnnotations(Arrays.asList(UniverseAnnotationMirrorHolder.SELF));
         }
     }
 }

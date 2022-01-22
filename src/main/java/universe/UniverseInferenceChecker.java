@@ -11,7 +11,6 @@ import checkers.inference.model.ConstraintManager;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.source.SupportedLintOptions;
 
-
 /**
  * The main checker class for the Generic Universe Types checker.
  *
@@ -32,8 +31,8 @@ public class UniverseInferenceChecker extends BaseInferrableChecker {
     }
 
     @Override
-    public InferenceVisitor<?, ?> createVisitor(InferenceChecker checker,
-            BaseAnnotatedTypeFactory factory, boolean infer) {
+    public InferenceVisitor<?, ?> createVisitor(
+            InferenceChecker checker, BaseAnnotatedTypeFactory factory, boolean infer) {
         return new UniverseInferenceVisitor(this, checker, factory, infer);
     }
 
@@ -44,12 +43,18 @@ public class UniverseInferenceChecker extends BaseInferrableChecker {
 
     @Override
     public InferenceAnnotatedTypeFactory createInferenceATF(
-            InferenceChecker inferenceChecker, InferrableChecker realChecker,
-            BaseAnnotatedTypeFactory realTypeFactory, SlotManager slotManager,
+            InferenceChecker inferenceChecker,
+            InferrableChecker realChecker,
+            BaseAnnotatedTypeFactory realTypeFactory,
+            SlotManager slotManager,
             ConstraintManager constraintManager) {
-        return new UniverseInferenceAnnotatedTypeFactory(inferenceChecker,
-                withCombineConstraints(), realTypeFactory, realChecker,
-                slotManager, constraintManager);
+        return new UniverseInferenceAnnotatedTypeFactory(
+                inferenceChecker,
+                withCombineConstraints(),
+                realTypeFactory,
+                realChecker,
+                slotManager,
+                constraintManager);
     }
 
     @Override

@@ -1,5 +1,12 @@
 package universe;
 
+import static universe.UniverseAnnotationMirrorHolder.ANY;
+import static universe.UniverseAnnotationMirrorHolder.BOTTOM;
+import static universe.UniverseAnnotationMirrorHolder.LOST;
+import static universe.UniverseAnnotationMirrorHolder.PEER;
+import static universe.UniverseAnnotationMirrorHolder.REP;
+import static universe.UniverseAnnotationMirrorHolder.SELF;
+
 import com.sun.source.tree.AssignmentTree;
 import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.ExpressionTree;
@@ -10,6 +17,8 @@ import com.sun.source.tree.NewClassTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.TypeCastTree;
 import com.sun.source.tree.VariableTree;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.type.TypeKind;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.common.basetype.BaseTypeVisitor;
 import org.checkerframework.framework.type.AnnotatedTypeFactory.ParameterizedExecutableType;
@@ -18,16 +27,6 @@ import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedDeclared
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedExecutableType;
 import org.checkerframework.framework.util.AnnotatedTypes;
 import org.checkerframework.javacutil.TreeUtils;
-
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.type.TypeKind;
-
-import static universe.UniverseAnnotationMirrorHolder.ANY;
-import static universe.UniverseAnnotationMirrorHolder.BOTTOM;
-import static universe.UniverseAnnotationMirrorHolder.LOST;
-import static universe.UniverseAnnotationMirrorHolder.PEER;
-import static universe.UniverseAnnotationMirrorHolder.REP;
-import static universe.UniverseAnnotationMirrorHolder.SELF;
 
 /**
  * Type visitor to either enforce or infer the universe type rules.
@@ -46,48 +45,43 @@ public class UniverseVisitor extends BaseTypeVisitor<UniverseAnnotatedTypeFactor
         checkStrictPurity = checker.getLintOption("checkStrictPurity", false);
     }
 
-    /**
-     * The type validator to ensure correct usage of ownership modifiers.
-     */
+    /** The type validator to ensure correct usage of ownership modifiers. */
     @Override
     protected UniverseTypeValidator createTypeValidator() {
         return new UniverseTypeValidator(checker, this, atypeFactory);
     }
 
     @Override
-    public boolean isValidUse(AnnotatedDeclaredType declarationType, AnnotatedDeclaredType useType, Tree tree) {
+    public boolean isValidUse(
+            AnnotatedDeclaredType declarationType, AnnotatedDeclaredType useType, Tree tree) {
         return true;
     }
 
-    /**
-     * Ignore method receiver annotations.
-     */
+    /** Ignore method receiver annotations. */
     @Override
-    protected void checkMethodInvocability(AnnotatedExecutableType method, MethodInvocationTree node) {
+    protected void checkMethodInvocability(
+            AnnotatedExecutableType method, MethodInvocationTree node) {
         return;
     }
 
-    /**
-     * Ignore constructor receiver annotations.
-     */
+    /** Ignore constructor receiver annotations. */
     @Override
-    protected void checkConstructorInvocation(AnnotatedDeclaredType dt,
-                                              AnnotatedExecutableType constructor, NewClassTree src) {}
+    protected void checkConstructorInvocation(
+            AnnotatedDeclaredType dt, AnnotatedExecutableType constructor, NewClassTree src) {}
 
     @Override
     public Void visitVariable(VariableTree node, Void p) {
         return super.visitVariable(node, p);
     }
 
-    /**
-     * Universe does not use receiver annotations, forbid them.
-     */
+    /** Universe does not use receiver annotations, forbid them. */
     @Override
     public Void visitMethod(MethodTree node, Void p) {
         AnnotatedExecutableType executableType = atypeFactory.getAnnotatedType(node);
 
         if (TreeUtils.isConstructor(node)) {
-            AnnotatedDeclaredType constructorReturnType = (AnnotatedDeclaredType) executableType.getReturnType();
+            AnnotatedDeclaredType constructorReturnType =
+                    (AnnotatedDeclaredType) executableType.getReturnType();
             if (!constructorReturnType.hasAnnotation(SELF)) {
                 checker.reportError(node, "uts.constructor.not.self");
             }
@@ -104,8 +98,13 @@ public class UniverseVisitor extends BaseTypeVisitor<UniverseAnnotatedTypeFactor
 
     @Override
     protected OverrideChecker createOverrideChecker(
-            Tree overriderTree, AnnotatedExecutableType overrider,AnnotatedTypeMirror overridingType,
-            AnnotatedTypeMirror overridingReturnType, AnnotatedExecutableType overridden, AnnotatedDeclaredType overriddenType, AnnotatedTypeMirror overriddenReturnType) {
+            Tree overriderTree,
+            AnnotatedExecutableType overrider,
+            AnnotatedTypeMirror overridingType,
+            AnnotatedTypeMirror overridingReturnType,
+            AnnotatedExecutableType overridden,
+            AnnotatedDeclaredType overriddenType,
+            AnnotatedTypeMirror overriddenReturnType) {
 
         return new OverrideChecker(
                 overriderTree,
@@ -123,19 +122,19 @@ public class UniverseVisitor extends BaseTypeVisitor<UniverseAnnotatedTypeFactor
     }
 
     /**
-     * There is no need to issue a warning if the result type of the constructor is not top in Universe.
+     * There is no need to issue a warning if the result type of the constructor is not top in
+     * Universe.
      */
     @Override
     protected void checkConstructorResult(
-            AnnotatedTypeMirror.AnnotatedExecutableType constructorType, ExecutableElement constructorElement) {}
+            AnnotatedTypeMirror.AnnotatedExecutableType constructorType,
+            ExecutableElement constructorElement) {}
 
     /**
      * Validate a new object creation.
      *
-     * @param node
-     *            the new object creation.
-     * @param p
-     *            not used.
+     * @param node the new object creation.
+     * @param p not used.
      */
     @Override
     public Void visitNewClass(NewClassTree node, Void p) {
@@ -180,10 +179,8 @@ public class UniverseVisitor extends BaseTypeVisitor<UniverseAnnotatedTypeFactor
     /**
      * Validate a method invocation.
      *
-     * @param node
-     *            the method invocation.
-     * @param p
-     *            not used.
+     * @param node the method invocation.
+     * @param p not used.
      */
     @Override
     public Void visitMethodInvocation(MethodInvocationTree node, Void p) {
@@ -205,7 +202,8 @@ public class UniverseVisitor extends BaseTypeVisitor<UniverseAnnotatedTypeFactor
                     ExecutableElement methodElement = TreeUtils.elementFromUse(node);
                     if (!UniverseTypeUtil.isPure(methodElement)) {
                         // I would say this non-lost and non-any restriction is really for declared
-                        // types, not for type variables. As type variables can't have methods to invoke.
+                        // types, not for type variables. As type variables can't have methods to
+                        // invoke.
                         if (receiverType.hasAnnotation(LOST) || receiverType.hasAnnotation(ANY)) {
                             checker.reportError(node, "oam.call.forbidden");
                         }
@@ -220,10 +218,8 @@ public class UniverseVisitor extends BaseTypeVisitor<UniverseAnnotatedTypeFactor
     /**
      * Validate an assignment.
      *
-     * @param node
-     *            the assignment.
-     * @param p
-     *            not used.
+     * @param node the assignment.
+     * @param p not used.
      */
     @Override
     public Void visitAssignment(AssignmentTree node, Void p) {
@@ -239,7 +235,8 @@ public class UniverseVisitor extends BaseTypeVisitor<UniverseAnnotatedTypeFactor
                 AnnotatedTypeMirror receiverType = atypeFactory.getAnnotatedType(receiverTree);
 
                 if (receiverType != null) {
-                    // Still, I think receiver can still only be declared types, so effectiveAnnotation
+                    // Still, I think receiver can still only be declared types, so
+                    // effectiveAnnotation
                     // is not needed.
                     if (receiverType.hasAnnotation(LOST) || receiverType.hasAnnotation(ANY)) {
                         checker.reportError(node, "oam.assignment.forbidden");
@@ -276,7 +273,8 @@ public class UniverseVisitor extends BaseTypeVisitor<UniverseAnnotatedTypeFactor
         // We cannot do a simple test of casting, as isSubtypeOf requires
         // the input types to be subtypes according to Java
         if (!isTypeCastSafe(castType, exprType)) {
-            checker.reportWarning(node, "cast.unsafe", exprType.toString(true), castType.toString(true));
+            checker.reportWarning(
+                    node, "cast.unsafe", exprType.toString(true), castType.toString(true));
         }
     }
 
@@ -297,8 +295,7 @@ public class UniverseVisitor extends BaseTypeVisitor<UniverseAnnotatedTypeFactor
                 break;
             case METHOD:
                 type = atypeFactory.getMethodReturnType((MethodTree) tree);
-                if (type == null ||
-                        type.getKind() == TypeKind.VOID) {
+                if (type == null || type.getKind() == TypeKind.VOID) {
                     // Nothing to do for void methods.
                     // Note that for a constructor the AnnotatedExecutableType does
                     // not use void as return type.

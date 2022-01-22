@@ -9,7 +9,7 @@ import checkers.inference.solver.frontend.Lattice;
 public class UniverseSolverEngine extends SolverEngine {
     @Override
     protected SolverFactory createSolverFactory() {
-        return new MaxSatSolverFactory(){
+        return new MaxSatSolverFactory() {
             @Override
             public MaxSatFormatTranslator createFormatTranslator(Lattice lattice) {
                 return new UniverseFormatTranslator(lattice);
