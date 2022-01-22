@@ -259,7 +259,7 @@ public class UniverseVisitor extends BaseTypeVisitor<UniverseAnnotatedTypeFactor
     public Void visitTypeCast(TypeCastTree node, Void p) {
         AnnotatedTypeMirror castty = atypeFactory.getAnnotatedType(node.getType());
 
-        if ((AnnotatedTypes.containsModifier(castty, LOST))) {
+        if (AnnotatedTypes.containsModifier(castty, LOST)) {
             checker.reportWarning(node, "uts.cast.type.warning", castty);
         }
 
@@ -275,14 +275,9 @@ public class UniverseVisitor extends BaseTypeVisitor<UniverseAnnotatedTypeFactor
 
         // We cannot do a simple test of casting, as isSubtypeOf requires
         // the input types to be subtypes according to Java
-        if (!isTypeCastSafe(castType, exprType, node)) {
+        if (!isTypeCastSafe(castType, exprType)) {
             checker.reportWarning(node, "cast.unsafe", exprType.toString(true), castType.toString(true));
         }
-    }
-
-    private boolean isTypeCastSafe(AnnotatedTypeMirror castType, AnnotatedTypeMirror exprType, TypeCastTree node) {
-        // Typechecking side standard implementation - warns if not upcasting
-        return super.isTypeCastSafe(castType, exprType);
     }
 
     @Override

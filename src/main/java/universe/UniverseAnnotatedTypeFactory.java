@@ -81,6 +81,7 @@ public class UniverseAnnotatedTypeFactory extends BaseInferenceRealTypeFactory {
         );
     }
 
+    @Override
     protected Set<Class<? extends Annotation>> createSupportedTypeQualifiers() {
         Set<Class<? extends Annotation>> annotations = new HashSet<>(
                 Arrays.asList(Any.class, Lost.class,
@@ -142,12 +143,12 @@ public class UniverseAnnotatedTypeFactory extends BaseInferenceRealTypeFactory {
         }
     }
 
-    private class UniversePropagationTreeAnnotator extends PropagationTreeAnnotator {
+    private static class UniversePropagationTreeAnnotator extends PropagationTreeAnnotator {
         /**
          * Creates a {@link DefaultForTypeAnnotator}
          * from the given checker, using that checker's type hierarchy.
          *
-         * @param atypeFactory
+         * @param atypeFactory type factory to use
          */
         public UniversePropagationTreeAnnotator(AnnotatedTypeFactory atypeFactory) {
             super(atypeFactory);

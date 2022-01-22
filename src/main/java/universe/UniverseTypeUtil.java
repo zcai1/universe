@@ -98,7 +98,7 @@ public class UniverseTypeUtil {
             in = true;
             // Exclude case in which enclosing class is static
             ClassTree classTree = TreePathUtil.enclosingClass(treePath);
-            if (classTree != null && classTree.getModifiers().getFlags().contains((Modifier.STATIC))) {
+            if (classTree != null && classTree.getModifiers().getFlags().contains(Modifier.STATIC)) {
                 in = false;
             }
         }

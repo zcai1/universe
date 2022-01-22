@@ -102,7 +102,7 @@ public class UniverseInferenceAnnotatedTypeFactory extends InferenceAnnotatedTyp
         }
     }
 
-    private class UniverseInferencePropagationTreeAnnotater extends PropagationTreeAnnotator {
+    private static class UniverseInferencePropagationTreeAnnotater extends PropagationTreeAnnotator {
         public UniverseInferencePropagationTreeAnnotater(AnnotatedTypeFactory atypeFactory) {
             super(atypeFactory);
         }

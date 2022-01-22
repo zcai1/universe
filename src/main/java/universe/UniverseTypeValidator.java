@@ -59,7 +59,7 @@ public class UniverseTypeValidator extends BaseTypeValidator{
         List<AnnotatedTypeParameterBounds> typeParamBounds = atypeFactory.typeVariablesFromUse(type, element);
         for (AnnotatedTypeParameterBounds atpb : typeParamBounds) {
             // Previously, here also checks two bounds are not TypeKind.NULL. What's the reason?
-            if ((AnnotatedTypes.containsModifier(atpb.getUpperBound(), LOST)) ||
+            if (AnnotatedTypes.containsModifier(atpb.getUpperBound(), LOST) ||
                     AnnotatedTypes.containsModifier(atpb.getLowerBound(), LOST)) {
                 checker.reportError(tree, "uts.lost.in.bounds", atpb.toString(), type.toString());
             }
