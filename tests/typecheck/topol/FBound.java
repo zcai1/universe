@@ -2,9 +2,7 @@ package typecheck.topol;
 
 import universe.qual.*;
 
-public class FBound<B extends FBound<B>> {
-
-}
+public class FBound<B extends FBound<B>> {}
 
 class MyComprator<T extends MyComparable<T>> {
     public void compare(T a1, T a2) {
@@ -13,5 +11,7 @@ class MyComprator<T extends MyComparable<T>> {
 }
 
 class MyComparable<S> {
-    public int compareTo(S a1) { return 0; }
+    public int compareTo(S a1) {
+        return 0;
+    }
 }

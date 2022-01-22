@@ -24,5 +24,4 @@ class GenericInterfaces {
         // subtyping checks. So assignment at line 22 is considered to
         // be subtype: ? extends @Any Object <: @Rep Object
     }
-
 }

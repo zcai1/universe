@@ -5,14 +5,14 @@ import universe.qual.Peer;
 import universe.qual.Rep;
 
 public class ArrayVP {
-    int @Peer[] pi;
-    int @Rep[] ri;
-    int @Any[] ai;
+    int @Peer [] pi;
+    int @Rep [] ri;
+    int @Any [] ai;
 
     void primOnThis() {
-        int @Peer[] xpi = this.pi;
-        int @Rep[] xri = this.ri;
-        int @Any[] xai = this.ai;
+        int @Peer [] xpi = this.pi;
+        int @Rep [] xri = this.ri;
+        int @Any [] xai = this.ai;
 
         @Peer Object xpo = this.pi;
         @Rep Object xro = this.ri;
@@ -31,23 +31,23 @@ public class ArrayVP {
 
     void primOnReceiver() {
         @Rep ArrayVP rav = new @Rep ArrayVP();
-        int @Rep[] o = rav.pi;
+        int @Rep [] o = rav.pi;
 
         @Peer ArrayVP pav = new @Peer ArrayVP();
         // :: error: (assignment.type.incompatible)
-        int @Rep[] o2 = pav.ri;
+        int @Rep [] o2 = pav.ri;
         // ok
-        int @Any[] o3 = pav.ri;
+        int @Any [] o3 = pav.ri;
     }
 
-    @Peer Object @Rep[] por;
-    @Rep Object @Peer[] rop;
+    @Peer Object @Rep [] por;
+    @Rep Object @Peer [] rop;
 
-    @Any Object @Peer[] aop;
-    @Any Object @Rep[] aor;
+    @Any Object @Peer [] aop;
+    @Any Object @Rep [] aor;
 
-    @Peer Object @Any[] poa;
-    @Rep Object @Any[] roa;
+    @Peer Object @Any [] poa;
+    @Rep Object @Any [] roa;
 
     void objOnReceiver() {
         @Peer ArrayVP pavp = new @Peer ArrayVP();
@@ -75,7 +75,7 @@ public class ArrayVP {
     }
 
     void objOnThis() {
-        //ok
+        // ok
         @Peer Object po = this.por[0];
         // :: error: (assignment.type.incompatible)
         po = this.rop[0];
@@ -121,9 +121,10 @@ public class ArrayVP {
 
     // there is a problem with defaulting of arrays :-(
     void testIntArr(int[] t) {}
+
     void demoIntArr() {
         int[] x = null;
         testIntArr(x);
-        testIntArr(new int[] { 5 });
+        testIntArr(new int[] {5});
     }
 }

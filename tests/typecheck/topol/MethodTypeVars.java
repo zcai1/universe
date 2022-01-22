@@ -3,18 +3,26 @@ package typecheck.topol;
 import universe.qual.*;
 
 public class MethodTypeVars {
-void foobar(Object p) {}
-{foobar(null);}
-    <T extends @Any Object> T transform(T a) { return null; }
+    void foobar(Object p) {}
 
-    <T extends @Any Object> T [] toArray(T [] a) { return null; }
+    {
+        foobar(null);
+    }
+
+    <T extends @Any Object> T transform(T a) {
+        return null;
+    }
+
+    <T extends @Any Object> T[] toArray(T[] a) {
+        return null;
+    }
 
     // Arrays are not in upper bounds :-(
     // <T extends Object[]> T toArray2(T a) { return null; }
 
     void m() {
         Object o = this.transform(new Object());
-        String [] oa = this.toArray(new String[10]);
+        String[] oa = this.toArray(new String[10]);
     }
 
     void mUniverse() {

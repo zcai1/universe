@@ -1,5 +1,5 @@
-import universe.qual.*;
 import java.util.List;
+import universe.qual.*;
 
 public class Member {
 
@@ -11,5 +11,4 @@ public class Member {
     class E {
         List<Object> le;
     }
-
 }

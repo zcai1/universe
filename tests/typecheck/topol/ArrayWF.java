@@ -16,11 +16,11 @@ public class ArrayWF {
     @Peer @Rep Object[] pro;
 
     // :: error: (type.invalid.conflicting.annos)
-    @Peer Object @Rep @Peer[] porp;
+    @Peer Object @Rep @Peer [] porp;
 
     // :: error: (type.invalid.conflicting.annos)
-    @Peer Object @Rep[] @Rep @Peer[] porrp;
+    @Peer Object @Rep [] @Rep @Peer [] porrp;
 
     // :: error: (type.invalid.conflicting.annos)
-    @Peer Object [] [] @Rep @Peer[] poaarp;
+    @Peer Object[][] @Rep @Peer [] poaarp;
 }

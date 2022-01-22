@@ -2,7 +2,6 @@ package typecheck.topol;
 
 import universe.qual.*;
 
-
 class GList<X extends @Any Object> {
     @Rep GNode<X> head;
 
@@ -24,7 +23,6 @@ class GNode<X extends @Any Object> {
         next = n;
     }
 }
-
 
 public class Generics {
     @Peer GList<@Rep Object> pro = new @Peer GList<@Rep Object>();

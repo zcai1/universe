@@ -18,7 +18,7 @@ public class Boxing {
         i = I;
     }
 
-    void k(){
+    void k() {
         int i;
     }
 
@@ -27,5 +27,4 @@ public class Boxing {
         I += 9;
         I += 3;
     }
-
 }

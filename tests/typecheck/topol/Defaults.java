@@ -24,7 +24,7 @@ class Defaults {
         // :: error: (assignment.type.incompatible)
         @Peer Object ploc1 = loc1;
 
-        //flow from RHS, should be @Rep
+        // flow from RHS, should be @Rep
         Object loc2 = r;
         @Rep Object rloc2 = loc2;
 

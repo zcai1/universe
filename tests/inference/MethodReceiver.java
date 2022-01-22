@@ -1,7 +1,5 @@
 import universe.qual.*;
 
 public class MethodReceiver {
-    void foo(MethodReceiver this) {
-
-    }
+    void foo(MethodReceiver this) {}
 }

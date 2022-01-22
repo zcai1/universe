@@ -22,13 +22,14 @@ public class StaticVP {
 
     static void bar() {
         // :: error: (uts.static.rep.forbidden)
-       @Rep Object or;
+        @Rep Object or;
 
         // :: error: (uts.static.rep.forbidden)
         or = new @Rep Object();
     }
     // :: error: (uts.static.rep.forbidden)
     static @Any Object ao = new @Rep Object();
+
     static {
         // :: error: (uts.static.rep.forbidden)
         new @Rep Object();

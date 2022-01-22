@@ -145,6 +145,7 @@ tasks.clean {
 
 spotless {
     java {
+        target 'src/*/java/**/*.java', 'tests/**/*.java'
         googleJavaFormat().aosp()
     }
 }
