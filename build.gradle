@@ -1,5 +1,7 @@
 plugins {
     id 'java'
+    id 'com.diffplug.spotless' version '6.2.0'
+    id 'net.ltgt.errorprone' version '2.0.2'
 }
 
 ext {
@@ -40,6 +42,9 @@ dependencies {
     implementation 'commons-logging:commons-logging:1.2'
     testImplementation framework_test_jar
     testImplementation 'junit:junit:4.13.2'
+
+    errorprone 'com.google.errorprone:error_prone_core:2.10.0'
+    errorproneJavac 'com.google.errorprone:javac:9+181-r4173-1'
 }
 
 sourceSets {
@@ -136,4 +141,10 @@ tasks.clean {
     delete 'bin', 'dist', 'testTmp', 'annotated',
             fileTree('.') { include '**/*.jaif', '**/*.txt' },
             fileTree('tests') { include '**/*.class' }
+}
+
+spotless {
+    java {
+        googleJavaFormat().aosp()
+    }
 }
