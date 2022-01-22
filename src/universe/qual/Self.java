@@ -1,5 +1,6 @@
 package universe.qual;
 
+import org.checkerframework.framework.qual.DefaultFor;
 import org.checkerframework.framework.qual.SubtypeOf;
 import org.checkerframework.framework.qual.TargetLocations;
 import org.checkerframework.framework.qual.TypeUseLocation;
@@ -18,7 +19,8 @@ import java.lang.annotation.Target;
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.TYPE_PARAMETER, ElementType.TYPE_USE })
-@TargetLocations({TypeUseLocation.RECEIVER})
+@Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})
+@TargetLocations({TypeUseLocation.RECEIVER, TypeUseLocation.CONSTRUCTOR_RESULT})
 @SubtypeOf({ Peer.class })
+@DefaultFor({TypeUseLocation.RECEIVER, TypeUseLocation.CONSTRUCTOR_RESULT})
 public @interface Self {}

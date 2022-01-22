@@ -1,17 +1,25 @@
-import universe.quals.Any;
+import universe.qual.Any;
 
 package java.lang;
 
 class Object {
-  boolean equals(@Any Object o);
+  boolean equals(@Any Object obj);
 }
 
 class String {
-  boolean equals(@Any Object o);
+  boolean equals(@Any Object anObject);
 }
 
 package java.util;
 
-class List<X extends @Any Object> {
-  void add(X p);
+interface List<E extends @Any Object> extends Collection<E>  {
+  public boolean add(E p);
+}
+
+class ArrayList<E extends @Any Object> extends List<E>  {
+  public boolean add(E p);
+}
+
+interface Collection<E extends @Any Object> {
+    boolean contains(@Any Object o);
 }

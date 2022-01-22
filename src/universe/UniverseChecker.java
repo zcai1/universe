@@ -1,12 +1,12 @@
 package universe;
 
+import universe.UniverseAnnotationMirrorHolder;
 
 import javax.annotation.processing.SupportedOptions;
 
 import org.checkerframework.common.basetype.BaseTypeChecker;
+import org.checkerframework.common.basetype.BaseTypeVisitor;
 import org.checkerframework.framework.source.SupportedLintOptions;
-import org.checkerframework.framework.type.AnnotatedTypeMirror;
-
 
 /**
  * The main checker class for the Generic Universe Types checker.
@@ -21,28 +21,15 @@ import org.checkerframework.framework.type.AnnotatedTypeMirror;
 @SupportedLintOptions({"allowLost", "checkOaM", "checkStrictPurity"})
 public class UniverseChecker extends BaseTypeChecker {
 
-    //TODO Clarify the purpose of this
-    public static boolean isAnyDefault(AnnotatedTypeMirror type) {
-        // if (!(type instanceof AnnotatedDeclaredType))
-        return false;
-        /*
-        DeclaredType dtype = ((AnnotatedDeclaredType)type).getUnderlyingType();
-        return TypesUtils.isDeclaredOfName(dtype, "java.lang.String") ||
-        TypesUtils.isDeclaredOfName(dtype, "java.lang.Character");
-        */
+    @Override
+    public void initChecker() {
+        super.initChecker();
+        UniverseAnnotationMirrorHolder.init(this);
     }
 
     @Override
-    public boolean withViewpointAdaptation() {
-	return true;
+    protected BaseTypeVisitor<?> createSourceVisitor() {
+        return new UniverseVisitor(this, new UniverseAnnotatedTypeFactory(this, false));
     }
-
-    /* TODO: purity/OaM checking
-    @Override
-    public boolean isAssignable(AnnotatedTypeMirror varType,
-            AnnotatedTypeMirror receiverType, Tree varTree) {
-        return super.isAssignable(varType, receiverType, varTree);
-    }
-    */
 
 }

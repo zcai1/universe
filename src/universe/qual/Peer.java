@@ -18,5 +18,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE_PARAMETER, ElementType.TYPE_USE })
 @DefaultQualifierInHierarchy
-@SubtypeOf({ VPLost.class })
+@SubtypeOf({ Lost.class })
 public @interface Peer {}
