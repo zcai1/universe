@@ -3,14 +3,12 @@ import universe.qual.*;
 public class MethodInvocation {
 
     class B {
-        // :: fixable-error: (return.type.incompatible)
-        @Rep
-        Object foo(Object o) {
+        @Rep Object foo(Object o) {
+	    // :: fixable-error: (return.type.incompatible)
             return new Object();
         }
 
-        @Peer
-        Object bar(Object o) {
+        @Peer Object bar(Object o) {
             return new Object();
         }
     }

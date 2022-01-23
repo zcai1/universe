@@ -61,23 +61,20 @@ public class Methods {
 
     class SubMethods1 extends Methods {
         // :: error: (override.return.invalid)
-        @Rep
-        Object m(@Peer Object o) {
+        @Rep Object m(@Peer Object o) {
             return null;
         }
     }
 
     class SubMethods2 extends Methods {
         // :: error: (override.param.invalid)
-        @Peer
-        Object m(@Rep Object o) {
+        @Peer Object m(@Rep Object o) {
             return null;
         }
     }
 
     class SubMethods3 extends Methods {
-        @Peer
-        Object m(@Peer Object o) {
+        @Peer Object m(@Peer Object o) {
             return null;
         }
     }
