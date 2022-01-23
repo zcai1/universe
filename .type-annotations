@@ -1,0 +1,8 @@
+# run-google-java-format configuration
+typeAnnotations = set([
+    "Any",
+    "Bottom",
+    "Lost",
+    "Peer",
+    "Rep",
+    "Self"])
