@@ -7,11 +7,12 @@ import static universe.UniverseAnnotationMirrorHolder.PEER;
 import static universe.UniverseAnnotationMirrorHolder.REP;
 import static universe.UniverseAnnotationMirrorHolder.SELF;
 
-import javax.lang.model.element.AnnotationMirror;
 import org.checkerframework.framework.type.AbstractViewpointAdapter;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.javacutil.AnnotationUtils;
+
+import javax.lang.model.element.AnnotationMirror;
 
 public class UniverseViewpointAdapter extends AbstractViewpointAdapter {
 

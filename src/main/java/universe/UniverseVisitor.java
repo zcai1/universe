@@ -17,8 +17,7 @@ import com.sun.source.tree.NewClassTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.TypeCastTree;
 import com.sun.source.tree.VariableTree;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.type.TypeKind;
+
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.common.basetype.BaseTypeVisitor;
 import org.checkerframework.framework.type.AnnotatedTypeFactory.ParameterizedExecutableType;
@@ -27,6 +26,9 @@ import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedDeclared
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedExecutableType;
 import org.checkerframework.framework.util.AnnotatedTypes;
 import org.checkerframework.javacutil.TreeUtils;
+
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.type.TypeKind;
 
 /**
  * Type visitor to either enforce or infer the universe type rules.

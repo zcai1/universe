@@ -6,8 +6,7 @@ import static universe.UniverseAnnotationMirrorHolder.REP;
 
 import com.sun.source.tree.ParameterizedTypeTree;
 import com.sun.source.tree.Tree;
-import java.util.List;
-import javax.lang.model.element.TypeElement;
+
 import org.checkerframework.common.basetype.BaseTypeChecker;
 import org.checkerframework.common.basetype.BaseTypeValidator;
 import org.checkerframework.common.basetype.BaseTypeVisitor;
@@ -16,6 +15,10 @@ import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.framework.type.AnnotatedTypeParameterBounds;
 import org.checkerframework.framework.util.AnnotatedTypes;
 import org.checkerframework.javacutil.TreeUtils;
+
+import java.util.List;
+
+import javax.lang.model.element.TypeElement;
 
 /** This type validator ensures correct usage of ownership modifiers to ensure well-formedness. */
 public class UniverseTypeValidator extends BaseTypeValidator {

@@ -14,6 +14,7 @@ import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.ConstraintManager;
 import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
+
 import com.sun.source.tree.AssignmentTree;
 import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.ExpressionTree;
@@ -24,9 +25,7 @@ import com.sun.source.tree.NewClassTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.TypeCastTree;
 import com.sun.source.tree.VariableTree;
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.type.TypeKind;
+
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeFactory.ParameterizedExecutableType;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
@@ -34,6 +33,10 @@ import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedDeclared
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedExecutableType;
 import org.checkerframework.framework.type.QualifierHierarchy;
 import org.checkerframework.javacutil.TreeUtils;
+
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.type.TypeKind;
 
 /**
  * Type visitor to either enforce or infer the universe type rules.

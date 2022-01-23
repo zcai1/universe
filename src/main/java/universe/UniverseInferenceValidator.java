@@ -6,15 +6,19 @@ import static universe.UniverseAnnotationMirrorHolder.REP;
 
 import checkers.inference.InferenceValidator;
 import checkers.inference.InferenceVisitor;
+
 import com.sun.source.tree.ParameterizedTypeTree;
 import com.sun.source.tree.Tree;
-import java.util.List;
-import javax.lang.model.element.TypeElement;
+
 import org.checkerframework.common.basetype.BaseTypeChecker;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.framework.type.AnnotatedTypeParameterBounds;
 import org.checkerframework.javacutil.TreeUtils;
+
+import java.util.List;
+
+import javax.lang.model.element.TypeElement;
 
 /**
  * This type validator ensures correct usage of ownership modifiers or generates constraints to

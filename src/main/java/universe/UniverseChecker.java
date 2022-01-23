@@ -1,9 +1,10 @@
 package universe;
 
-import javax.annotation.processing.SupportedOptions;
 import org.checkerframework.common.basetype.BaseTypeChecker;
 import org.checkerframework.common.basetype.BaseTypeVisitor;
 import org.checkerframework.framework.source.SupportedLintOptions;
+
+import javax.annotation.processing.SupportedOptions;
 
 /**
  * The main checker class for the Generic Universe Types checker.

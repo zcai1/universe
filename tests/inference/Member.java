@@ -1,5 +1,6 @@
-import java.util.List;
 import universe.qual.*;
+
+import java.util.List;
 
 public class Member {
 

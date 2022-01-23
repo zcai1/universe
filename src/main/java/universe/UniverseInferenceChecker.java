@@ -8,6 +8,7 @@ import checkers.inference.InferenceVisitor;
 import checkers.inference.InferrableChecker;
 import checkers.inference.SlotManager;
 import checkers.inference.model.ConstraintManager;
+
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.source.SupportedLintOptions;
 

@@ -5,6 +5,7 @@ import checkers.inference.solver.backend.encoder.combine.CombineConstraintEncode
 import checkers.inference.solver.backend.maxsat.MaxSatFormatTranslator;
 import checkers.inference.solver.backend.maxsat.encoder.MaxSATConstraintEncoderFactory;
 import checkers.inference.solver.frontend.Lattice;
+
 import org.sat4j.core.VecInt;
 
 public class UniverseFormatTranslator extends MaxSatFormatTranslator {

@@ -15,10 +15,11 @@ import checkers.inference.VariableAnnotator;
 import checkers.inference.model.ConstraintManager;
 import checkers.inference.model.Slot;
 import checkers.inference.util.InferenceViewpointAdapter;
+
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.TypeCastTree;
-import javax.lang.model.element.AnnotationMirror;
+
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
@@ -27,6 +28,8 @@ import org.checkerframework.framework.type.treeannotator.ListTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.LiteralTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.PropagationTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
+
+import javax.lang.model.element.AnnotationMirror;
 
 public class UniverseInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFactory {
 

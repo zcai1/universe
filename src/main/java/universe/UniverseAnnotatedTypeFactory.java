@@ -1,6 +1,7 @@
 package universe;
 
 import checkers.inference.BaseInferenceRealTypeFactory;
+
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.IdentifierTree;
@@ -8,16 +9,7 @@ import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.NewArrayTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.TypeCastTree;
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.type.TypeKind;
+
 import org.checkerframework.common.basetype.BaseTypeChecker;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
@@ -30,12 +22,25 @@ import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
 import org.checkerframework.framework.type.typeannotator.DefaultForTypeAnnotator;
 import org.checkerframework.javacutil.Pair;
 import org.checkerframework.javacutil.TreeUtils;
+
 import universe.qual.Any;
 import universe.qual.Bottom;
 import universe.qual.Lost;
 import universe.qual.Peer;
 import universe.qual.Rep;
 import universe.qual.Self;
+
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.type.TypeKind;
 
 /**
  * Apply viewpoint adaptation and add implicit annotations to "this" and "super".
@@ -181,7 +186,8 @@ public class UniverseAnnotatedTypeFactory extends BaseInferenceRealTypeFactory {
             }
 
             assert prev != null
-                    : "PropagationTreeAnnotator.visitNewArray: violated assumption about qualifiers";
+                    : "PropagationTreeAnnotator.visitNewArray: violated assumption about"
+                            + " qualifiers";
 
             Pair<Tree, AnnotatedTypeMirror> context =
                     atypeFactory.getVisitorState().getAssignmentContext();

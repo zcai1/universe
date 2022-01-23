@@ -15,13 +15,16 @@ import checkers.inference.solver.backend.maxsat.MathUtils;
 import checkers.inference.solver.backend.maxsat.VectorUtils;
 import checkers.inference.solver.backend.maxsat.encoder.MaxSATAbstractConstraintEncoder;
 import checkers.inference.solver.frontend.Lattice;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import javax.lang.model.element.AnnotationMirror;
+
 import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.BugInCF;
 import org.sat4j.core.VecInt;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.lang.model.element.AnnotationMirror;
 
 public class UniverseCombineConstraintEncoder extends MaxSATAbstractConstraintEncoder
         implements CombineConstraintEncoder<VecInt[]> {

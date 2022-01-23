@@ -5,10 +5,20 @@ import checkers.inference.SlotManager;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.ConstraintManager;
 import checkers.inference.model.Slot;
+
 import com.sun.source.tree.ClassTree;
 import com.sun.source.util.TreePath;
+
+import org.checkerframework.framework.qual.DefaultFor;
+import org.checkerframework.framework.type.AnnotatedTypeMirror;
+import org.checkerframework.javacutil.TreePathUtil;
+import org.checkerframework.javacutil.TypesUtils;
+
+import universe.qual.Bottom;
+
 import java.util.Arrays;
 import java.util.List;
+
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -16,11 +26,6 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
-import org.checkerframework.framework.qual.DefaultFor;
-import org.checkerframework.framework.type.AnnotatedTypeMirror;
-import org.checkerframework.javacutil.TreePathUtil;
-import org.checkerframework.javacutil.TypesUtils;
-import universe.qual.Bottom;
 
 public class UniverseTypeUtil {
 
