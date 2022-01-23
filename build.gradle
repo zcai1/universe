@@ -157,14 +157,14 @@ task getCodeFormatScripts() {
         exec {
             workingDir "${formatScripts}/../"
             executable 'git'
-            args = ['clone', '-q', 'https://github.com/eisop-plume-lib/run-google-java-format.git', '.run-google-java-format']
+            args = ['clone', '-q', '--depth', '1', 'https://github.com/eisop-plume-lib/run-google-java-format.git', '.run-google-java-format']
         }
     }
 }
 
 task pythonIsInstalled(type: Exec) {
-    description "Check that the python executable is installed."
-    executable = "python"
+    description "Check that the python3 executable is installed."
+    executable = "python3"
     args "--version"
 }
 
@@ -189,15 +189,19 @@ List<String> getJavaFilesToFormat() {
 
 task checkFormat(type: Exec, dependsOn: [getCodeFormatScripts, pythonIsInstalled], group: 'Format') {
     description 'Check whether the source code is properly formatted'
-    executable 'python'
+    executable 'python3'
     doFirst {
+        if (isJava8) {
+            println 'The checkFormat task cannot be run on Java 8.  Please use Java 11+.'
+            return
+        }
         args += "${formatScripts}/check-google-java-format.py"
         args += "--aosp" // 4 space indentation
         args += getJavaFilesToFormat()
     }
     ignoreExitValue = true
     doLast {
-        if (executionResult.get().exitValue != 0) {
+        if (!executionResult.isPresent() || executionResult.get().exitValue != 0) {
             throw new RuntimeException('Found improper formatting, try running:  ./gradlew reformat"')
         }
     }
@@ -205,8 +209,12 @@ task checkFormat(type: Exec, dependsOn: [getCodeFormatScripts, pythonIsInstalled
 
 task reformat(type: Exec, dependsOn: [getCodeFormatScripts, pythonIsInstalled], group: 'Format') {
     description 'Format the Java source code'
-    executable 'python'
+    executable 'python3'
     doFirst {
+        if (isJava8) {
+            println 'The reformat task cannot be run on Java 8.  Please use Java 11+.'
+            return
+        }
         args += "${formatScripts}/run-google-java-format.py"
         args += "--aosp" // 4 space indentation
         args += getJavaFilesToFormat()
