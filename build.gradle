@@ -138,7 +138,7 @@ afterEvaluate {
 }
 
 tasks.clean {
-    delete 'bin', 'dist', 'testTmp', 'annotated',
+    delete 'bin', 'dist', 'testTmp', 'testdata/tmp',
             fileTree('.') { include '**/*.jaif', '**/*.txt' },
             fileTree('tests') { include '**/*.class' }
 }

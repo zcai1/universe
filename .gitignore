@@ -21,5 +21,8 @@
 .DS_Store
 
 # Annotated
-/annotated/
+/testdata/tmp
 *.jaif
+
+# run-google-java-format
+scripts/.run-google-java-format/
