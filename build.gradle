@@ -10,6 +10,8 @@ ext {
     afu = "${jsr308}/annotation-tools/annotation-file-utilities"
     universePath = "${jsr308}/universe"
     formatScripts = "${universePath}/scripts/.run-google-java-format"
+
+    isJava8 = JavaVersion.current() == JavaVersion.VERSION_1_8
 }
 
 println '==================================='
