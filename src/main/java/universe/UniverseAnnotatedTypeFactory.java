@@ -2,22 +2,15 @@ package universe;
 
 import checkers.inference.BaseInferenceRealTypeFactory;
 
-import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.IdentifierTree;
 import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.Tree;
-import com.sun.source.tree.TypeCastTree;
 
 import org.checkerframework.common.basetype.BaseTypeChecker;
-import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedDeclaredType;
 import org.checkerframework.framework.type.ViewpointAdapter;
-import org.checkerframework.framework.type.treeannotator.ListTreeAnnotator;
-import org.checkerframework.framework.type.treeannotator.LiteralTreeAnnotator;
-import org.checkerframework.framework.type.treeannotator.PropagationTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
-import org.checkerframework.framework.type.typeannotator.DefaultForTypeAnnotator;
 import org.checkerframework.javacutil.TreeUtils;
 
 import universe.qual.Any;
@@ -61,19 +54,6 @@ public class UniverseAnnotatedTypeFactory extends BaseInferenceRealTypeFactory {
     @Override
     protected ViewpointAdapter createViewpointAdapter() {
         return new UniverseViewpointAdapter(this);
-    }
-
-    /**
-     * Create our own TreeAnnotator.
-     *
-     * @return the new TreeAnnotator.
-     */
-    @Override
-    protected TreeAnnotator createTreeAnnotator() {
-        return new ListTreeAnnotator(
-                new UniversePropagationTreeAnnotator(this),
-                new LiteralTreeAnnotator(this),
-                new UniverseTreeAnnotator());
     }
 
     @Override
@@ -135,52 +115,6 @@ public class UniverseAnnotatedTypeFactory extends BaseInferenceRealTypeFactory {
             ExecutableElement executableElement = TreeUtils.elementFromDeclaration(node);
             UniverseTypeUtil.defaultConstructorReturnToSelf(executableElement, p);
             return super.visitMethod(node, p);
-        }
-    }
-
-    private static class UniversePropagationTreeAnnotator extends PropagationTreeAnnotator {
-        /**
-         * Creates a {@link DefaultForTypeAnnotator} from the given checker, using that checker's
-         * type hierarchy.
-         *
-         * @param atypeFactory type factory to use
-         */
-        public UniversePropagationTreeAnnotator(AnnotatedTypeFactory atypeFactory) {
-            super(atypeFactory);
-        }
-
-        /**
-         * Add immutable to the result type of a binary operation if the result type is implicitly
-         * immutable
-         */
-        @Override
-        public Void visitBinary(BinaryTree node, AnnotatedTypeMirror type) {
-            applyImmutableIfImplicitlyBottom(
-                    type); // Usually there isn't existing annotation on binary trees, but to be
-            // safe, run it first
-            super.visitBinary(node, type);
-            return null;
-        }
-
-        /** Add immutable to the result type of a cast if the result type is implicitly immutable */
-        @Override
-        public Void visitTypeCast(TypeCastTree node, AnnotatedTypeMirror type) {
-            applyImmutableIfImplicitlyBottom(
-                    type); // Must run before calling super method to respect existing annotation
-            return super.visitTypeCast(node, type);
-        }
-
-        /**
-         * Because TreeAnnotator runs before DefaultForTypeAnnotator, implicitly immutable types are
-         * not guaranteed to always have immutable annotation. If this happens, we manually add
-         * immutable to type. We use addMissingAnnotations because we want to respect existing
-         * annotation on type
-         */
-        private void applyImmutableIfImplicitlyBottom(AnnotatedTypeMirror type) {
-            if (UniverseTypeUtil.isImplicitlyBottomType(type)) {
-                type.addMissingAnnotations(
-                        new HashSet<>(Arrays.asList(UniverseAnnotationMirrorHolder.BOTTOM)));
-            }
         }
     }
 }
