@@ -10,6 +10,9 @@ import org.checkerframework.common.basetype.BaseTypeChecker;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedDeclaredType;
 import org.checkerframework.framework.type.ViewpointAdapter;
+import org.checkerframework.framework.type.treeannotator.ListTreeAnnotator;
+import org.checkerframework.framework.type.treeannotator.LiteralTreeAnnotator;
+import org.checkerframework.framework.type.treeannotator.PropagationTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
 import org.checkerframework.javacutil.TreeUtils;
 
@@ -54,6 +57,19 @@ public class UniverseAnnotatedTypeFactory extends BaseInferenceRealTypeFactory {
     @Override
     protected ViewpointAdapter createViewpointAdapter() {
         return new UniverseViewpointAdapter(this);
+    }
+
+    /**
+     * Create our own TreeAnnotator.
+     *
+     * @return the new TreeAnnotator.
+     */
+    @Override
+    protected TreeAnnotator createTreeAnnotator() {
+        return new ListTreeAnnotator(
+                new PropagationTreeAnnotator(this),
+                new LiteralTreeAnnotator(this),
+                new UniverseTreeAnnotator());
     }
 
     @Override
