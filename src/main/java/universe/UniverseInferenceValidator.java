@@ -39,9 +39,6 @@ public class UniverseInferenceValidator extends InferenceValidator {
      */
     @Override
     public Void visitDeclared(AnnotatedTypeMirror.AnnotatedDeclaredType type, Tree p) {
-        if (checkTopLevelDeclaredOrPrimitiveType) {
-            checkImplicitlyBottomTypeError(type, p);
-        }
         checkStaticRepError(type, p);
         // @Peer is allowed in static context
 
@@ -79,25 +76,10 @@ public class UniverseInferenceValidator extends InferenceValidator {
         return super.visitArray(type, tree);
     }
 
-    @Override
-    public Void visitPrimitive(AnnotatedTypeMirror.AnnotatedPrimitiveType type, Tree tree) {
-        if (checkTopLevelDeclaredOrPrimitiveType) {
-            checkImplicitlyBottomTypeError(type, tree);
-        }
-        return super.visitPrimitive(type, tree);
-    }
-
     private void checkStaticRepError(AnnotatedTypeMirror type, Tree tree) {
         if (UniverseTypeUtil.inStaticScope(visitor.getCurrentPath())) {
             ((UniverseInferenceVisitor) visitor)
                     .doesNotContain(type, REP, "uts.static.rep.forbidden", tree);
-        }
-    }
-
-    private void checkImplicitlyBottomTypeError(AnnotatedTypeMirror type, Tree tree) {
-        if (UniverseTypeUtil.isImplicitlyBottomType(type)) {
-            ((UniverseInferenceVisitor) visitor)
-                    .effectiveIs(type, BOTTOM, "type.invalid.annotations.on.use", tree);
         }
     }
 }
