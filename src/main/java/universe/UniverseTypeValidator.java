@@ -1,6 +1,5 @@
 package universe;
 
-import static universe.UniverseAnnotationMirrorHolder.BOTTOM;
 import static universe.UniverseAnnotationMirrorHolder.LOST;
 import static universe.UniverseAnnotationMirrorHolder.REP;
 
