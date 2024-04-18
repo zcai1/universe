@@ -3,9 +3,6 @@ package universe;
 import static universe.UniverseAnnotationMirrorHolder.LOST;
 import static universe.UniverseAnnotationMirrorHolder.REP;
 
-import checkers.inference.InferenceValidator;
-import checkers.inference.InferenceVisitor;
-
 import com.sun.source.tree.ParameterizedTypeTree;
 import com.sun.source.tree.Tree;
 
@@ -18,6 +15,9 @@ import org.checkerframework.javacutil.TreeUtils;
 import java.util.List;
 
 import javax.lang.model.element.TypeElement;
+
+import checkers.inference.InferenceValidator;
+import checkers.inference.InferenceVisitor;
 
 /**
  * This type validator ensures correct usage of ownership modifiers or generates constraints to

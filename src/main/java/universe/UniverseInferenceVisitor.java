@@ -6,15 +6,6 @@ import static universe.UniverseAnnotationMirrorHolder.LOST;
 import static universe.UniverseAnnotationMirrorHolder.REP;
 import static universe.UniverseAnnotationMirrorHolder.SELF;
 
-import checkers.inference.InferenceChecker;
-import checkers.inference.InferenceMain;
-import checkers.inference.InferenceVisitor;
-import checkers.inference.SlotManager;
-import checkers.inference.model.ConstantSlot;
-import checkers.inference.model.ConstraintManager;
-import checkers.inference.model.Slot;
-import checkers.inference.model.VariableSlot;
-
 import com.sun.source.tree.AssignmentTree;
 import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.ExpressionTree;
@@ -37,6 +28,15 @@ import org.checkerframework.javacutil.TreeUtils;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.TypeKind;
+
+import checkers.inference.InferenceChecker;
+import checkers.inference.InferenceMain;
+import checkers.inference.InferenceVisitor;
+import checkers.inference.SlotManager;
+import checkers.inference.model.ConstantSlot;
+import checkers.inference.model.ConstraintManager;
+import checkers.inference.model.Slot;
+import checkers.inference.model.VariableSlot;
 
 /**
  * Type visitor to either enforce or infer the universe type rules.
@@ -313,8 +313,10 @@ public class UniverseInferenceVisitor
             // comparable,
             // but to infer more program, let this case fall back to "anycast" silently and continue
             // inference.
-            return qualHierarchy.isSubtype(castCSSlot.getValue(), exprCSSlot.getValue())
-                    || qualHierarchy.isSubtype(exprCSSlot.getValue(), castCSSlot.getValue());
+            return qualHierarchy.isSubtypeQualifiersOnly(
+                            castCSSlot.getValue(), exprCSSlot.getValue())
+                    || qualHierarchy.isSubtypeQualifiersOnly(
+                            exprCSSlot.getValue(), castCSSlot.getValue());
         } else {
             // But if there is at least on Slot, inference guarantees that solutions don't include
             // incomparable casts.
@@ -376,5 +378,5 @@ public class UniverseInferenceVisitor
 
     @Override
     // Universe Type System does not need to check extends and implements
-    protected void checkExtendsImplements(ClassTree classTree) {}
+    protected void checkExtendsAndImplements(ClassTree classTree) {}
 }
